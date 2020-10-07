@@ -1,0 +1,33 @@
+{
+    "id": 1892,
+    "block_cost": 0,
+    "cost": "35",
+    "description": "50% off if BRING YOUR OWN EQUIPMENT",
+    "max": "",
+    "min": "",
+    "name": "Archery",
+    "parent_id": 304,
+    "sort_order": 0,
+    "meta_data": [
+        {
+            "id": 3418,
+            "key": "cost",
+            "value": "35"
+        },
+        {
+            "id": 3419,
+            "key": "block_cost",
+            "value": "0"
+        },
+        {
+            "id": 3420,
+            "key": "min",
+            "value": ""
+        },
+        {
+            "id": 3421,
+            "key": "max",
+            "value": ""
+        }
+    ]
+}

@@ -1,0 +1,200 @@
+{
+    "id": 304,
+    "name": "Singular Passes",
+    "slug": "singular-passes",
+    "date_created": {
+        "date": "2020-09-30 16:22:10.000000",
+        "timezone_type": 3,
+        "timezone": "America\/Toronto"
+    },
+    "date_modified": {
+        "date": "2020-10-05 17:11:27.000000",
+        "timezone_type": 3,
+        "timezone": "America\/Toronto"
+    },
+    "status": "publish",
+    "featured": false,
+    "catalog_visibility": "catalog",
+    "description": "If 5 persons or more please contact the management",
+    "short_description": "Daniel:\r\n\r\nAll customers have to be here to book the on-site event. If the customer has any promo pass with &gt; 0 times remaining he\/she can choose to use it (or must use it first).\r\n\r\nIf the times remaining is not enough the customer will be charged if he\/she needs more vacancies. The customer will be notified if he\/she do so.\r\n\r\nOnce the customer buys it, the customer will be notified their times remaining. The <strong>'promo'<\/strong> value in the database will minus the account he\/she bought. If the customer cancels the order the value will come back.\r\n\r\nAlso there will be a link to the <strong>'Promo Passes'<\/strong> page at the bottom of the page, so far it's like 'Related Product'.\r\n\r\nNow the problem is the customers cannot buy assorted passes together in one page. They can only choose one item within Archery, Airsoft and the Combo at one time. For now I just make them separate, alter on we can work on how to buy different passes at one time. (<strong>Update Oct 4<\/strong>: Now customers can buy the passes assortedly, maximum 7 altogether)",
+    "sku": "",
+    "price": "35",
+    "regular_price": "",
+    "sale_price": "",
+    "date_on_sale_from": null,
+    "date_on_sale_to": null,
+    "total_sales": 1,
+    "tax_status": "taxable",
+    "tax_class": "",
+    "manage_stock": false,
+    "stock_quantity": null,
+    "stock_status": "instock",
+    "backorders": "no",
+    "low_stock_amount": "",
+    "sold_individually": false,
+    "weight": "",
+    "length": "",
+    "width": "",
+    "height": "",
+    "upsell_ids": [],
+    "cross_sell_ids": [],
+    "parent_id": 0,
+    "reviews_allowed": true,
+    "purchase_note": "",
+    "attributes": [],
+    "default_attributes": [],
+    "menu_order": 0,
+    "post_password": "",
+    "virtual": true,
+    "downloadable": false,
+    "category_ids": [
+        37
+    ],
+    "tag_ids": [],
+    "shipping_class_id": 0,
+    "downloads": [],
+    "image_id": "354",
+    "gallery_image_ids": [],
+    "download_limit": -1,
+    "download_expiry": -1,
+    "rating_counts": [],
+    "average_rating": "0",
+    "review_count": 0,
+    "apply_adjacent_buffer": false,
+    "availability": [
+        {
+            "type": "time:1",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "10:00",
+            "to": "17:00"
+        },
+        {
+            "type": "time:2",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "10:00",
+            "to": "17:00"
+        },
+        {
+            "type": "time:3",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "10:00",
+            "to": "17:00"
+        },
+        {
+            "type": "time:4",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "10:00",
+            "to": "18:00"
+        },
+        {
+            "type": "time:5",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "10:00",
+            "to": "18:00"
+        },
+        {
+            "type": "time:6",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "10:00",
+            "to": "17:00"
+        },
+        {
+            "type": "time:7",
+            "bookable": "yes",
+            "priority": 10,
+            "from": "11:00",
+            "to": "16:00"
+        }
+    ],
+    "block_cost": "0",
+    "buffer_period": 0,
+    "calendar_display_mode": "always_visible",
+    "cancel_limit_unit": "day",
+    "cancel_limit": 1,
+    "check_start_block_only": false,
+    "cost": "0",
+    "default_date_availability": "non-available",
+    "display_cost": "",
+    "duration_type": "fixed",
+    "duration_unit": "hour",
+    "duration": 1,
+    "enable_range_picker": false,
+    "first_block_time": "",
+    "has_person_cost_multiplier": true,
+    "has_person_qty_multiplier": true,
+    "has_person_types": true,
+    "has_persons": true,
+    "has_resources": false,
+    "has_restricted_days": "",
+    "max_date_unit": "month",
+    "max_date_value": 12,
+    "max_duration": 1,
+    "max_persons": 5,
+    "min_date_unit": "hour",
+    "min_date_value": 0,
+    "min_duration": 1,
+    "min_persons": 1,
+    "person_types": {
+        "1892": {},
+        "1893": {},
+        "1894": {}
+    },
+    "pricing": [],
+    "qty": 7,
+    "requires_confirmation": false,
+    "resource_label": "",
+    "resource_base_costs": [],
+    "resource_block_costs": [],
+    "resource_ids": [],
+    "resources_assignment": "customer",
+    "restricted_days": "",
+    "user_can_cancel": true,
+    "meta_data": [
+        {
+            "id": 1473,
+            "key": "_wpml_word_count",
+            "value": "{\"total\":0,\"to_translate\":{\"zh-hans\":8,\"en\":8}}"
+        },
+        {
+            "id": 1519,
+            "key": "_top_nav_excluded",
+            "value": ""
+        },
+        {
+            "id": 1520,
+            "key": "_cms_nav_minihome",
+            "value": ""
+        },
+        {
+            "id": 1528,
+            "key": "_alp_processed",
+            "value": "1601497335"
+        },
+        {
+            "id": 1541,
+            "key": "_wpml_media_duplicate",
+            "value": "1"
+        },
+        {
+            "id": 1542,
+            "key": "_wpml_media_featured",
+            "value": "1"
+        },
+        {
+            "id": 3479,
+            "key": "_rednao_advanced_product_options",
+            "value": "{\"Rows\":[{\"Columns\":[{\"Field\":{\"Id\":1,\"Type\":\"checkbox\",\"Label\":\"\",\"Required\":false,\"RowId\":0,\"Conditions\":[],\"Formulas\":[],\"Description\":\"\",\"Tooltip\":\"\",\"PriceType\":\"options\",\"Price\":\"\",\"SalePrice\":\"\",\"HidePrice\":false,\"ShowQuantitySelector\":false,\"QuantityPosition\":\"bottom\",\"QuantityMinimumValue\":0,\"QuantityMaximumValue\":0,\"QuantityDefaultValue\":\"\",\"QuantityPlaceholder\":\"\",\"QuantityLabel\":\"Quantity\",\"Options\":[{\"Id\":1,\"PriceType\":\"fixed_amount\",\"SalePrice\":\"\",\"RegularPrice\":\"57.75\",\"Label\":\"Bring Your Own Equipment\"}],\"AdditionalOptionColumn\":[],\"Placeholder\":\"\",\"MaximumNumberOfItems\":0},\"WidthPercentage\":100}],\"StepId\":0}],\"Extensions\":[],\"DynamicFieldTypes\":[\"FBCheckBox\"],\"Version\":1,\"Styles\":\"\",\"MapsApiKey\":\"\",\"Icons\":[],\"MultipleSteps\":null,\"OptionsAmountLabel\":\"Options amount\",\"FinalTotalLabel\":\"Final Total\",\"ExtensionsUsed\":[]}"
+        },
+        {
+            "id": 3480,
+            "key": "_rednao_advanced_product_server_list",
+            "value": []
+        }
+    ]
+}
