@@ -38,8 +38,7 @@ add_action('woocommerce_before_add_to_cart_button', 'add_byoe_checkbox');
  */
 function add_promo_checkbox()
 {
-    global $promo_count;
-    ?>
+    global $promo_count; ?>
 
 <div class="sz-pos-m">
     <input type="checkbox" id="byoe" name="byoe" value="byoe">
@@ -59,8 +58,6 @@ function apply_info_if_more_than_five_persons()
     $singular_passes = new WC_Product_Booking(304);
     $data = wc_bookings_get_posted_data($_POST, $singular_passes);
     $persons = array_sum($data['_persons']);
-    
-    // echo "<script>console.log(JSON.stringify(" . $singular_passes . "))</script>";
 
     if ($persons > 5) {
         return 'Contact the host if more than 5 persons';
@@ -68,4 +65,16 @@ function apply_info_if_more_than_five_persons()
 }
 add_filter('woocommerce_bookings_calculated_booking_cost_error_output', 'apply_info_if_more_than_five_persons');
 
-?>
+/**
+ * @desc Change the display of 'Singular Passes' price
+ * @return string
+ */
+function apply_byoe_discount()
+{
+    $discounted_price = get_post_meta(SINGULAR_ID, 'cost', true);
+    if ($discounted_price !== false) {
+        $price_html = '<span class="amount">' . wc_price($discounted_price) . '</span>';
+    }
+    return $price_html;
+}
+add_filter('woocommerce_get_price_html', 'apply_byoe_discount');

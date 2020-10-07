@@ -18,3 +18,9 @@ Utilities that are deprecated temporarily or permanently
 
 WC_Product_Booking object
 
+## Snippet
+
+    ?>
+    <script>console.log(<?php echo $base_price ?>)</script>
+    <?php
+

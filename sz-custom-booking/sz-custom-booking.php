@@ -12,6 +12,10 @@
  // Exit if accessed directly
 defined('ABSPATH') or exit;
 
+// Config Area
+define('SINGULAR_ID', 304);
+define('PROMO_ID', 358);
+
 // Times remaining of the Promo Pass. Fetch from the database
 // Type of pass will be in the future
 $promo_count = 11;
@@ -29,7 +33,7 @@ add_action('wp_enqueue_scripts', 'load_style');
  */
 function is_singular_pass()
 {
-    return get_the_ID() === 304;
+    return get_the_ID() === SINGULAR_ID;
 }
 
 /**
@@ -94,7 +98,7 @@ function add_promo_link()
         ?>
 <div>
     <p><span class="sz-text-highlight">Do you know? </span>You can enjoy one FREE extra entry if you buy the promo?</p>
-    <a href="<?php echo get_permalink(358)?>"><button>Take me to
+    <a href="<?php echo get_permalink(PROMO_ID)?>"><button>Take me to
             Promo!</button></a>
 </div>
 <?php
@@ -102,5 +106,32 @@ function add_promo_link()
 }
 add_action('woocommerce_single_product_summary', 'add_promo_link');
 
+/**
+ * @desc Apply BYOE discount in 'Singular Passes'
+ * @return int
+ */
+function apply_byoe_discount()
+{
+    $product = wc_get_product(SINGULAR_ID);
+    $base_price = $product->get_price();
+    $discounted_price = number_format($base_price * 0.5, 2);
+    $product->set_price($discounted_price);
+    $product->save();
+    return $discounted_price;
+}
+add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_byoe_discount');
+
+/**
+ * @desc Apply Promo discount in 'Singular Passes'
+ * @return int
+ */
+function apply_promo_discount()
+{
+    $product = wc_get_product(SINGULAR_ID);
+    $product->set_price(0);
+    $product->save();
+    return 0;
+}
+add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
 
 // require_once __DIR__ . '/coupon.php';
