@@ -9,12 +9,15 @@
  * Text Domain: costom-booking
  */
 
+ 
  // Exit if accessed directly
 defined('ABSPATH') or exit;
 
 // Config Area
-define('SINGULAR_ID', 304);
-define('PROMO_ID', 358);
+// define('SINGULAR_ID', 304);
+// define('PROMO_ID', 358);
+define('SINGULAR_ID', 7);
+define('PROMO_ID', 8);
 
 // Times remaining of the Promo Pass. Fetch from the database
 // Type of pass will be in the future
@@ -26,6 +29,15 @@ function load_style()
     wp_enqueue_style('style', $plugin_url . '/style.css', array(), rand(111, 9999));
 }
 add_action('wp_enqueue_scripts', 'load_style');
+
+// wp_enqueue_script( 'jquery' );
+// wp_enqueue_script( 'byoe' );
+// echo '<script src="' . plugin_dir_url(__FILE__) . 'byoe"></script>';
+
+// function render_ajax()
+// {
+//     echo 'aaaaa' . $_REQUEST['byoe'];
+// }
 
 /**
  * @desc Check if the current product is 'Singular Passes'
@@ -42,6 +54,7 @@ function is_singular_pass()
  */
 function add_byoe_checkbox()
 {
+    // render_ajax();
     is_singular_pass() and
     woocommerce_form_field('byoe', array(
         'type'        => 'checkbox',
@@ -110,14 +123,16 @@ add_action('woocommerce_single_product_summary', 'add_promo_link');
  * @desc Apply BYOE discount in 'Singular Passes'
  * @return int
  */
-function apply_byoe_discount()
+function apply_byoe_discount($booking_cost)
 {
-    $product = wc_get_product(SINGULAR_ID);
-    $base_price = $product->get_price();
-    $discounted_price = number_format($base_price * 0.5, 2);
-    $product->set_price($discounted_price);
-    $product->save();
-    return $discounted_price;
+    if (isset($_POST['byoe']) && !empty($_POST['byoe'])) {
+        $discounted_price = number_format($booking_cost* 0.5, 2);
+        $product = wc_get_product(SINGULAR_ID);
+        $product->set_price($discounted_price);
+        $product->save();
+        return $discounted_price;
+    }
+    return $booking_cost;
 }
 add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_byoe_discount');
 
@@ -132,6 +147,6 @@ function apply_promo_discount()
     $product->save();
     return 0;
 }
-add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
+// add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
 
 // require_once __DIR__ . '/coupon.php';
