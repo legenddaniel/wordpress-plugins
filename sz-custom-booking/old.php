@@ -21,6 +21,17 @@ function is_promotable_type()
  */
 function add_byoe_checkbox()
 {
+    // woocommerce_form_field('byoe_archery', array(
+    //     'type'        => 'checkbox',
+    //     'label'       => 'Bring Your Own Equipment - Archery',
+    //     'label_class' => array('sz-size-checkbox')
+    // ));
+        // woocommerce_form_field('byoe_combo', array(
+    //     'type'        => 'checkbox',
+    //     'label'       => 'Bring Your Own Equipment - Combo',
+    //     'label_class' => array('sz-size-checkbox'),
+    //     'class'       => array('d-none')
+    // ));
     ?>
 
 <div class="sz-pos-m">
@@ -38,6 +49,11 @@ add_action('woocommerce_before_add_to_cart_button', 'add_byoe_checkbox');
  */
 function add_promo_checkbox()
 {
+    // woocommerce_form_field('promo', array(
+    //     'type'        => 'checkbox',
+    //     'label'       => 'Use Promo' . " ($promo_count times left)",
+    //     'label_class' => 'sz-size-checkbox',
+    // ));
     global $promo_count; ?>
 
 <div class="sz-pos-m">

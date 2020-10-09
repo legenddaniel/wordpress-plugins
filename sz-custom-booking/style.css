@@ -6,3 +6,15 @@
     width: 1px;
     white-space: nowrap;
 }
+
+.sz-discount-fields {
+    margin: 20px 0;
+}
+
+.sz-discount-field {
+    margin: 10px 0;
+}
+
+.d-none {
+    display: none;
+}

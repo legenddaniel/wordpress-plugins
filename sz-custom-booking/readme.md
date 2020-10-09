@@ -1,3 +1,11 @@
+    Plugin Name: Custom Booking
+    Version: 0.0.0
+    Plugin URI: null
+    Description: Custom booking
+    Author: Siyuan Zuo
+    Author URI: https://github.com/legenddaniel
+    Text Domain: costom-booking
+
 # File explanation:
 
 ## pruduct.json
@@ -11,6 +19,10 @@ An data model of get_person_type()[$post->ID]
 ## old.css & old.php
 
 Utilities that are deprecated temporarily or permanently
+
+## byoe.js
+
+Client side BRING YOUR OWN EQUIPMENT functionalities
 
 ## Woocommerce Booking
 
