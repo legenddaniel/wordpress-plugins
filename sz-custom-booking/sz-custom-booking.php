@@ -2,16 +2,17 @@
 /*
  * Plugin Name: Custom Booking
  * Version: 0.0.0
- * Plugin URI: null
  * Description: Custom booking
- * Author: Siyuan Zuo
+ * Author: Daniel Siyuan Zuo
  * Author URI: https://github.com/legenddaniel
  * Text Domain: costom-booking
  */
 
- 
- // Exit if accessed directly
+// Exit if accessed directly
 defined('ABSPATH') or exit;
+
+// Admin Dashboard
+require_once plugin_dir_path(__FILE__) . 'admin.php';
 
 // Config Area
 define('SINGULAR_ID', 304);
@@ -30,10 +31,10 @@ $promo_count = 11;
 function init_scripts_styles()
 {
     $plugin_url = plugin_dir_url(__FILE__);
-    wp_enqueue_style('style', $plugin_url . '/style.css', array(), rand(111, 9999));
+    wp_enqueue_style('style', $plugin_url . 'style.css', array(), rand(111, 9999));
 
     wp_enqueue_script('jquery');
-    wp_enqueue_script('byoe', $plugin_url . '/byoe.js', array(), rand(111, 9999), true);
+    wp_enqueue_script('byoe', $plugin_url . 'byoe.js', array(), rand(111, 9999), true);
 }
 add_action('wp_enqueue_scripts', 'init_scripts_styles');
 
@@ -138,24 +139,6 @@ function add_promo_checkbox()
 add_action('woocommerce_before_add_to_cart_button', 'add_promo_checkbox');
 
 /**
- * @desc Remove '(optional)' text from the checkbox label in 'Singular Passes'
- * @param string $field
- * @param string $key
- * @param array $args
- * @param string? $value
- * @return void
- */
-function remove_label_optional_text($field, $key, $args, $value)
-{
-    if (is_singular_pass()) {
-        $optional = '&nbsp;<span class="optional">(' . esc_html__('optional', 'woocommerce') . ')</span>';
-        $field = str_replace($optional, '', $field);
-    }
-    return $field;
-}
-// add_filter('woocommerce_form_field', 'remove_label_optional_text', 10, 4);
-
-/**
  * @desc Add html templates of access to 'Promo Passes' in 'Singular Passes'
  * @return void
  */
@@ -211,3 +194,5 @@ function apply_promo_discount()
 // add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
 
 // require_once __DIR__ . '/coupon.php';
+
+

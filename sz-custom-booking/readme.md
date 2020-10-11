@@ -24,6 +24,10 @@ Utilities that are deprecated temporarily or permanently
 
 Client side BRING YOUR OWN EQUIPMENT functionalities
 
+## admin.php
+
+Components in WordPress Admin dashboard
+
 ## Woocommerce Booking
 
 ### woocommerce-bookings\includes\data-objects\class-wc-product-booking.php

@@ -5,25 +5,25 @@
     "date_created": {
         "date": "2020-09-30 16:22:10.000000",
         "timezone_type": 3,
-        "timezone": "America\/Toronto"
+        "timezone": "America/Toronto"
     },
     "date_modified": {
-        "date": "2020-10-05 17:11:27.000000",
+        "date": "2020-10-10 17:08:16.000000",
         "timezone_type": 3,
-        "timezone": "America\/Toronto"
+        "timezone": "America/Toronto"
     },
     "status": "publish",
     "featured": false,
     "catalog_visibility": "catalog",
     "description": "If 5 persons or more please contact the management",
-    "short_description": "Daniel:\r\n\r\nAll customers have to be here to book the on-site event. If the customer has any promo pass with &gt; 0 times remaining he\/she can choose to use it (or must use it first).\r\n\r\nIf the times remaining is not enough the customer will be charged if he\/she needs more vacancies. The customer will be notified if he\/she do so.\r\n\r\nOnce the customer buys it, the customer will be notified their times remaining. The <strong>'promo'<\/strong> value in the database will minus the account he\/she bought. If the customer cancels the order the value will come back.\r\n\r\nAlso there will be a link to the <strong>'Promo Passes'<\/strong> page at the bottom of the page, so far it's like 'Related Product'.\r\n\r\nNow the problem is the customers cannot buy assorted passes together in one page. They can only choose one item within Archery, Airsoft and the Combo at one time. For now I just make them separate, alter on we can work on how to buy different passes at one time. (<strong>Update Oct 4<\/strong>: Now customers can buy the passes assortedly, maximum 7 altogether)",
+    "short_description": "",
     "sku": "",
     "price": "35",
     "regular_price": "",
     "sale_price": "",
     "date_on_sale_from": null,
     "date_on_sale_to": null,
-    "total_sales": 1,
+    "total_sales": 15,
     "tax_status": "taxable",
     "tax_class": "",
     "manage_stock": false,
@@ -128,9 +128,9 @@
     "first_block_time": "",
     "has_person_cost_multiplier": true,
     "has_person_qty_multiplier": true,
-    "has_person_types": true,
+    "has_person_types": false,
     "has_persons": true,
-    "has_resources": false,
+    "has_resources": true,
     "has_restricted_days": "",
     "max_date_unit": "month",
     "max_date_value": 12,
@@ -140,18 +140,26 @@
     "min_date_value": 0,
     "min_duration": 1,
     "min_persons": 1,
-    "person_types": {
-        "1892": {},
-        "1893": {},
-        "1894": {}
-    },
+    "person_types": [],
     "pricing": [],
     "qty": 7,
     "requires_confirmation": false,
     "resource_label": "",
-    "resource_base_costs": [],
-    "resource_block_costs": [],
-    "resource_ids": [],
+    "resource_base_costs": {
+        "291": "35",
+        "292": "45",
+        "293": "70"
+    },
+    "resource_block_costs": {
+        "291": "",
+        "292": "",
+        "293": ""
+    },
+    "resource_ids": [
+        291,
+        292,
+        293
+    ],
     "resources_assignment": "customer",
     "restricted_days": "",
     "user_can_cancel": true,
@@ -195,6 +203,16 @@
             "id": 3480,
             "key": "_rednao_advanced_product_server_list",
             "value": []
+        },
+        {
+            "id": 4402,
+            "key": "cost",
+            "value": "17.5"
+        },
+        {
+            "id": 5035,
+            "key": "_product_meta_id",
+            "value": "2"
         }
     ]
 }

@@ -25,13 +25,13 @@ function add_byoe_checkbox()
     //     'type'        => 'checkbox',
     //     'label'       => 'Bring Your Own Equipment - Archery',
     //     'label_class' => array('sz-size-checkbox')
-    // ));
+    // ), '17.5');
         // woocommerce_form_field('byoe_combo', array(
     //     'type'        => 'checkbox',
     //     'label'       => 'Bring Your Own Equipment - Combo',
     //     'label_class' => array('sz-size-checkbox'),
     //     'class'       => array('d-none')
-    // ));
+    // ), '57.25');
     ?>
 
 <div class="sz-pos-m">
@@ -53,7 +53,7 @@ function add_promo_checkbox()
     //     'type'        => 'checkbox',
     //     'label'       => 'Use Promo' . " ($promo_count times left)",
     //     'label_class' => 'sz-size-checkbox',
-    // ));
+    // ), '0');
     global $promo_count; ?>
 
 <div class="sz-pos-m">
@@ -64,6 +64,24 @@ function add_promo_checkbox()
 <?php
 }
 add_action('woocommerce_before_add_to_cart_button', 'add_promo_checkbox');
+
+/**
+ * @desc Remove '(optional)' text from the checkbox label in 'Singular Passes'
+ * @param string $field
+ * @param string $key
+ * @param array $args
+ * @param string? $value
+ * @return void
+ */
+function remove_label_optional_text($field, $key, $args, $value)
+{
+    if (is_singular_pass()) {
+        $optional = '&nbsp;<span class="optional">(' . esc_html__('optional', 'woocommerce') . ')</span>';
+        $field = str_replace($optional, '', $field);
+    }
+    return $field;
+}
+add_filter('woocommerce_form_field', 'remove_label_optional_text', 10, 4);
 
 /**
  * @desc Change text of notice if more than 5 persons booking
