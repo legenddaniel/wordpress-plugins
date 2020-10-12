@@ -11,9 +11,9 @@ jQuery(document).ready(function ($) {
     };
 
     // Add an anchor to the booking cost div as a ref
-    $('#wc-bookings-booking-form:last-child').attr('id', 'booking-cost');
+    $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
-    // Display different checkboxes for different types
+    // Display checkboxes based on types
     $('#wc_bookings_field_resource').on('change', function () {
         switch ($(this).val()) {
             case '291':
@@ -31,5 +31,38 @@ jQuery(document).ready(function ($) {
         }
     });
 
+    // Display checkboxes based on stock
+    try {
+        var observedNode = document.getElementById('booking-cost');
+        var targetNode = document.getElementById('sz-discount-fields');
+
+        var config = { attributes: true, childList: true };
+        var mutationObserver = new MutationObserver(function (mutationsList, observer) {
+            mutationsList.forEach(function (mutation) {
+
+                // Observe booking cost div display change
+                if (mutation.type === 'attributes') {
+                    targetNode.className =
+                        mutation.target.style.getPropertyValue('display') === 'none' ?
+                            'sz-discount-fields d-none' :
+                            'sz-discount-fields';
+                    return;
+                }
+
+                // Observe booking validity
+                if (mutation.type === 'childList') {
+                    targetNode.className =
+                        mutation.addedNodes.length === 2 ?
+                            'sz-discount-fields' :
+                            'sz-discount-fields d-none';
+                    return;
+                }
+            });
+        });
+
+        mutationObserver.observe(observedNode, config);
+    } catch (error) {
+        console.log(error);
+    }
 
 })

@@ -87,7 +87,7 @@ function add_byoe_checkbox_archery()
     if (!is_singular_pass()) {
         return;
     } ?>
-<div class="sz-discount-fields">
+<div class="sz-discount-fields d-none" id="sz-discount-fields">
     <p class="sz-discount-field" id="byoe_archery_field">
         <input type="checkbox" id="byoe_archery" name="byoe_archery" value="17.5">
         <label for="byoe_archery">Bring Your Own Equipment - Archery</label>
