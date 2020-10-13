@@ -1,6 +1,16 @@
 <?php
 // Functions that are deprecated temporarily or permanently
 
+/**
+ * @desc Set up AJAX at the front end for 'BYOE'
+ * @return void
+ */
+function set_ajaxurl()
+{
+    echo '<script>var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>';
+}
+add_action('wp_head', 'set_ajaxurl');
+
 /** Unavailable
  * @desc Check if booking Archery or Combo
  * @return bool

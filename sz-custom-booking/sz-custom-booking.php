@@ -25,51 +25,6 @@ define('PROMO_ID', 358);
 $promo_count = 11;
 
 /**
- * @desc Load CSS
- * @return void
- */
-function init_scripts_styles()
-{
-    $plugin_url = plugin_dir_url(__FILE__);
-    wp_enqueue_style('style', $plugin_url . 'style.css', array(), rand(111, 9999));
-
-    wp_enqueue_script('jquery');
-    wp_enqueue_script('byoe', $plugin_url . 'byoe.js', array(), rand(111, 9999), true);
-}
-add_action('wp_enqueue_scripts', 'init_scripts_styles');
-
-/**
- * @desc Set up AJAX at the front end for 'BYOE'
- * @return void
- */
-function set_ajaxurl()
-{
-    echo '<script>var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>'; ?>
-<script>
-    jQuery(document).ready(function($) {
-        $('input[name="byoe"]').on('change', function() {
-            $.ajax({
-                type: 'post',
-                url: ajaxurl,
-                data: {
-                    action: 'apply_byoe_discount',
-                    checked: $(this).attr('checked')
-                },
-                success: function() {
-                    console.log('byoe ajax success')
-                },
-                error: function() {
-                    console.log('byoe ajax fail')
-                }
-            })
-        })
-    })
-</script>
-<?php
-}
-add_action('wp_head', 'set_ajaxurl');
-
-/**
  * @desc Check if the current product is 'Singular Passes'
  * @return boolean
  */
@@ -77,6 +32,45 @@ function is_singular_pass()
 {
     return get_the_ID() === SINGULAR_ID;
 }
+
+/**
+ * @desc Load CSS and JavaScript
+ * @return void
+ */
+function init_assets()
+{
+    if (!is_singular_pass()) {
+        return;
+    }
+    $plugin_url = plugin_dir_url(__FILE__);
+
+    wp_enqueue_style(
+        'style',
+        $plugin_url . 'style.css',
+        array(),
+        rand(111, 9999)
+    );
+
+    wp_enqueue_script(
+        'byoe',
+        $plugin_url . 'discount-field.js',
+        array('jquery'),
+        rand(111, 9999)
+    );
+    wp_enqueue_script(
+        'byoe_archery_ajax',
+        $plugin_url . 'byoe-archery-ajax.js',
+        array('jquery'),
+        rand(111, 9999)
+    );
+    
+    $nonce = wp_create_nonce('byoe_archery_ajax');
+    wp_localize_script('byoe_archery_ajax', 'my_ajax_obj', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => $nonce,
+    ));
+}
+add_action('wp_enqueue_scripts', 'init_assets');
 
 /**
  * @desc Add BYOE checkbox for Archery in 'Singular Passes'
@@ -87,6 +81,7 @@ function add_byoe_checkbox_archery()
     if (!is_singular_pass()) {
         return;
     } ?>
+
 <div class="sz-discount-fields d-none" id="sz-discount-fields">
     <p class="sz-discount-field" id="byoe_archery_field">
         <input type="checkbox" id="byoe_archery" name="byoe_archery" value="17.5">
@@ -107,6 +102,7 @@ function add_byoe_checkbox_combo()
     if (!is_singular_pass()) {
         return;
     } ?>
+
     <p class="sz-discount-field d-none" id="byoe_combo_field">
         <input type="checkbox" id="byoe_combo" name="byoe_combo" value="57.25">
         <label for="byoe_combo">Bring Your Own Equipment - Combo</label>
@@ -127,9 +123,10 @@ function add_promo_checkbox()
     if (!is_singular_pass()) {
         return;
     } ?>
+
     <p class="sz-discount-field" id="promo_field">
         <input type="checkbox" id="promo" name="promo" value="0">
-        <label for="promo">Use Promo (<?php echo $promo_count ?>)</label>
+        <label for="promo">Use Promo (<?php echo $promo_count ?> left)</label>
     </p>
 </div>
 
@@ -157,28 +154,33 @@ function add_promo_link()
 add_action('woocommerce_single_product_summary', 'add_promo_link');
 
 /**
- * @desc Apply BYOE discount in 'Singular Passes'
- * @return int
+ * @desc Apply BYOE discount for Archery in 'Singular Passes'
+ * @return void
  */
-function apply_byoe_discount()
+function apply_byoe_archery_discount()
 {
-    add_filter('woocommerce_bookings_calculated_booking_cost', function ($booking_cost) {
-        if (isset($_POST['byoe']) && !empty($_POST['byoe'])) {
-            $discounted_price = number_format($booking_cost* 0.5, 2);
-            $product = wc_get_product(SINGULAR_ID);
-            $product->set_price($discounted_price);
-            $product->save();
-            return $discounted_price;
-        }
-        return $booking_cost;
-    });
+    check_ajax_referer('byoe_archery_ajax');
+
+    $product = wc_get_product(SINGULAR_ID);
+
+    echo $product->get_type();
+    $price = $product->get_price();
+    $discounted_price = number_format($price * 0.5, 2);
+
+    $is_checked = $_POST['checked'];
+
+    if ($is_checked) {
+        $product->set_price($discounted_price);
+    } else {
+        $product->set_price($price);
+    }
+    $product->save();
+
+    do_action('woocommerce_bookings_calculated_booking_cost');
+    wp_die();
 }
-
-add_action('wp_ajax_apply_byoe_discount', 'apply_byoe_discount');
-add_action('wp_ajax_nopriv_apply_byoe_discount', 'apply_byoe_discount');
-// add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_byoe_discount');
-
-
+add_action('wp_ajax_apply_byoe_archery_discount', 'apply_byoe_archery_discount');
+add_action('wp_ajax_nopriv_apply_byoe_archery_discount', 'apply_byoe_archery_discount');
 
 /**
  * @desc Apply Promo discount in 'Singular Passes'
@@ -192,7 +194,3 @@ function apply_promo_discount()
     return 0;
 }
 // add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
-
-// require_once __DIR__ . '/coupon.php';
-
-
