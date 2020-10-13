@@ -17,6 +17,8 @@ require_once plugin_dir_path(__FILE__) . 'admin.php';
 // Config Area
 define('SINGULAR_ID', 304);
 define('PROMO_ID', 358);
+define('ARCHERY_ID', 291);
+define('COMBO_ID', 293);
 // define('SINGULAR_ID', 7);
 // define('PROMO_ID', 8);
 
@@ -52,23 +54,11 @@ function init_assets()
     );
 
     wp_enqueue_script(
-        'byoe',
+        'discount_field',
         $plugin_url . 'discount-field.js',
         array('jquery'),
         rand(111, 9999)
     );
-    wp_enqueue_script(
-        'byoe_archery_ajax',
-        $plugin_url . 'byoe-archery-ajax.js',
-        array('jquery'),
-        rand(111, 9999)
-    );
-    
-    $nonce = wp_create_nonce('byoe_archery_ajax');
-    wp_localize_script('byoe_archery_ajax', 'my_ajax_obj', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => $nonce,
-    ));
 }
 add_action('wp_enqueue_scripts', 'init_assets');
 
@@ -80,12 +70,16 @@ function add_byoe_checkbox_archery()
 {
     if (!is_singular_pass()) {
         return;
-    } ?>
+    }
+    // In the future the discounted price will be from the admin dashboard
+    $product = wc_get_product(SINGULAR_ID);
+    $price = $product->get_resource(ARCHERY_ID)->get_base_cost();
+    $discounted_price = $price * 0.5; ?>
 
 <div class="sz-discount-fields d-none" id="sz-discount-fields">
-    <p class="sz-discount-field" id="byoe_archery_field">
-        <input type="checkbox" id="byoe_archery" name="byoe_archery" value="17.5">
-        <label for="byoe_archery">Bring Your Own Equipment - Archery</label>
+    <p class="sz-discount-field" id="byoe-archery-field">
+        <input type="checkbox" id="byoe-archery" name="byoe-archery" value=<?php echo $discounted_price; ?> data-price=<?php echo $price; ?>>
+        <label for="byoe-archery">Bring Your Own Equipment - Archery</label>
     </p>
 
     <?php
@@ -101,11 +95,15 @@ function add_byoe_checkbox_combo()
 {
     if (!is_singular_pass()) {
         return;
-    } ?>
+    }
+    // In the future the discounted price will be from the admin dashboard
+    $product = wc_get_product(SINGULAR_ID);
+    $price = $product->get_resource(COMBO_ID)->get_base_cost();
+    $discounted_price = $price * 0.825; ?>
 
-    <p class="sz-discount-field d-none" id="byoe_combo_field">
-        <input type="checkbox" id="byoe_combo" name="byoe_combo" value="57.25">
-        <label for="byoe_combo">Bring Your Own Equipment - Combo</label>
+    <p class="sz-discount-field d-none" id="byoe-combo-field">
+        <input type="checkbox" id="byoe-combo" name="byoe-combo" value=<?php echo $discounted_price; ?> data-price=<?php echo $price; ?>>
+        <label for="byoe-combo">Bring Your Own Equipment - Combo</label>
     </p>
 
     <?php
@@ -124,9 +122,10 @@ function add_promo_checkbox()
         return;
     } ?>
 
-    <p class="sz-discount-field" id="promo_field">
+    <p class="sz-discount-field" id="promo-field">
         <input type="checkbox" id="promo" name="promo" value="0">
-        <label for="promo">Use Promo (<?php echo $promo_count ?> left)</label>
+        <label for="promo">Use Promo (<?php echo $promo_count ?>
+            left)</label>
     </p>
 </div>
 
@@ -154,43 +153,39 @@ function add_promo_link()
 add_action('woocommerce_single_product_summary', 'add_promo_link');
 
 /**
- * @desc Apply BYOE discount for Archery in 'Singular Passes'
- * @return void
+ * @desc Add the entry of discount in the cart item data
+ * @param array $cart_item_data
+ * @param int $product?
+ * @param string $variation
+ * @return array
  */
-function apply_byoe_archery_discount()
+function set_discount_in_cart_data($cart_item_data, $product, $variation)
 {
-    check_ajax_referer('byoe_archery_ajax');
-
-    $product = wc_get_product(SINGULAR_ID);
-
-    echo $product->get_type();
-    $price = $product->get_price();
-    $discounted_price = number_format($price * 0.5, 2);
-
-    $is_checked = $_POST['checked'];
-
-    if ($is_checked) {
-        $product->set_price($discounted_price);
-    } else {
-        $product->set_price($price);
+    if (isset($_POST['byoe-archery'])) {
+        $cart_item_data['discounted_price'] = $_POST['byoe-archery'];
+        $cart_item_data['unique_key']     = md5(microtime().rand());
     }
-    $product->save();
-
-    do_action('woocommerce_bookings_calculated_booking_cost');
-    wp_die();
+    return $cart_item_data;
 }
-add_action('wp_ajax_apply_byoe_archery_discount', 'apply_byoe_archery_discount');
-add_action('wp_ajax_nopriv_apply_byoe_archery_discount', 'apply_byoe_archery_discount');
+add_filter('woocommerce_add_cart_item_data', 'set_discount_in_cart_data', 10, 3);
 
 /**
- * @desc Apply Promo discount in 'Singular Passes'
- * @return int
+ * @desc Re-calculate the prices in the cart
+ * @return void
  */
-function apply_promo_discount()
+function calculate_byoe_discount($cart)
 {
-    $product = wc_get_product(SINGULAR_ID);
-    $product->set_price(0);
-    $product->save();
-    return 0;
+    if (is_admin() && ! defined('DOING_AJAX')) {
+        return;
+    }
+    if (did_action('woocommerce_before_calculate_totals') >= 2) {
+        return;
+    }
+
+    foreach ($cart->get_cart() as $cart_item) {
+        if (isset($cart_item['discounted_price'])) {
+            $cart_item['data']->set_price($cart_item['booking']['_qty'] * $cart_item['discounted_price']);
+        }
+    }
 }
-// add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
+add_action('woocommerce_before_calculate_totals', 'calculate_byoe_discount');

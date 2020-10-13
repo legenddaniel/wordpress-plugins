@@ -122,3 +122,48 @@ function apply_byoe_discount()
     return $price_html;
 }
 add_filter('woocommerce_get_price_html', 'apply_byoe_discount');
+
+// Modify actual quantity, will cause over calculation
+foreach ($cart->cart_contents as $item_key => $item) {
+    $cart->set_quantity($item_key, $item['booking']['_qty']);
+    echo '<script>console.log(' . json_encode($item_key) .')</script>';
+}
+
+/**
+ * @desc Apply Promo discount in 'Singular Passes'
+ * @return int
+ */
+function apply_promo_discount()
+{
+    $product = wc_get_product(SINGULAR_ID);
+    $product->set_price(0);
+    $product->save();
+    return 0;
+}
+// add_filter('woocommerce_bookings_calculated_booking_cost', 'apply_promo_discount');
+
+/**
+ * @desc Apply BYOE discount for Archery in 'Singular Passes'
+ * @return void
+ */
+function apply_byoe_archery_discount()
+{
+    check_ajax_referer('byoe_archery_ajax');
+
+    $product = wc_get_product(SINGULAR_ID);
+
+    $price = $product->get_price();
+    $discounted_price = number_format($price * 0.5, 2);
+
+    $is_checked = $_POST['checked'];
+
+    if ($is_checked) {
+        echo $price;
+    } else {
+        echo $discounted_price;
+    }
+
+    wp_die();
+}
+add_action('wp_ajax_apply_byoe_archery_discount', 'apply_byoe_archery_discount');
+add_action('wp_ajax_nopriv_apply_byoe_archery_discount', 'apply_byoe_archery_discount');
