@@ -1,0 +1,36 @@
+{
+    "promo_used": null,
+    "discounted_price": "0",
+    "unique_key": "afabaccaa695b87b270c1f4d4f653ff1",
+    "booking": {
+        "_year": "2020",
+        "_month": "10",
+        "_day": "19",
+        "_persons": [
+            1
+        ],
+        "_date": "2020-10-19",
+        "date": "October 19, 2020",
+        "_time": "10:00",
+        "time": "10:00 am",
+        "_qty": 1,
+        "Persons": 1,
+        "_start_date": 1603101600,
+        "_end_date": 1603105200,
+        "_all_day": 0,
+        "_resource_id": 291,
+        "type": "Archery",
+        "_local_timezone": "",
+        "_cost": 35,
+        "_booking_id": 2140
+    },
+    "key": "df385237a9417468858440b66a84e203",
+    "product_id": 304,
+    "variation_id": 0,
+    "variation": [],
+    "quantity": 1,
+    "data": {
+        "availability_rules": []
+    },
+    "data_hash": "70fbd381c354ab9d174c2a17a55bda58"
+}

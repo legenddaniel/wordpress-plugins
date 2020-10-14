@@ -6,5 +6,5 @@
     Author URI: https://github.com/legenddaniel
     Text Domain: costom-booking
 
-# Browser Support: IE11+
+# Browser Support: IE not supported. need Babel
 

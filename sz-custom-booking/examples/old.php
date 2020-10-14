@@ -54,28 +54,6 @@ function add_byoe_checkbox()
 add_action('woocommerce_before_add_to_cart_button', 'add_byoe_checkbox');
 
 /**
- * @desc Add 'Use Promo' checkbox in 'Singular Passes'
- * @return void
- */
-function add_promo_checkbox()
-{
-    // woocommerce_form_field('promo', array(
-    //     'type'        => 'checkbox',
-    //     'label'       => 'Use Promo' . " ($promo_count times left)",
-    //     'label_class' => 'sz-size-checkbox',
-    // ), '0');
-    global $promo_count; ?>
-
-<div class="sz-pos-m">
-    <input type="checkbox" id="byoe" name="byoe" value="byoe">
-    <label for="byoe" title="Use Promo">Use Promo (<?php echo $promo_count; ?> times left)</label>
-</div>
-
-<?php
-}
-add_action('woocommerce_before_add_to_cart_button', 'add_promo_checkbox');
-
-/**
  * @desc Remove '(optional)' text from the checkbox label in 'Singular Passes'
  * @param string $field
  * @param string $key
@@ -128,6 +106,34 @@ foreach ($cart->cart_contents as $item_key => $item) {
     $cart->set_quantity($item_key, $item['booking']['_qty']);
     echo '<script>console.log(' . json_encode($item_key) .')</script>';
 }
+
+/**
+ * @desc Add 'Use Promo' checkbox in 'Singular Passes'
+ * @return void
+ */
+function add_promo_checkbox()
+{
+    // woocommerce_form_field('promo', array(
+    //     'type'        => 'checkbox',
+    //     'label'       => 'Use Promo' . " ($promo_count times left)",
+    //     'label_class' => 'sz-size-checkbox',
+    // ), '0');
+    global $promo_count;
+    if (!is_singular_pass()) {
+        return;
+    } ?>
+
+<p class="sz-discount-field" id="promo-field">
+    <input type="checkbox" id="promo" name="promo" value="0">
+    <label for="promo">Use Promo (<?php echo $promo_count ?>
+        left)</label>
+</p>
+</div>
+
+<?php
+}
+// 'woocommerce_before_single_variation' not working, the calendar keeps loading
+add_action('woocommerce_before_add_to_cart_button', 'add_promo_checkbox');
 
 /**
  * @desc Apply Promo discount in 'Singular Passes'
