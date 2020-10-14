@@ -12,7 +12,7 @@
 defined('ABSPATH') or exit;
 
 // Exit if not a registered user
-is_user_logged_in() or exit;
+// is_user_logged_in() or exit; (This cause error)
 
 // Admin Dashboard
 require_once plugin_dir_path(__FILE__) . 'admin.php';
