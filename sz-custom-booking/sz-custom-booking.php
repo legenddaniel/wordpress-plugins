@@ -11,6 +11,9 @@
 // Exit if accessed directly
 defined('ABSPATH') or exit;
 
+// Exit if not a registered user
+is_user_logged_in() or exit;
+
 // Admin Dashboard
 require_once plugin_dir_path(__FILE__) . 'admin.php';
 
@@ -161,11 +164,16 @@ add_action('woocommerce_single_product_summary', 'add_promo_link');
  */
 function set_discount_in_cart_data($cart_item_data, $product, $variation)
 {
+    if (isset($_POST['byoe-combo'])) {
+        $cart_item_data['discounted_price'] = $_POST['byoe-combo'];
+        $cart_item_data['unique_key']     = md5(microtime().rand());
+        return $cart_item_data;
+    }
     if (isset($_POST['byoe-archery'])) {
         $cart_item_data['discounted_price'] = $_POST['byoe-archery'];
         $cart_item_data['unique_key']     = md5(microtime().rand());
+        return $cart_item_data;
     }
-    return $cart_item_data;
 }
 add_filter('woocommerce_add_cart_item_data', 'set_discount_in_cart_data', 10, 3);
 
