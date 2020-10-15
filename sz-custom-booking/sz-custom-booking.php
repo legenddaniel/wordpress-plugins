@@ -47,7 +47,7 @@ function query_promo_times($type)
              FROM $wpdb->usermeta 
              WHERE meta_key LIKE %s 
              AND user_id = %d",
-            array("Promo%$promo%", $user)
+            array("%$type%", $user)
         )
     );
     return $promo_times;
@@ -81,6 +81,24 @@ function init_assets()
 add_action('wp_enqueue_scripts', 'init_assets');
 
 /**
+ * Add html templates of access to 'Promo Passes' in 'Singular Passes'
+ * @return void
+ */
+function add_promo_link()
+{
+    if (is_singular_pass()) {
+        ?>
+<div>
+    <p><span class="sz-text-highlight">Do you know? </span>You can enjoy one FREE extra entry if you buy the promo?</p>
+    <a href="<?php echo get_permalink(PROMO_ID)?>"><button>Take me to
+            Promo!</button></a>
+</div>
+<?php
+    }
+}
+add_action('woocommerce_single_product_summary', 'add_promo_link');
+
+/**
  * Add discount checkboxes for Archery in 'Singular Passes'
  * @return void
  */
@@ -104,6 +122,7 @@ function add_discount_field_archery()
         </p>
 
         <?php
+        // Only display 'Use Promo' field to registered customers
         if (!is_user_logged_in()) {
             return;
         } ?>
@@ -129,12 +148,12 @@ function add_discount_field_airsoft()
     if (!is_singular_pass()) {
         return;
     }
+    // Only display 'Use Promo' field to registered customers
     if (!is_user_logged_in()) {
         return;
     }
     
     $airsoft_promo_count = query_promo_times('Airsoft');
-    ;
     $product = wc_get_product(SINGULAR_ID);
     $price = $product->get_resource(AIRSOFT_ID)->get_base_cost(); ?>
     <div class="sz-discount-field d-none" id="airsoft-field" data-price=<?php echo $price; ?>>
@@ -160,7 +179,6 @@ function add_discount_field_combo()
     }
     // In the future the discounted price will be from the admin dashboard
     $combo_promo_count = query_promo_times('Combo');
-    ;
     $product = wc_get_product(SINGULAR_ID);
     $price = $product->get_resource(COMBO_ID)->get_base_cost();
     $discounted_price = $price * 0.825; ?>
@@ -172,6 +190,7 @@ function add_discount_field_combo()
         </p>
 
         <?php
+        // Only display 'Use Promo' field to registered customers
         if (!is_user_logged_in()) {
             return;
         } ?>
@@ -190,32 +209,22 @@ function add_discount_field_combo()
 add_action('woocommerce_before_add_to_cart_button', 'add_discount_field_combo');
 
 /**
- * Add html templates of access to 'Promo Passes' in 'Singular Passes'
- * @return void
- */
-function add_promo_link()
-{
-    if (is_singular_pass()) {
-        ?>
-<div>
-    <p><span class="sz-text-highlight">Do you know? </span>You can enjoy one FREE extra entry if you buy the promo?</p>
-    <a href="<?php echo get_permalink(PROMO_ID)?>"><button>Take me to
-            Promo!</button></a>
-</div>
-<?php
-    }
-}
-add_action('woocommerce_single_product_summary', 'add_promo_link');
-
-/**
  * Add the entries of discounts in the cart item data. Fire at the beginning of $cart_item_data initialization?
- * @param array $cart_item_data?
- * @param int $product?
+ * @param array? $cart_item_data
+ * @param int? $product
  * @param string $variation
  * @return array
  */
 function add_discount_field_into_data($cart_item_data, $product, $variation)
 {
+    $cart_item_data['discount_type'] = array();
+    if (isset($_POST['promo'])) {
+        array_push($cart_item_data['discount_type'], 'Use Promo');
+    }
+    if (isset($_POST['byoe'])) {
+        array_push($cart_item_data['discount_type'], 'Bring Your Own Equipment');
+    }
+
     if (isset($_POST['promo'])) {
         // So far use promo for all persons by default, later on will add the number of passes being used
         // $cart_item_data['promo_used'] = '1';
@@ -232,8 +241,29 @@ function add_discount_field_into_data($cart_item_data, $product, $variation)
 add_filter('woocommerce_add_cart_item_data', 'add_discount_field_into_data', 10, 3);
 
 /**
+ * Add discount information field in the cart as well as the cart preview in the product page
+ * @param mixed? $cart_item_data
+ * @param mixed? $cart_item?
+ * @return mixed?
+ */
+function add_discount_field_into_cart($cart_item_data, $cart_item)
+{
+    if (!isset($cart_item['discount_type'])) {
+        return;
+    }
+
+    $display = join("\n", $cart_item['discount_type']);
+    $cart_item_data[] = array(
+        'name' => __("Discount Options", "woocommerce"),
+        'value' => __($display, "woocommerce")
+    );
+    return $cart_item_data;
+}
+add_filter('woocommerce_get_item_data', 'add_discount_field_into_cart', 10, 2);
+
+/**
  * Re-calculate the prices in the cart
- * @param mixed $cart?
+ * @param mixed? $cart
  * @return void
  */
 function recalculate_total($cart)

@@ -5,7 +5,6 @@ jQuery(document).ready(function ($) {
      * @desc Toggle classes of the field
      * @param {string} fieldShowed - Field being displayed
      * @param {...string} fieldsHidden - Fields being hidden
-     * @param {boolean} display
      * @return {undefined}
      */
     const toggleField = function (fieldShowed, ...fieldsHidden) {
