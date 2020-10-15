@@ -2,7 +2,7 @@
 // Admin Dashboard Components
 
 /**
- * @desc Template of custom field
+ * Template of custom field
  * @param int $resource
  * @param string $product
  * @return array
@@ -13,16 +13,16 @@ function create_admin_byoe_field($resource, $product)
     if ($product !== strval(SINGULAR_ID)) {
         return;
     }
-    if ($resource !== 291 && $resource !== 293) {
+    if ($resource !== ARCHERY_ID && $resource !== COMBO_ID) {
         return;
     }
 
     switch ($resource) {
-        case 291:
+        case ARCHERY_ID:
             $id = 'byoe_price_archery';
             $value = '17.5';
             break;
-        case 293:
+        case COMBO_ID:
             $id = 'byoe_price_combo';
             $value = '57.25';
             break;
@@ -48,7 +48,7 @@ function admin_byoe_field($resource, $product)
     if ($product !== strval(SINGULAR_ID)) {
         return;
     }
-    if ($resource !== 291 && $resource !== 293) {
+    if ($resource !== ARCHERY_ID && $resource !== COMBO_ID) {
         return;
     }
     

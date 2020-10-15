@@ -14,14 +14,30 @@ defined('ABSPATH') or exit;
 // Admin Dashboard
 require_once plugin_dir_path(__FILE__) . 'admin.php';
 
-// Config Area
-define('SINGULAR_ID', 304);
-define('PROMO_ID', 358);
-define('ARCHERY_ID', 291);
-define('AIRSOFT_ID', 292);
-define('COMBO_ID', 293);
+// ---------------Config Area Starts
+
+// For real
+define('SINGULAR_ID', 68051);
+define('PROMO_ID', 68067);
+define('ARCHERY_ID', 68059);
+define('AIRSOFT_ID', 68060);
+define('COMBO_ID', 68062);
+
+// For test
+// define('SINGULAR_ID', 304);
+// define('PROMO_ID', 358);
+// define('ARCHERY_ID', 291);
+// define('AIRSOFT_ID', 292);
+// define('COMBO_ID', 293);
+
+// For local
 // define('SINGULAR_ID', 7);
 // define('PROMO_ID', 8);
+// define('ARCHERY_ID', 20);
+// define('AIRSOFT_ID', 21);
+// define('COMBO_ID', 22);
+
+// ---------------Config Area Ends
 
 /**
  * Check if the current product is 'Singular Passes'
@@ -50,7 +66,7 @@ function query_promo_times($type)
             array("%$type%", $user)
         )
     );
-    return $promo_times;
+    return $promo_times ?? 0;
 }
 
 /**
@@ -80,21 +96,24 @@ function init_assets()
 }
 add_action('wp_enqueue_scripts', 'init_assets');
 
+// Remove product images
+remove_action('woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20);
+
 /**
  * Add html templates of access to 'Promo Passes' in 'Singular Passes'
  * @return void
  */
 function add_promo_link()
 {
-    if (is_singular_pass()) {
-        ?>
+    if (!is_singular_pass()) {
+        return;
+    } ?>
 <div>
     <p><span class="sz-text-highlight">Do you know? </span>You can enjoy one FREE extra entry if you buy the promo?</p>
     <a href="<?php echo get_permalink(PROMO_ID)?>"><button>Take me to
             Promo!</button></a>
 </div>
 <?php
-    }
 }
 add_action('woocommerce_single_product_summary', 'add_promo_link');
 
@@ -282,3 +301,12 @@ function recalculate_total($cart)
     }
 }
 add_action('woocommerce_before_calculate_totals', 'recalculate_total');
+
+add_action('woocommerce_add_order_item_meta', 'add_order_item_meta', 10, 2);
+function add_order_item_meta($item_id, $values)
+{
+    if (isset($values [ 'discount_type' ])) {
+        $custom_data  = $values [ 'discount_type' ];
+        wc_add_order_item_meta($item_id, 'Discount Type', $custom_data['discount_type']);
+    }
+}

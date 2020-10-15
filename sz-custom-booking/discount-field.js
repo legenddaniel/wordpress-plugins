@@ -1,6 +1,10 @@
 // Checkbox area before add_to_cart button layout and functionalities
 jQuery(document).ready(function ($) {
 
+    // Should not hard coded
+    const [archeryID, airsoftID, comboID] = ['68059', '68060', '68062'];
+    // const [archeryID, airsoftID, comboID] = ['291', '292', '293'];
+
     /**
      * @desc Toggle classes of the field
      * @param {string} fieldShowed - Field being displayed
@@ -14,19 +18,20 @@ jQuery(document).ready(function ($) {
         });
     };
 
+
     // Add an anchor to the booking cost div as a ref
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
     // Display checkboxes based on types
     $('#wc_bookings_field_resource').on('change', function () {
         switch ($(this).val()) {
-            case '291':
+            case archeryID:
                 toggleField('#archery-field', '#airsoft-field', '#combo-field');
                 break;
-            case '292':
+            case airsoftID:
                 toggleField('#airsoft-field', '#archery-field', '#combo-field');
                 break;
-            case '293':
+            case comboID:
                 toggleField('#combo-field', '#airsoft-field', '#archery-field');
                 break;
         }
