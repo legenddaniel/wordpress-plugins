@@ -305,8 +305,8 @@ add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 add_action('woocommerce_add_order_item_meta', 'add_order_item_meta', 10, 2);
 function add_order_item_meta($item_id, $values)
 {
-    if (isset($values [ 'discount_type' ])) {
-        $custom_data  = $values [ 'discount_type' ];
-        wc_add_order_item_meta($item_id, 'Discount Type', $custom_data['discount_type']);
+    if (isset($values['discount_type'])) {
+        $discount_type  = $values['discount_type'];
+        wc_add_order_item_meta($item_id, 'discount_type', $discount_type);
     }
 }
