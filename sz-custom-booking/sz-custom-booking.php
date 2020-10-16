@@ -12,6 +12,7 @@
 defined('ABSPATH') or exit;
 
 // Admin Dashboard
+is_admin() and
 require_once plugin_dir_path(__FILE__) . 'admin.php';
 
 // ---------------Config Area Starts
@@ -103,25 +104,57 @@ remove_action('woocommerce_before_single_product_summary', 'woocommerce_show_pro
  * Add html templates of access to 'Promo Passes' in 'Singular Passes'
  * @return void
  */
-function add_promo_link()
+function render_summary()
 {
     if (!is_singular_pass()) {
         return;
     } ?>
-<div>
+<div class="mtb-25">
     <p><span class="sz-text-highlight">Do you know? </span>You can enjoy one FREE extra entry if you buy the promo?</p>
     <a href="<?php echo get_permalink(PROMO_ID)?>"><button>Take me to
             Promo!</button></a>
 </div>
+<div class="mtb-25">
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+        laborum.
+    </p>
+    <div class="flex">
+        <div class="mlr-10">
+            <p class="sz-summary-title">Title</p>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua.
+            </p>
+        </div>
+        <div class="mlr-10">
+            <p class="sz-summary-title">Title</p>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua.
+            </p>
+        </div>
+        <div class="mlr-10">
+            <p class="sz-summary-title">Title</p>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua.
+            </p>
+        </div>
+    </div>
+</div>
 <?php
 }
-add_action('woocommerce_single_product_summary', 'add_promo_link');
+add_action('woocommerce_single_product_summary', 'render_summary');
 
 /**
  * Add discount checkboxes for Archery in 'Singular Passes'
  * @return void
  */
-function add_discount_field_archery()
+function render_discount_field_archery()
 {
     if (!is_singular_pass()) {
         return;
@@ -156,13 +189,13 @@ function add_discount_field_archery()
     <?php
 }
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
-add_action('woocommerce_before_add_to_cart_button', 'add_discount_field_archery');
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_archery');
 
 /**
  * Add discount checkboxes for Airsoft in 'Singular Passes'
  * @return void
  */
-function add_discount_field_airsoft()
+function render_discount_field_airsoft()
 {
     if (!is_singular_pass()) {
         return;
@@ -185,13 +218,13 @@ function add_discount_field_airsoft()
 
     <?php
 }
-add_action('woocommerce_before_add_to_cart_button', 'add_discount_field_airsoft');
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_airsoft');
 
 /**
  * Add discount checkboxes for Combo in 'Singular Passes'
  * @return array
  */
-function add_discount_field_combo()
+function render_discount_field_combo()
 {
     if (!is_singular_pass()) {
         return;
@@ -225,7 +258,7 @@ function add_discount_field_combo()
 <?php
 }
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
-add_action('woocommerce_before_add_to_cart_button', 'add_discount_field_combo');
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_combo');
 
 /**
  * Add the entries of discounts in the cart item data. Fire at the beginning of $cart_item_data initialization?
@@ -234,7 +267,7 @@ add_action('woocommerce_before_add_to_cart_button', 'add_discount_field_combo');
  * @param string $variation
  * @return array
  */
-function add_discount_field_into_data($cart_item_data, $product, $variation)
+function add_discount_info_into_data($cart_item_data, $product, $variation)
 {
     $cart_item_data['discount_type'] = array();
     if (isset($_POST['promo'])) {
@@ -257,7 +290,7 @@ function add_discount_field_into_data($cart_item_data, $product, $variation)
         return $cart_item_data;
     }
 }
-add_filter('woocommerce_add_cart_item_data', 'add_discount_field_into_data', 10, 3);
+add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_data', 10, 3);
 
 /**
  * Add discount information field in the cart as well as the cart preview in the product page
@@ -265,7 +298,7 @@ add_filter('woocommerce_add_cart_item_data', 'add_discount_field_into_data', 10,
  * @param mixed? $cart_item?
  * @return mixed?
  */
-function add_discount_field_into_cart($cart_item_data, $cart_item)
+function render_discount_field_in_cart($cart_item_data, $cart_item)
 {
     if (!isset($cart_item['discount_type'])) {
         return;
@@ -278,7 +311,7 @@ function add_discount_field_into_cart($cart_item_data, $cart_item)
     );
     return $cart_item_data;
 }
-add_filter('woocommerce_get_item_data', 'add_discount_field_into_cart', 10, 2);
+add_filter('woocommerce_get_item_data', 'render_discount_field_to_cart', 10, 2);
 
 /**
  * Re-calculate the prices in the cart

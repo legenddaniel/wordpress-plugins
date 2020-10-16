@@ -1,3 +1,7 @@
+.wc-bookings-booking-form .block-picker a {
+    color: rgb(43, 43, 43);
+}
+
 .sz-text-highlight {
     color: red;
 }
@@ -17,4 +21,22 @@
 
 .d-none {
     display: none;
+}
+
+.mtb-25 {
+    margin: 25px 0;
+}
+
+.mlr-10 {
+    margin: 0 10px;
+}
+
+.flex {
+    display: flex;
+}
+
+.sz-summary-title {
+    margin: initial;
+    font-size: 24px;
+    font-weight: 500;
 }

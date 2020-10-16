@@ -56,3 +56,8 @@ function admin_byoe_field($resource, $product)
     woocommerce_wp_text_input($field);
 }
 add_action('woocommerce_bookings_after_resource_cost', 'admin_byoe_field', 10, 2);
+
+// function admin_add_booking_details($booking_id){
+//     $booking = new WC_Booking($booking_id);
+// }
+// add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');
