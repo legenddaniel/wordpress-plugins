@@ -1,0 +1,20 @@
+{
+    "terms": 0,
+    "createaccount": 0,
+    "payment_method": "",
+    "shipping_method": "",
+    "ship_to_different_address": false,
+    "woocommerce_checkout_update_totals": false,
+    "billing_first_name": "First",
+    "billing_last_name": "Last",
+    "billing_company": "",
+    "billing_country": "CA",
+    "billing_address_1": "196 Street Street",
+    "billing_address_2": "",
+    "billing_city": "Toronto",
+    "billing_state": "ON",
+    "billing_postcode": "M2J 2W9",
+    "billing_phone": "1234567890",
+    "billing_email": "a@a.com",
+    "order_comments": ""
+}

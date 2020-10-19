@@ -57,7 +57,8 @@ function admin_byoe_field($resource, $product)
 }
 add_action('woocommerce_bookings_after_resource_cost', 'admin_byoe_field', 10, 2);
 
-// function admin_add_booking_details($booking_id){
-//     $booking = new WC_Booking($booking_id);
-// }
-// add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');
+function admin_add_booking_details($booking_id){
+    $booking = new WC_Booking($booking_id);
+    echo 'Will add discount info here';
+}
+add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');

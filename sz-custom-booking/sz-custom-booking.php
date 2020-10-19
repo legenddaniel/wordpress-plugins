@@ -122,7 +122,7 @@ function render_summary()
         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
         laborum.
     </p>
-    <div class="flex">
+    <div class="sz-sum-sub-desc">
         <div class="mlr-10">
             <p class="sz-summary-title">Title</p>
             <p>
@@ -276,7 +276,7 @@ function add_discount_info_into_data($cart_item_data, $product, $variation)
     if (isset($_POST['byoe'])) {
         array_push($cart_item_data['discount_type'], 'Bring Your Own Equipment');
     }
-
+	
     if (isset($_POST['promo'])) {
         // So far use promo for all persons by default, later on will add the number of passes being used
         // $cart_item_data['promo_used'] = '1';
@@ -311,7 +311,7 @@ function render_discount_field_in_cart($cart_item_data, $cart_item)
     );
     return $cart_item_data;
 }
-add_filter('woocommerce_get_item_data', 'render_discount_field_to_cart', 10, 2);
+add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
 
 /**
  * Re-calculate the prices in the cart
@@ -335,11 +335,25 @@ function recalculate_total($cart)
 }
 add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 
-add_action('woocommerce_add_order_item_meta', 'add_order_item_meta', 10, 2);
-function add_order_item_meta($item_id, $values)
+// add_action('woocommerce_add_order_item_meta', 'add_order_item_meta', 10, 2);
+// function add_order_item_meta($item_id, $values)
+// {
+//     echo '<script>console.log('.json_encode($values).')</script>';
+//     if (isset($values['discount_type'])) {
+//         $discount_type  = $values['discount_type'];
+//         wc_add_order_item_meta($item_id, 'discount_type', $discount_type);
+//     }
+// }
+// 
+// add_action( 'woocommerce_before_order_notes', 'add_checkout_custom_text_fields', 20, 1 );
+// 
+function add_discount_info_into_booking_data($data)
 {
-    if (isset($values['discount_type'])) {
-        $discount_type  = $values['discount_type'];
-        wc_add_order_item_meta($item_id, 'discount_type', $discount_type);
-    }
+// 	if (isset($cart_item_data['discount_type']) && count($cart_item_data['discount_type'])) {
+// 		$booking = WC_Booking_Cart_Manager()::create_booking_from_cart_data();
+// 		$data['aaaaa'] = 'aaaaa';
+		array_merge($data, array('aaaaa' => 'aaaaa'));
+		return $data;
+// 	}
 }
+add_filter('woocommerce_new_booking_data', 'add_discount_info_into_booking_data');
