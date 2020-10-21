@@ -1,5 +1,5 @@
 // Checkbox area before add_to_cart button layout and functionalities
-jQuery(document).ready(function ($) {
+jQuery(document).ready($ => {
 
     // Should not hard coded
     const [archeryID, airsoftID, comboID] = ['68059', '68060', '68062'];
@@ -11,9 +11,9 @@ jQuery(document).ready(function ($) {
      * @param {...string} fieldsHidden - Fields being hidden
      * @return {undefined}
      */
-    const toggleField = function (fieldShowed, ...fieldsHidden) {
+    const toggleField = (fieldShowed, ...fieldsHidden) => {
         $(fieldShowed).attr('class', 'sz-discount-field');
-        fieldsHidden.forEach(function (field) {
+        fieldsHidden.forEach(field => {
             $(field).attr('class', 'sz-discount-field d-none');
         });
     };
@@ -23,7 +23,7 @@ jQuery(document).ready(function ($) {
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
     // Display checkboxes based on types
-    $('#wc_bookings_field_resource').on('change', function () {
+    $('#wc_bookings_field_resource').on('change', () => {
         switch ($(this).val()) {
             case archeryID:
                 toggleField('#archery-field', '#airsoft-field', '#combo-field');
@@ -38,14 +38,14 @@ jQuery(document).ready(function ($) {
     });
 
     // Change price displayed according the discount options
-    $('#sz-discount-fields input').on('change', function () {
+    $('#sz-discount-fields input').on('change', () => {
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
         const $price = $(this).closest('.sz-discount-field').attr('data-price');
 
         // Apply the discount with the lowest cost
         let $discounted_price = $price;
-        $('#sz-discount-fields input').each(function () {
+        $('#sz-discount-fields input').each(() => {
             if (
                 $(this).is(':checked') &&
                 +$(this).val() < +$discounted_price
@@ -67,10 +67,10 @@ jQuery(document).ready(function ($) {
         const config = { attributes: true, childList: true };
 
         const mutationObserver = new MutationObserver(function (mutations, observer) {
-            mutations.forEach(function (mutation) {
+            mutations.forEach(mutation => {
 
                 // Uncheck all discount options when booking changes
-                checkboxes.forEach(function (checkbox) {
+                checkboxes.forEach(checkbox => {
                     checkbox.checked = false;
                 })
 

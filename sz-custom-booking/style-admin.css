@@ -1,0 +1,16 @@
+/* Admin styles starts */
+
+.sz-admin-byoe-input {
+
+}
+
+.sz-admin-byoe-checkbox {
+    width: 16px !important;
+    min-width: initial !important;
+}
+
+.d-none {
+    display: none;
+}
+
+/* Admin styles ends */
