@@ -23,7 +23,7 @@ jQuery(document).ready($ => {
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
     // Display checkboxes based on types
-    $('#wc_bookings_field_resource').on('change', () => {
+    $('#wc_bookings_field_resource').on('change', function() {
         switch ($(this).val()) {
             case archeryID:
                 toggleField('#archery-field', '#airsoft-field', '#combo-field');
@@ -38,7 +38,7 @@ jQuery(document).ready($ => {
     });
 
     // Change price displayed according the discount options
-    $('#sz-discount-fields input').on('change', () => {
+    $('#sz-discount-fields input').on('change', function() {
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
         const $price = $(this).closest('.sz-discount-field').attr('data-price');
