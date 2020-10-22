@@ -1,5 +1,5 @@
 // Checkbox area before add_to_cart button layout and functionalities
-jQuery(document).ready($ => {
+jQuery(document).ready(function ($) {
 
     // Should not hard coded
     const [archeryID, airsoftID, comboID] = ['68059', '68060', '68062'];
@@ -11,9 +11,9 @@ jQuery(document).ready($ => {
      * @param {...string} fieldsHidden - Fields being hidden
      * @return {undefined}
      */
-    const toggleField = (fieldShowed, ...fieldsHidden) => {
+    const toggleField = function (fieldShowed, ...fieldsHidden) {
         $(fieldShowed).attr('class', 'sz-discount-field');
-        fieldsHidden.forEach(field => {
+        fieldsHidden.forEach(function (field) {
             $(field).attr('class', 'sz-discount-field d-none');
         });
     };
@@ -23,7 +23,7 @@ jQuery(document).ready($ => {
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
     // Display checkboxes based on types
-    $('#wc_bookings_field_resource').on('change', function() {
+    $('#wc_bookings_field_resource').on('change', function () {
         switch ($(this).val()) {
             case archeryID:
                 toggleField('#archery-field', '#airsoft-field', '#combo-field');
@@ -38,20 +38,20 @@ jQuery(document).ready($ => {
     });
 
     // Change price displayed according the discount options
-    $('#sz-discount-fields input').on('change', function() {
+    $('#sz-discount-fields input').on('change', function () {
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
         const $price = $(this).closest('.sz-discount-field').attr('data-price');
 
         // Apply the discount with the lowest cost
         let $discounted_price = $price;
-        $('#sz-discount-fields input').each(() => {
+        $('#sz-discount-fields input').each(function () {
             if (
                 $(this).is(':checked') &&
                 +$(this).val() < +$discounted_price
             ) {
-                $discounted_price = $(this).val();
-            }
+                      //$discounted_price = $(this).val();
+            		$discounted_price = $discounted_price - $price;            }
         })
 
         bdiHtml += ($discounted_price * $qty).toFixed(2);
@@ -67,10 +67,10 @@ jQuery(document).ready($ => {
         const config = { attributes: true, childList: true };
 
         const mutationObserver = new MutationObserver(function (mutations, observer) {
-            mutations.forEach(mutation => {
+            mutations.forEach(function (mutation) {
 
                 // Uncheck all discount options when booking changes
-                checkboxes.forEach(checkbox => {
+                checkboxes.forEach(function (checkbox) {
                     checkbox.checked = false;
                 })
 

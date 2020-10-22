@@ -5,7 +5,7 @@
  * Description: Custom booking
  * Author: Daniel Siyuan Zuo
  * Author URI: https://github.com/legenddaniel
- * Text Domain: costom-booking
+ * Text Domain: custom-booking
  */
 
 // Exit if accessed directly
@@ -97,9 +97,6 @@ function init_assets()
 }
 add_action('wp_enqueue_scripts', 'init_assets');
 
-// Remove product images
-remove_action('woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20);
-
 /**
  * Add html templates of access to 'Promo Passes' in 'Singular Passes'
  * @return void
@@ -109,39 +106,43 @@ function render_summary()
     if (!is_singular_pass()) {
         return;
     } ?>
-<div class="mtb-25">
-    <p><span class="sz-text-highlight">Do you know? </span>You can enjoy one FREE extra entry if you buy the promo?</p>
+<div class="mtb-25 promoQuestion">
+    <p><span class="sz-text-highlight">Did you know? </span>You can enjoy one FREE extra entry if you buy the promo
+        package!</p>
     <a href="<?php echo get_permalink(PROMO_ID)?>"><button>Take me to
             Promo!</button></a>
 </div>
-<div class="mtb-25">
-    <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-        laborum.
+
+<hr>
+
+<div class="mtb-25 ">
+    <p class="headLine">
+        You are a few clicks away from booking your session at <span style="color:#5ab152">Solely Outdoors</span>
+        located at <span style="color:#5ab152">101 - 8365 Woodbine Avenue, Marham ON.</span>. <br>
+        We are open by reservation only. For same day booking, please call first to check availability: (905) 882-8629.
+        <br>
+        You may also book over the phone. See you soon!
     </p>
     <div class="sz-sum-sub-desc">
         <div class="mlr-10">
-            <p class="sz-summary-title">Title</p>
+            <p class="sz-summary-title">Check-in</p>
             <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua.
+                Check-in starts 10 minutes prior to your booked session time. If you book for 4:30, please arrive at
+                4:20 for check-in. </p>
+        </div>
+        <div class="mlr-10">
+            <p class="sz-summary-title">Duration</p>
+            <p>
+
+                The session is 60 minutes long and includes expert shooting instructions from your instructor.
             </p>
         </div>
         <div class="mlr-10">
-            <p class="sz-summary-title">Title</p>
+            <p class="sz-summary-title">Age</p>
             <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua.
-            </p>
-        </div>
-        <div class="mlr-10">
-            <p class="sz-summary-title">Title</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua.
+
+                There are no age restrictions but children under 16 years old must be accompanied by an adult.
+
             </p>
         </div>
     </div>
@@ -166,7 +167,6 @@ function render_discount_field_archery()
     $discounted_price = $price * 0.5; ?>
 
 <div class="sz-discount-fields d-none" id="sz-discount-fields">
-    </p>
     <div class="sz-discount-field" id="archery-field" data-price=<?php echo $price; ?>>
         <p>
             <input type="checkbox" id="byoe-archery" name="byoe" value=<?php echo $discounted_price; ?>>
@@ -179,17 +179,31 @@ function render_discount_field_archery()
             return;
         } ?>
 
-        <p>
-            <input type="checkbox" id="promo-archery" name="promo" value="0">
-            <label for="promo-archery">Use Promo (<?php echo $archery_promo_count; ?>
-                left)</label>
-        </p>
+
+        <input type="checkbox" id="promo-archery" name="promo" value="0">
+        <label for="promo-archery">Use Promo (<?php echo $archery_promo_count; ?>
+            left)</label>
+
+
+        <div class="txtAge" style="display:none">
+            <div class="wdm-custom-fields">
+                <label for="passes">How many passes to use:</label>
+                <select name="wdm_name" id="passes">
+                    <?php
+    for ($i = 0; $i <= 1; $i++) {
+        echo "<option>" .$i. "</option>";
+    } ?>
+                </select>
+            </div>
+        </div>
+
+
     </div>
 
     <?php
 }
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
-add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_archery');
+// add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_archery');
 
 /**
  * Add discount checkboxes for Airsoft in 'Singular Passes'
@@ -214,11 +228,24 @@ function render_discount_field_airsoft()
             <label for="promo-airsoft">Use Promo (<?php echo $airsoft_promo_count; ?>
                 left)</label>
         </p>
+
+        <div class="txtAge" style="display:none">
+            <div class="wdm-custom-fields">
+                <label for="passes">How many passes to use:</label>
+                <select name="wdm_name" id="passes">
+                    <?php
+    for ($i = 0; $i <= 1; $i++) {
+        echo "<option>" .$i. "</option>";
+    } ?>
+                </select>
+            </div>
+        </div>
+
     </div>
 
     <?php
 }
-add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_airsoft');
+// add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_airsoft');
 
 /**
  * Add discount checkboxes for Combo in 'Singular Passes'
@@ -252,13 +279,26 @@ function render_discount_field_combo()
             <label for="promo-combo">Use Promo (<?php echo $combo_promo_count; ?>
                 left)</label>
         </p>
+
+        <div class="txtAge" style="display:none">
+            <div class="wdm-custom-fields">
+                <label for="passes">How many passes to use:</label>
+                <select name="wdm_name" id="passes">
+                    <?php
+    for ($i = 0; $i <= 1; $i++) {
+        echo "<option>" .$i. "</option>";
+    } ?>
+                </select>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <?php
 }
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
-add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_combo');
+// add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_combo');
 
 /**
  * Add the entries of discounts in the cart item data. Fire at the beginning of $cart_item_data initialization?
@@ -276,21 +316,19 @@ function add_discount_info_into_data($cart_item_data, $product, $variation)
     if (isset($_POST['byoe'])) {
         array_push($cart_item_data['discount_type'], 'Bring Your Own Equipment');
     }
-	
+    
     if (isset($_POST['promo'])) {
         // So far use promo for all persons by default, later on will add the number of passes being used
         // $cart_item_data['promo_used'] = '1';
         $cart_item_data['discounted_price'] = $_POST['promo'];
-        $cart_item_data['unique_key']     = md5(microtime().rand());
         return $cart_item_data;
     }
     if (isset($_POST['byoe'])) {
         $cart_item_data['discounted_price'] = $_POST['byoe'];
-        $cart_item_data['unique_key']     = md5(microtime().rand());
         return $cart_item_data;
     }
 }
-add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_data', 10, 3);
+// add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_data', 10, 3);
 
 /**
  * Add discount information field in the cart as well as the cart preview in the product page
@@ -311,7 +349,7 @@ function render_discount_field_in_cart($cart_item_data, $cart_item)
     );
     return $cart_item_data;
 }
-add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
+// add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
 
 /**
  * Re-calculate the prices in the cart
@@ -333,7 +371,7 @@ function recalculate_total($cart)
         }
     }
 }
-add_action('woocommerce_before_calculate_totals', 'recalculate_total');
+// add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 
 // add_action('woocommerce_add_order_item_meta', 'add_order_item_meta', 10, 2);
 // function add_order_item_meta($item_id, $values)
@@ -344,16 +382,288 @@ add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 //         wc_add_order_item_meta($item_id, 'discount_type', $discount_type);
 //     }
 // }
-// 
+//
 // add_action( 'woocommerce_before_order_notes', 'add_checkout_custom_text_fields', 20, 1 );
-// 
+//
 function add_discount_info_into_booking_data($data)
 {
-// 	if (isset($cart_item_data['discount_type']) && count($cart_item_data['discount_type'])) {
-// 		$booking = WC_Booking_Cart_Manager()::create_booking_from_cart_data();
-// 		$data['aaaaa'] = 'aaaaa';
-		array_merge($data, array('aaaaa' => 'aaaaa'));
-		return $data;
-// 	}
+    // 	if (isset($cart_item_data['discount_type']) && count($cart_item_data['discount_type'])) {
+    // 		$booking = WC_Booking_Cart_Manager()::create_booking_from_cart_data();
+    // 		$data['aaaaa'] = 'aaaaa';
+    array_merge($data, array('aaaaa' => 'aaaaa'));
+    return $data;
+    // 	}
 }
-add_filter('woocommerce_new_booking_data', 'add_discount_info_into_booking_data');
+// add_filter('woocommerce_new_booking_data', 'add_discount_info_into_booking_data');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Daniel's new modification below
+
+/**
+ * Add discount checkboxes for Archery in 'Singular Passes'
+ * @return void
+ */
+function render_discount_field_archery2()
+{
+    if (!is_singular_pass()) {
+        return;
+    }
+    // In the future the discounted price will be from the admin dashboard
+    $archery_promo_count = query_promo_times('Archery');
+    $product = wc_get_product(SINGULAR_ID);
+    $price = $product->get_resource(ARCHERY_ID)->get_base_cost();
+    $price_off = $price * (1 - 0.5); ?>
+
+<div class="sz-discount-fields d-none" id="sz-discount-fields">
+    <div class="sz-discount-field" id="archery-field" data-price=<?php echo $price; ?>>
+        <p>
+            <input type="checkbox" id="byoe-archery" name="byoe-enable" value=<?php echo $price_off; ?>>
+            <label for="byoe-archery">Bring Your Own Equipment - Archery</label>
+        </p>
+
+        <?php
+        // Only display 'Use Promo' field to registered customers
+        if (!is_user_logged_in()) {
+            return;
+        } ?>
+
+        <input type="checkbox" id="promo-archery" name="promo-enable" value="0">
+        <label for="promo-archery">Use Promo (<?php echo $archery_promo_count; ?>
+            left)</label>
+
+        <div class="txtAge" style="display:none">
+            <div class="wdm-custom-fields">
+                <label for="passes-archery">How many passes to use:</label>
+                <select name="wdm_name" id="passes-archery">
+                    <?php
+    for ($i = 0; $i <= 1; $i++) {
+        echo "<option>" .$i. "</option>";
+    } ?>
+                </select>
+            </div>
+        </div>
+
+
+    </div>
+
+    <?php
+}
+// 'woocommerce_before_single_variation' not working, the calendar keeps loading
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_archery2');
+
+/**
+ * Add discount checkboxes for Airsoft in 'Singular Passes'
+ * @return void
+ */
+function render_discount_field_airsoft2()
+{
+    if (!is_singular_pass()) {
+        return;
+    }
+    // Only display 'Use Promo' field to registered customers
+    if (!is_user_logged_in()) {
+        return;
+    }
+    
+    $airsoft_promo_count = query_promo_times('Airsoft');
+    $product = wc_get_product(SINGULAR_ID);
+    $price = $product->get_resource(AIRSOFT_ID)->get_base_cost(); ?>
+    <div class="sz-discount-field d-none" id="airsoft-field" data-price=<?php echo $price; ?>>
+        <p>
+            <input type="checkbox" id="promo-airsoft" name="promo-enable" value="0">
+            <label for="promo-airsoft">Use Promo (<?php echo $airsoft_promo_count; ?>
+                left)</label>
+        </p>
+
+        <div class="txtAge" style="display:none">
+            <div class="wdm-custom-fields">
+                <label for="passes-airsoft">How many passes to use:</label>
+                <select name="wdm_name" id="passes-airsoft">
+                    <?php
+    for ($i = 0; $i <= 1; $i++) {
+        echo "<option>" .$i. "</option>";
+    } ?>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <?php
+}
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_airsoft2');
+
+/**
+ * Add discount checkboxes for Combo in 'Singular Passes'
+ * @return array
+ */
+function render_discount_field_combo2()
+{
+    if (!is_singular_pass()) {
+        return;
+    }
+    // In the future the discounted price will be from the admin dashboard
+    $combo_promo_count = query_promo_times('Combo');
+    $product = wc_get_product(SINGULAR_ID);
+    $price = $product->get_resource(COMBO_ID)->get_base_cost();
+    $price_off = $price * (1 - 0.825); ?>
+
+    <div class="sz-discount-field d-none" id="combo-field" data-price=<?php echo $price; ?>>
+        <p>
+            <input type="checkbox" id="byoe-combo" name="byoe-enable" value=<?php echo $price_off; ?>>
+            <label for="byoe-combo">Bring Your Own Equipment - Combo</label>
+        </p>
+
+        <?php
+        // Only display 'Use Promo' field to registered customers
+        if (!is_user_logged_in()) {
+            return;
+        } ?>
+
+        <p>
+            <input type="checkbox" id="promo-combo" name="promo-enable" value="0">
+            <label for="promo-combo">Use Promo (<?php echo $combo_promo_count; ?>
+                left)</label>
+        </p>
+
+        <div class="txtAge" style="display:none">
+            <div class="wdm-custom-fields">
+                <label for="passes-combo">How many passes to use:</label>
+                <select name="wdm_name" id="passes-combo">
+                    <?php
+    for ($i = 0; $i <= 1; $i++) {
+        echo "<option>" .$i. "</option>";
+    } ?>
+                </select>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<?php
+}
+// 'woocommerce_before_single_variation' not working, the calendar keeps loading
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_combo2');
+
+
+/**
+ * Add the entries of discounts in the cart item data. Fire at the beginning of $cart_item_data initialization?
+ * @param array? $cart_item_data
+ * @param int? $product
+ * @param string $variation
+ * @return array
+ */
+function add_discount_info_into_data2($cart_item_data, $product, $variation)
+{
+    $cart_item_data['discount'] = array();
+    
+    // && !empty($_POST['wdm_name'])
+    if (isset($_POST['promo-enable'])) {
+        array_push($cart_item_data['discount'], array(
+            'type' 		=> 'Use Promo',
+            'price_off' => $_POST['promo-enable'],
+            'qty' 		=> $_POST['wdm_name'],
+        ));
+    }
+    
+    if (isset($_POST['byoe-enable'])) {
+        array_push($cart_item_data['discount'], array(
+            'type' 		=> 'Bring Your Own Equipment',
+            'price_off' => $_POST['byoe-enable'],
+            'qty' 		=> $_POST['wdm_name'],
+        ));
+    }
+    
+    return $cart_item_data;
+}
+add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_data2', 10, 3);
+
+/**
+ * Add discount information field in the cart as well as the cart preview in the product page
+ * @param mixed? $cart_item_data
+ * @param mixed? $cart_item?
+ * @return mixed?
+ */
+function render_discount_field_in_cart2($cart_item_data, $cart_item)
+{
+    if (!count($cart_item['discount'])) {
+        return;
+    }
+    
+    $display = '';
+    foreach ($cart_item['discount'] as $discount) {
+        foreach ($discount as $key => $value) {
+            $display .= "\n$key: $value";
+        }
+    }
+    $display = ltrim($display, "\n");
+    
+    $cart_item_data[] = array(
+        'name' => __("Discount Info", "woocommerce"),
+        'value' => __($display, "woocommerce")
+    );
+    return $cart_item_data;
+}
+add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart2', 10, 2);
+
+/**
+ * Re-calculate the prices in the cart
+ * @param mixed? $cart
+ * @return void
+ */
+function recalculate_total2($cart)
+{
+    if (is_admin() && ! defined('DOING_AJAX')) {
+        return;
+    }
+    if (did_action('woocommerce_before_calculate_totals') >= 2) {
+        return;
+    }
+
+    foreach ($cart->get_cart() as $cart_item) {
+        if (count($cart_item['discount'])) {
+            $total = $cart_item['booking']['_cost'];
+            $price_off = 0;
+            foreach ($cart_item['discount'] as $discount) {
+                $price_off += $discount['price_off'] * $discount['qty'];
+            }
+            $total -= $price_off;
+            $total = $total > 0 ? $total : 0;
+            $cart_item['data']->set_price($total);
+        }
+    }
+}
+add_action('woocommerce_before_calculate_totals', 'recalculate_total2');

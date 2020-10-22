@@ -19,5 +19,5 @@ jQuery(document).ready($ => {
     toggleDisplay();
 
     // Check once checkbox status changes
-    $BYOECheckboxes.on('change', toggleDisplay);
+    $('.sz-admin-byoe-checkbox').on('change', toggleDisplay);
 })
