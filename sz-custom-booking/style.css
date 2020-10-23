@@ -1,15 +1,11 @@
-/* Woocommerce styles starts */
-
-.wc-bookings-booking-form .block-picker a {
-    color: rgb(43, 43, 43);
-}
-
-/* Woocommerce styles ends */
-
 /* Custom styles starts */
 
-.sz-text-highlight {
+.sz-text-highlight-red {
     color: red;
+}
+
+.sz-text-highlight-green {
+    color: #5ab152;
 }
 
 .sz-size-checkbox {
@@ -37,12 +33,18 @@
     margin: 0 10px;
 }
 
+.sz-sum-head {
+    font-size: 20px;
+}
+
 .sz-sum-sub-desc {
     display: flex;
 }
 
-.sz-summary-title {
+.sz-sum-title {
     margin: initial;
+    color: white;
+    text-align: center;
     font-size: 24px;
     font-weight: 500;
 }

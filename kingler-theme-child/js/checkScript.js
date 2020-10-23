@@ -1,9 +1,10 @@
-jQuery(document).ready(function($) {
-  
+jQuery(document).ready(function($){
 
-$('#isAgeSelected').click(function() {
-     $("#txtAge").toggle(this.checked);
-});
 
+$('[name="promo-enable"]').change(function()
+      {
+            $(".txtAge").toggle( this.checked );
+
+      });
 })
-
+  

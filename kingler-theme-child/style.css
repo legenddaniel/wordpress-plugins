@@ -8,12 +8,35 @@ Template: kingler-theme
 Text Domain: kingler-theme-child
 */
 
-.booking-page {
+/* Product qty input text */
+.scheme_original .woocommerce div.product form.cart div.quantity input[type="number"] {
+    color: initial;
+}
+
+/* Singular & Promo main body */
+#product-68067 .summary,
+#product-68051 .summary {
 	float: none !important;
 	margin: auto !important;
 	width: auto !important;
 }
 
+/* Calendar date block text */
+.wc-bookings-booking-form .block-picker a {
+    color: rgb(43, 43, 43);
+}
+
+/* Cart item details table*/
+.woocommerce-cart-form__cart-item .product-name .variation {
+	text-align: left;
+}
+
+/* Cart item details table row title */
+.woocommerce-cart-form__cart-item .product-name dt {
+	width: 100px;
+}
+
+/* ??? */
 @media screen and (min-width: 481px) {
 	.post_item_wrap {
 		border-radius: 5px 5px !important;

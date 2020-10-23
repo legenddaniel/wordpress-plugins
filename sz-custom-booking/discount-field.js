@@ -45,16 +45,81 @@ jQuery(document).ready(function ($) {
 
         // Apply the discount with the lowest cost
         let $discounted_price = $price;
+
+	$total = $price * $qty;
+	//console.log($total);
+
+
+	/*original
         $('#sz-discount-fields input').each(function () {
             if (
                 $(this).is(':checked') &&
                 +$(this).val() < +$discounted_price
             ) {
-                      //$discounted_price = $(this).val();
-            		$discounted_price = $discounted_price - $price;            }
-        })
+                      $discounted_price = $(this).val();
+		 }
+        })*/
 
-        bdiHtml += ($discounted_price * $qty).toFixed(2);
+	
+	/* test
+        $('#sz-discount-fields input').each(function () {
+            if (
+                $('[name="byoe-enable"]').is(':checked') &&
+                +$('[name="byoe-enable"]').val() < +$discounted_price
+            ) {
+                      //$discounted_price = $(this).val();
+			$byoe = $(this).val();
+
+			
+		 }	
+        }) */
+	
+
+	////////////////////////////////// Aik
+
+
+	var ischeckedByou= $('[name="byoe-enable"]').is(':checked');
+	if (ischeckedByou) {
+
+ 		//$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
+		$byoe = $('[name="byoe-enable"]').val();
+		console.log($byoe);
+
+
+}
+	if (!ischeckedByou) {
+	//$discounted_price =  parseInt($discounted_price) * parseInt($qty);
+	$byoe = 0;
+	//console.log($byoe);
+
+
+	}
+
+	//////////////////////
+
+	
+	var ischecked= $('[name="promo-enable"]').is(':checked');
+	if (ischecked) {
+
+ 		//$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
+		$prom =  $price;
+
+
+}
+	if (!ischecked) {
+	//$discounted_price =  parseInt($discounted_price) * parseInt($qty);
+	$prom = 0;
+	console.log($prom);
+
+	}
+	/////////////////////////
+	$new = parseFloat($total) - parseFloat($byoe) - parseFloat($prom);
+	if(parseFloat($new) < 0) $new = 0;
+	//console.log($new);
+
+        //bdiHtml += ($discounted_price * $qty).toFixed(2); //original
+	bdiHtml += (parseFloat($new)).toFixed(2);
+
         $('#booking-cost bdi').html(bdiHtml);
     })
 
