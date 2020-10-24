@@ -90,7 +90,7 @@ function init_assets()
 
     wp_enqueue_script(
         'discount_field',
-        "{$plugin_url}discount-field.js",
+        "{$plugin_url}old-discount-field.js",
         array('jquery'),
         rand(111, 9999)
     );

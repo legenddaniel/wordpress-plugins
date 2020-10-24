@@ -26,13 +26,15 @@ Text Domain: kingler-theme-child
     color: rgb(43, 43, 43);
 }
 
-/* Cart item details table*/
-.woocommerce-cart-form__cart-item .product-name .variation {
+/* Cart and checkout item details table*/
+.woocommerce-cart-form__cart-item .product-name .variation,
+.woocommerce-checkout-review-order .product-name .variation {
 	text-align: left;
 }
 
-/* Cart item details table row title */
-.woocommerce-cart-form__cart-item .product-name dt {
+/* Cart and checkout item details table row title */
+.woocommerce-cart-form__cart-item .product-name dt, 
+.woocommerce-checkout-review-order .product-name dt {
 	width: 100px;
 }
 

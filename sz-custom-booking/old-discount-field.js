@@ -18,7 +18,6 @@ jQuery(document).ready(function ($) {
         });
     };
 
-
     // Add an anchor to the booking cost div as a ref
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
@@ -37,134 +36,35 @@ jQuery(document).ready(function ($) {
         }
     });
 
-	
-
     // Change price displayed according the discount options
-    $('#sz-discount-fields input').on('change', function () {
+    $('input[name="byoe-enable"], select[name="promo-qty"]').on('change', function () {
+        const $field = $(this).closest('.sz-discount-field');
+        const $byoeInput = $field.find('input[name="byoe-enable"]');
+        const $promoInput = $field.find('input[name="promo-enable"]');
+        const $promoSelect = $field.find('select[name="promo-qty"]');
+
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
-        const $price = $(this).closest('.sz-discount-field').attr('data-price');
+        const $price = $field.attr('data-price'); // Original base cost
 
-        // Apply the discount with the lowest cost
-        let $discounted_price = $price;
+        const $byoeDiscount = $byoeInput.is(':checked') && $byoeInput.val() * 1; // So far byoe-qty always 1
+        const $promoDiscount = $promoSelect.val() * $promoInput.val();
 
-	$total = $price * $qty;
-	var prom;
-	//console.log($total);
+        let $total = $qty * $price;
+        $total = $total - $byoeDiscount - $promoDiscount;
+        $total = $total > 0 ? $total : 0;
 
-
-	/*original
-        $('#sz-discount-fields input').each(function () {
-            if (
-                $(this).is(':checked') &&
-                +$(this).val() < +$discounted_price
-            ) {
-                      $discounted_price = $(this).val();
-		 }
-        })*/
-
-	
-	/* test
-        $('#sz-discount-fields input').each(function () {
-            if (
-                $('[name="byoe-enable"]').is(':checked') &&
-                +$('[name="byoe-enable"]').val() < +$discounted_price
-            ) {
-                      //$discounted_price = $(this).val();
-			$byoe = $(this).val();
-
-			
-		 }	
-        }) */
-	
-
-	////////////////////////////////// Aik
-
-
-	var ischeckedByou= $('[name="byoe-enable"]').is(':checked');
-	if (ischeckedByou) {
-
- 		//$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
-		$byoe = $('[name="byoe-enable"]').val();
-		console.log($byoe);
-
-
-}
-	if (!ischeckedByou) {
-	//$discounted_price =  parseInt($discounted_price) * parseInt($qty);
-	$byoe = 0;
-	//console.log($byoe);
-
-
-	}
-
-	//////////////////////
-
-	/*
-	var ischecked= $('[name="promo-enable"]').is(':checked');
-	if (ischecked) {
-
- 		//$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
-		$prom =  $price;
-
-
-	}
-	if (!ischecked) {
-	//$discounted_price =  parseInt($discounted_price) * parseInt($qty);
-	$prom = 0;
-
-	}
-*/	
-
-
-	/////////////////////////
-	$new = parseFloat($total) - parseFloat($byoe);
-	if(parseFloat($new) < 0) $new = 0;
-
-        //bdiHtml += ($discounted_price * $qty).toFixed(2); //original
-	bdiHtml += (parseFloat($new)).toFixed(2);
-
+        bdiHtml += $total.toFixed(2);
         $('#booking-cost bdi').html(bdiHtml);
     })
-
-
-
-	$('[name="promo-qty"]').on('change', function() {
-	
-	 const $qty = $('#wc_bookings_field_persons').val();
-        const $price = $(this).closest('.sz-discount-field').attr('data-price');
-	let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
-
- 	$qtyOfPasses = $('[name="promo-qty"]').val();
-	
-	if($qtyOfPasses == '') 
-	{
-	$qtyOfPasses = 0;
-	$prom = 0;
-	console.log($prom);
-	}
-	else {
- 	$prom = parseInt($price) * $qtyOfPasses;
-	console.log($prom);
-	}
-	
-
-	$new = parseFloat($total) - parseFloat($prom);
-
-	if(parseFloat($new) < 0) $new = 0;
-
-      	bdiHtml += (parseFloat($new)).toFixed(2);
-
-        $('#booking-cost bdi').html(bdiHtml);
-
-})
-
 
     // Display checkboxes based on stock
     try {
         const observedNode = document.getElementById('booking-cost');
         const targetNode = document.getElementById('sz-discount-fields');
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selects = document.querySelectorAll('select[name="promo-qty"]');
+        const selectFields = document.querySelectorAll('.txtAge');
 
         const config = { attributes: true, childList: true };
 
@@ -174,6 +74,16 @@ jQuery(document).ready(function ($) {
                 // Uncheck all discount options when booking changes
                 checkboxes.forEach(function (checkbox) {
                     checkbox.checked = false;
+                })
+
+                // Reset all select values to the initial
+                selects.forEach(function (select) {
+                    select.value = '';
+                })
+
+                // Hide all select fields
+                selectFields.forEach(function (selectField) {
+                    selectField.style.display = 'none';
                 })
 
                 // Observe booking cost div display change
