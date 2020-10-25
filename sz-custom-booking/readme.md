@@ -4,7 +4,7 @@
     Description: Custom booking
     Author: Siyuan Zuo
     Author URI: https://github.com/legenddaniel
-    Text Domain: costom-booking
+    Text Domain: custom-booking
 
 # Browser Support: IE not supported. need Babel
 
