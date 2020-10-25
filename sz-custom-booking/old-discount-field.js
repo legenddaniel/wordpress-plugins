@@ -37,7 +37,7 @@ jQuery(document).ready(function ($) {
     });
 
     // Change price displayed according the discount options
-    $('input[name="byoe-enable"], select[name="promo-qty"]').on('change', function () {
+    $('input[name="byoe-enable"], input[name="promo-enable"], select[name="promo-qty"]').on('change', function () {
         const $field = $(this).closest('.sz-discount-field');
         const $byoeInput = $field.find('input[name="byoe-enable"]');
         const $promoInput = $field.find('input[name="promo-enable"]');
@@ -48,7 +48,7 @@ jQuery(document).ready(function ($) {
         const $price = $field.attr('data-price'); // Original base cost
 
         const $byoeDiscount = $byoeInput.is(':checked') && $byoeInput.val() * 1; // So far byoe-qty always 1
-        const $promoDiscount = $promoSelect.val() * $promoInput.val();
+        const $promoDiscount = $promoInput.is(':checked') && $promoSelect.val() * $promoInput.val();
 
         let $total = $qty * $price;
         $total = $total - $byoeDiscount - $promoDiscount;
