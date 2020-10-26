@@ -37,7 +37,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-	
+    
 
     // Change price displayed according the discount options
     $('#sz-discount-fields input').on('change', function () {
@@ -45,115 +45,61 @@ jQuery(document).ready(function ($) {
         const $qty = $('#wc_bookings_field_persons').val();
         const $price = $(this).closest('.sz-discount-field').attr('data-price');
 
-        // Apply the discount with the lowest cost
-        let $discounted_price = $price;
 
-	$total = $price * $qty;
-	var prom;
-	//console.log($total);
+    $total = $price * $qty;
 
 
-	/*original
-        $('#sz-discount-fields input').each(function () {
-            if (
-                $(this).is(':checked') &&
-                +$(this).val() < +$discounted_price
-            ) {
-                      $discounted_price = $(this).val();
-		 }
-        })*/
+    var ischeckedByou= $('[name="byoe-enable"]').is(':checked');
+    if (ischeckedByou) {
 
-	
-	/* test
-        $('#sz-discount-fields input').each(function () {
-            if (
-                $('[name="byoe-enable"]').is(':checked') &&
-                +$('[name="byoe-enable"]').val() < +$discounted_price
-            ) {
-                      //$discounted_price = $(this).val();
-			$byoe = $(this).val();
-
-			
-		 }	
-        }) */
-	
-
-	////////////////////////////////// Aik
-
-
-	var ischeckedByou= $('[name="byoe-enable"]').is(':checked');
-	if (ischeckedByou) {
-
- 		//$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
-		$byoe = $('[name="byoe-enable"]').val();
-		console.log($byoe);
+        //$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
+        $byoe = $('[name="byoe-enable"]').val();
+        console.log($byoe);
 
 
 }
-	if (!ischeckedByou) {
-	//$discounted_price =  parseInt($discounted_price) * parseInt($qty);
-	$byoe = 0;
-	//console.log($byoe);
+    if (!ischeckedByou) {
+    //$discounted_price =  parseInt($discounted_price) * parseInt($qty);
+    $byoe = 0;
+    //console.log($byoe);
+    }
 
 
-	}
-
-	//////////////////////
-
-	/*
-	var ischecked= $('[name="promo-enable"]').is(':checked');
-	if (ischecked) {
-
- 		//$discounted_price =  parseInt($discounted_price) * parseInt($qty) -  parseInt($price);
-		$prom =  $price;
-
-
-	}
-	if (!ischecked) {
-	//$discounted_price =  parseInt($discounted_price) * parseInt($qty);
-	$prom = 0;
-
-	}
-*/	
-
-
-	/////////////////////////
-	$new = parseFloat($total) - parseFloat($byoe);
-	if(parseFloat($new) < 0) $new = 0;
+    $new = parseFloat($total) - parseFloat($byoe);
+    if(parseFloat($new) < 0) $new = 0;
 
         //bdiHtml += ($discounted_price * $qty).toFixed(2); //original
-	bdiHtml += (parseFloat($new)).toFixed(2);
+    bdiHtml += (parseFloat($new)).toFixed(2);
 
         $('#booking-cost bdi').html(bdiHtml);
     })
 
 
-
-	$('[name="promo-qty"]').on('change', function() {
-	
-	 const $qty = $('#wc_bookings_field_persons').val();
+    $('[name="promo-qty"]').on('change', function() {
+    
+     const $qty = $('#wc_bookings_field_persons').val();
         const $price = $(this).closest('.sz-discount-field').attr('data-price');
-	let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
+    let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
 
- 	$qtyOfPasses = $('[name="promo-qty"]').val();
-	
-	if($qtyOfPasses == '') 
-	{
-	$qtyOfPasses = 0;
-	$prom = 0;
-	console.log($prom);
-	}
-	else {
- 	$prom = parseInt($price) * $qtyOfPasses;
-	console.log($prom);
-	}
-	
+    $qtyOfPasses = $('[name="promo-qty"]').val();
+    
+    if($qtyOfPasses == '') 
+    {
+    $qtyOfPasses = 0;
+    $prom = 0;
+    console.log($prom);
+    }
+    else {
+    $prom = parseInt($price) * $qtyOfPasses;
+    console.log($prom);
+    }
+    
 
-	$new = parseFloat($total) - parseFloat($prom);
+    $new = parseFloat($total) - parseFloat($prom);
 
-	if(parseFloat($new) < 0) $new = 0;
+    if(parseFloat($new) < 0) $new = 0;
 
-      	bdiHtml += (parseFloat($new)).toFixed(2);
+        bdiHtml += (parseFloat($new)).toFixed(2);
 
         $('#booking-cost bdi').html(bdiHtml);
 

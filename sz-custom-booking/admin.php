@@ -3,7 +3,7 @@
 
 /**
  * Load CSS and JavaScript
- * @return void
+ * @return null
  */
 function init_admin_assets()
 {
@@ -109,7 +109,7 @@ function create_admin_byoe_input_field($resource, $product)
 
 /**
  * @desc Add BYOE price setting field
- * @return void
+ * @return null
  */
 function admin_byoe_field($resource, $product)
 {

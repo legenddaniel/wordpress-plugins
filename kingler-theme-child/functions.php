@@ -7,7 +7,7 @@ if (! defined('ABSPATH')) {
 
 /**
  * Load styles
- * @return void
+ * @return null
  */
 function init_styles()
 {
@@ -41,7 +41,7 @@ add_action('wp_enqueue_scripts', 'init_styles');
 
 /**
  * Remove 'Singular Passes' product image
- * @return void
+ * @return null
  */
 function remake_layout()
 {

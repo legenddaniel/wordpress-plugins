@@ -1,9 +1,17 @@
 jQuery(document).ready(function ($) {
-      $('[name="promo-enable"]').on('change', function () {
+      $('[name="byoe-enable"]').on('change', function () {
             const isChecked = this.checked;
             if (!isChecked) {
-                  $(this).closest('.sz-discount-field').find('select[name="promo-qty"]').val('');
+                  $(this).closest('.sz-discount-field').find('select[name="byoe-qty"]').val('');
             }
-            $(".txtAge").toggle(isChecked);
-      });
+            $('.sz-select-field').toggle(isChecked);  
+      })
+
+      // $('[name="promo-enable"]').on('change', function () {
+      //       const isChecked = this.checked;
+      //       if (!isChecked) {
+      //             $(this).closest('.sz-discount-field').find('select[name="promo-qty"]').val('');
+      //       }
+      //       $(".txtAge").toggle(isChecked);
+      // });
 })

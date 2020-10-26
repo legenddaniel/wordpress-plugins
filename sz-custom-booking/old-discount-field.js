@@ -18,6 +18,23 @@ jQuery(document).ready(function ($) {
         });
     };
 
+    /**
+     * @desc Calculate discount for byoe and promo
+     * @param {object} e - Event being passed in the event handler
+     * @param {string} field - 'byoe' or 'promo'
+     * @return {number} - Discount
+     */
+    const calculateDiscount = function (e, field) {
+        const $field = e.currentTarget.closest('.sz-discount-field');
+        const $input = $($field).find(`input[name="${field}-enable"]`);
+        const $select = $($field).find(`select[name="${field}-qty"]`);
+        const $price = $input.length ? $input.val() : 0;
+        const $qty = $select.length ? $select.val() : 1;
+
+        const $discount = $input.is(':checked') && $price * $qty;
+        return $discount;
+    };
+
     // Add an anchor to the booking cost div as a ref
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
@@ -37,18 +54,13 @@ jQuery(document).ready(function ($) {
     });
 
     // Change price displayed according the discount options
-    $('input[name="byoe-enable"], input[name="promo-enable"], select[name="promo-qty"]').on('change', function () {
-        const $field = $(this).closest('.sz-discount-field');
-        const $byoeInput = $field.find('input[name="byoe-enable"]');
-        const $promoInput = $field.find('input[name="promo-enable"]');
-        const $promoSelect = $field.find('select[name="promo-qty"]');
-
+    $('input[name$="-enable"], select[name$="-qty"]').on('change', function (e) {
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
-        const $price = $field.attr('data-price'); // Original base cost
+        const $price = $(this).closest('.sz-discount-field').attr('data-price'); // Original base cost
 
-        const $byoeDiscount = $byoeInput.is(':checked') && $byoeInput.val() * 1; // So far byoe-qty always 1
-        const $promoDiscount = $promoInput.is(':checked') && $promoSelect.val() * $promoInput.val();
+        const $byoeDiscount = calculateDiscount(e, 'byoe');
+        const $promoDiscount = calculateDiscount(e, 'promo');
 
         let $total = $qty * $price;
         $total = $total - $byoeDiscount - $promoDiscount;
@@ -62,9 +74,9 @@ jQuery(document).ready(function ($) {
     try {
         const observedNode = document.getElementById('booking-cost');
         const targetNode = document.getElementById('sz-discount-fields');
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        const selects = document.querySelectorAll('select[name="promo-qty"]');
-        const selectFields = document.querySelectorAll('.txtAge');
+        const checkboxes = document.querySelectorAll('#sz-discount-fields input[type="checkbox"]');
+        const selects = document.querySelectorAll('#sz-discount-fields select');
+        const selectFields = document.querySelectorAll('.txtAge, .sz-select-field'); // No '.txtAge'
 
         const config = { attributes: true, childList: true };
 

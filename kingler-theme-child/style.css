@@ -9,9 +9,9 @@ Text Domain: kingler-theme-child
 */
 
 /* Product qty input text */
-.scheme_original .woocommerce div.product form.cart div.quantity input[type="number"] {
+/* .scheme_original .woocommerce div.product form.cart div.quantity input[type="number"] {
     color: initial;
-}
+} */
 
 /* Singular & Promo main body */
 #product-68067 .summary,
