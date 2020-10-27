@@ -6,23 +6,23 @@ jQuery(document).ready(function ($) {
      * @return {undefined}
      */
     const renderSelectOptions = function (field) {
-        const numOfPersons = +$('#wc_bookings_field_persons').val();
-        const currentSelect = $(`.sz-discount-field:not(.d-none) select[name="${field}-qty"]`);
+        const $numOfPersons = +$('#wc_bookings_field_persons').val();
+        const $select = $(`#${field}-qty`);
 
-        let numOfOptions;
+        let $numOfOptions;
         if (field === 'byoe') {
-            numOfOptions = numOfPersons;
+            $numOfOptions = $numOfPersons;
         }
         if (field === 'promo') {
-            const numOfPromo = +currentSelect.attr('data-passes');
-            numOfOptions = Math.min(numOfPersons, numOfPromo);
+            const numOfPromo = +$select.attr('data-passes');
+            $numOfOptions = Math.min($numOfPersons, numOfPromo);
         }
 
         let selectHtml = '<option selected></option>';
-        for (let i = 1; i < numOfOptions + 1; i++) {
+        for (let i = 1; i < $numOfOptions + 1; i++) {
             selectHtml += `<option>${i}</option>`;
         }
-        currentSelect.html(selectHtml);
+        $select.html(selectHtml);
     };
 
     // When page initialize

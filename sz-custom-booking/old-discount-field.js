@@ -20,16 +20,17 @@ jQuery(document).ready(function ($) {
 
     /**
      * @desc Calculate discount for byoe and promo
-     * @param {object} e - Event being passed in the event handler
      * @param {string} field - 'byoe' or 'promo'
      * @return {number} - Discount
      */
-    const calculateDiscount = function (e, field) {
-        const $field = e.currentTarget.closest('.sz-discount-field');
-        const $input = $($field).find(`input[name="${field}-enable"]`);
-        const $select = $($field).find(`select[name="${field}-qty"]`);
-        const $price = $input.length ? $input.val() : 0;
+    const calculateDiscount = function (field) {
+        const $input = $(`#${field}-enable`);
+        const $select = $(`#${field}-qty`);
+
+        const $price = $input.length ? $input.attr('data-price') : 0;
         const $qty = $select.length ? $select.val() : 1;
+
+        console.log($price, '*', $qty)
 
         const $discount = $input.is(':checked') && $price * $qty;
         return $discount;
@@ -38,29 +39,19 @@ jQuery(document).ready(function ($) {
     // Add an anchor to the booking cost div as a ref
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
 
-    // Display checkboxes based on types
+    // Hide BYOE field for Airsoft. Should not hard code it.
     $('#wc_bookings_field_resource').on('change', function () {
-        switch ($(this).val()) {
-            case archeryID:
-                toggleField('#archery-field', '#airsoft-field', '#combo-field');
-                break;
-            case airsoftID:
-                toggleField('#airsoft-field', '#archery-field', '#combo-field');
-                break;
-            case comboID:
-                toggleField('#combo-field', '#airsoft-field', '#archery-field');
-                break;
-        }
-    });
+        $('#sz-discount-field div').slice(0, 2).toggle(this.value !== airsoftID);
+    })
 
     // Change price displayed according the discount options
-    $('input[name$="-enable"], select[name$="-qty"]').on('change', function (e) {
+    $('input[name$="-enable"], select[name$="-qty"]').on('change', function () {
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
-        const $price = $(this).closest('.sz-discount-field').attr('data-price'); // Original base cost
+        const $price = $('#sz-discount-field').attr('data-price'); // Original base cost
 
-        const $byoeDiscount = calculateDiscount(e, 'byoe');
-        const $promoDiscount = calculateDiscount(e, 'promo');
+        const $byoeDiscount = calculateDiscount('byoe');
+        const $promoDiscount = calculateDiscount('promo');
 
         let $total = $qty * $price;
         $total = $total - $byoeDiscount - $promoDiscount;
@@ -73,10 +64,10 @@ jQuery(document).ready(function ($) {
     // Display checkboxes based on stock
     try {
         const observedNode = document.getElementById('booking-cost');
-        const targetNode = document.getElementById('sz-discount-fields');
-        const checkboxes = document.querySelectorAll('#sz-discount-fields input[type="checkbox"]');
-        const selects = document.querySelectorAll('#sz-discount-fields select');
-        const selectFields = document.querySelectorAll('.txtAge, .sz-select-field'); // No '.txtAge'
+        const targetNode = document.getElementById('sz-discount-field');
+        const checkboxes = document.querySelectorAll('#byoe-enable, #promo-enable');
+        const selects = document.querySelectorAll('#byoe-qty, #promo-qty');
+        const selectFields = document.querySelectorAll('.sz-select-field');
 
         const config = { attributes: true, childList: true };
 
@@ -102,8 +93,8 @@ jQuery(document).ready(function ($) {
                 if (mutation.type === 'attributes') {
                     targetNode.className =
                         mutation.target.style.getPropertyValue('display') === 'none' ?
-                            'sz-discount-fields d-none' :
-                            'sz-discount-fields';
+                            'sz-discount-field d-none' :
+                            'sz-discount-field';
                     return;
                 }
 
@@ -111,8 +102,8 @@ jQuery(document).ready(function ($) {
                 if (mutation.type === 'childList') {
                     targetNode.className =
                         mutation.addedNodes.length === 2 ?
-                            'sz-discount-fields' :
-                            'sz-discount-fields d-none';
+                            'sz-discount-field' :
+                            'sz-discount-field d-none';
                     return;
                 }
             });

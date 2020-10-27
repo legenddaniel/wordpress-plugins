@@ -50,6 +50,53 @@ function is_singular_pass()
 }
 
 /**
+ * Get price for a resource of a product
+ * @param string $product_id
+ * @param integer $resource_id
+ * @return integer
+ */
+function get_resource_price($product_id, $resource_id)
+{
+    $product = wc_get_product($product_id);
+    if (!$product->has_resources()) {
+        return;
+    }
+
+    $price = $product->get_resource($resource_id)->get_base_cost();
+    return $price;
+}
+
+/**
+ * Get price off for a resource of a product
+ * @param string $product_id
+ * @param integer $resource_id
+ * @return integer
+ */
+function get_resource_price_off($product_id, $resource_id)
+{
+    // So far it's fixed and only for our 3 booking products. In the future they will be from the admin dashboard.
+
+    $product = wc_get_product($product_id);
+    if (!$product->has_resources()) {
+        return;
+    }
+
+    $price_off = 0;
+    switch ($resource_id) {
+        case ARCHERY_ID:
+            $price_off = 17.5;
+            break;
+        case AIRSOFT_ID:
+            $price_off = 0;
+            break;
+        case COMBO_ID:
+            $price_off = 12.25;
+            break;
+    }
+    return $price_off;
+}
+
+/**
  * Query the promo remaining for the given type
  * @param string $type
  * @return string
@@ -71,44 +118,6 @@ function query_promo_times($type)
 }
 
 /**
- * Add different data into cart_item_data according to ajax values
- * @param mixed $cart_item_data
- * @param string $field
- * @return null
- */
-function process_discount_ajax(&$cart_item_data, $field)
-{
-    // Return if discount is not enabled
-    if (!isset($_POST["$field-enable"])) {
-        return;
-    }
-
-    // Return if using 0 discount
-    if (isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
-        return;
-    }
-
-    $discount_type = '';
-    if ($field === 'byoe') {
-        $discount_type = 'Bring Your Own Equipment';
-    }
-    if ($field === 'promo') {
-        $discount_type = 'Use Promo';
-    }
-
-    $discount_data = array(
-        'type' => $discount_type,
-        'price_off' => $_POST["$field-enable"],
-        'qty' => null,
-    );
-
-    // Discount quantity will be 1 if no select dropdown
-    $discount_data['qty'] = !isset($_POST["$field-qty"]) ? 1 : $_POST["$field-qty"];
-
-    array_push($cart_item_data['discount'], $discount_data);
-}
-
-/**
  * Load CSS and JavaScript
  * @return null
  */
@@ -127,6 +136,12 @@ function init_assets()
     );
 
     wp_enqueue_script(
+        'discount_ajax',
+        "{$plugin_url}discount-ajax.js",
+        array('jquery'),
+        rand(111, 9999)
+    );
+    wp_enqueue_script(
         'discount_field',
         "{$plugin_url}old-discount-field.js",
         array('jquery'),
@@ -138,8 +153,45 @@ function init_assets()
         array('jquery'),
         rand(111, 9999)
     );
+
+    $title_nonce = wp_create_nonce('discount_prices');
+    wp_localize_script(
+        'discount_ajax',
+        'my_ajax_obj',
+        array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => $title_nonce,
+        )
+    );
 }
 add_action('wp_enqueue_scripts', 'init_assets');
+
+/**
+ * @desc Fetch discount prices for 'Singular Passes'
+ * @return void
+ */
+function fetch_discount_prices()
+{
+    try {
+        check_ajax_referer('discount_prices');
+
+        $resource = $_POST['resource_id'];
+        $price = get_resource_price(SINGULAR_ID, $resource);
+        $price_off = get_resource_price_off(SINGULAR_ID, $resource);
+
+        $res = array(
+            'resource' => $resource,
+            'price' => $price,
+            'price_off' => $price_off,
+        );
+        wp_send_json_success($res);
+
+    } catch (Exception $e) {
+        wp_send_json_error($e->getMessage());
+    }
+}
+add_action('wp_ajax_fetch_discount_prices', 'fetch_discount_prices');
+add_action('wp_ajax_nopriv_fetch_discount_prices', 'fetch_discount_prices');
 
 /**
  * Add html templates of access to 'Promo Passes' in 'Singular Passes'
@@ -199,119 +251,53 @@ function render_summary()
 add_action('woocommerce_single_product_summary', 'render_summary');
 
 /**
- * Add discount checkboxes for Archery in 'Singular Passes'
+ * Add discount field in 'Singular Passes'
  * @return null
  */
-function render_discount_field_archery()
+function render_discount_field()
 {
     if (!is_singular_pass()) {
         return;
     }
-    // In the future the discounted price will be from the admin dashboard
+
+    // Render Archery info by default.
+    $price = get_resource_price(SINGULAR_ID, ARCHERY_ID);
+    $price_off = get_resource_price_off(SINGULAR_ID, ARCHERY_ID);
     $archery_promo_count = query_promo_times('Archery');
-    $product = wc_get_product(SINGULAR_ID);
-    $price = $product->get_resource(ARCHERY_ID)->get_base_cost();
-    $price_off = $price * (1 - 0.5);?>
+    ?>
 
-<div class="sz-discount-fields d-none" id="sz-discount-fields">
-    <div class="sz-discount-field" id="archery-field" data-price=<?php echo $price; ?>>
-        <p>
-            <input type="checkbox" id="byoe-archery" name="byoe-enable" value=<?php echo $price_off; ?>>
-            <label for="byoe-archery">Bring Your Own Equipment - Archery</label>
-        </p>
+    <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?php echo $price; ?>>
+        <div>
+            <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?php echo $price_off; ?>>
+            <label for="byoe-enable">Bring Your Own Equipment</label>
+        </div>
 
         <div class="sz-select-field" style="display:none">
-            <label for="select-byoe-archery">Quantity:</label>
-            <select name="byoe-qty" id="select-byoe-archery">
+            <label for="byoe-qty">Quantity:</label>
+            <select name="byoe-qty" id="byoe-qty">
             </select>
         </div>
 
-        <?php
-// Only display 'Use Promo' field to registered customers
-    if (!is_user_logged_in()) {
-        return;
-    }?>
+    <?php
 
-        <p>
-            <input type="checkbox" id="promo-archery" name="promo-enable" value=<?php echo $price; ?>>
-            <label for="promo-archery">Use Promo (<?php echo $archery_promo_count; ?>
+    // SO far only display 'Use Promo' field to registered customers
+    if (!is_user_logged_in()) {
+        echo '</div>';
+        return;
+    }
+    ?>
+
+        <div>
+            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?php echo $price; ?>>
+            <label for="promo-enable">Use Promo (<?php echo $archery_promo_count; ?>
                 left)</label>
-        </p>
+        </div>
     </div>
 
     <?php
 }
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
-add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_archery');
-
-/**
- * Add discount checkboxes for Airsoft in 'Singular Passes'
- * @return null
- */
-function render_discount_field_airsoft()
-{
-    if (!is_singular_pass()) {
-        return;
-    }
-    // Only display 'Use Promo' field to registered customers
-    if (!is_user_logged_in()) {
-        return;
-    }
-
-    $airsoft_promo_count = query_promo_times('Airsoft');
-    $product = wc_get_product(SINGULAR_ID);
-    $price = $product->get_resource(AIRSOFT_ID)->get_base_cost();?>
-    <div class="sz-discount-field d-none" id="airsoft-field" data-price=<?php echo $price; ?>>
-        <p>
-            <input type="checkbox" id="promo-airsoft" name="promo-enable" value=<?php echo $price; ?>>
-            <label for="promo-airsoft">Use Promo (<?php echo $airsoft_promo_count; ?>
-                left)</label>
-        </p>
-    </div>
-
-    <?php
-}
-add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_airsoft');
-
-/**
- * Add discount checkboxes for Combo in 'Singular Passes'
- * @return array
- */
-function render_discount_field_combo()
-{
-    if (!is_singular_pass()) {
-        return;
-    }
-    // In the future the discounted price will be from the admin dashboard
-    $combo_promo_count = query_promo_times('Combo');
-    $product = wc_get_product(SINGULAR_ID);
-    $price = $product->get_resource(COMBO_ID)->get_base_cost();
-    $price_off = $price * (1 - 0.825);?>
-
-    <div class="sz-discount-field d-none" id="combo-field" data-price=<?php echo $price; ?>>
-        <p>
-            <input type="checkbox" id="byoe-combo" name="byoe-enable" value=<?php echo $price_off; ?>>
-            <label for="byoe-combo">Bring Your Own Equipment - Combo</label>
-        </p>
-
-        <div class="sz-select-field" style="display:none">
-            <label for="select-byoe-combo">Quantity:</label>
-            <select name="byoe-qty" id="select-byoe-combo">
-            </select>
-        </div>
-
-        <p>
-            <input type="checkbox" id="promo-combo" name="promo-enable" value=<?php echo $price; ?>>
-            <label for="promo-combo">Use Promo (<?php echo $combo_promo_count; ?>
-                left)</label>
-        </p>
-    </div>
-</div>
-
-<?php
-}
-// 'woocommerce_before_single_variation' not working, the calendar keeps loading
-add_action('woocommerce_before_add_to_cart_button', 'render_discount_field_combo');
+add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
 
 /**
  * Add the entries of discounts in the cart item data. Fire at the beginning of $cart_item_data initialization?
@@ -324,8 +310,40 @@ function add_discount_info_into_data($cart_item_data, $product, $variation)
 {
     $cart_item_data['discount'] = array();
 
-    process_discount_ajax($cart_item_data, 'byoe');
-    process_discount_ajax($cart_item_data, 'promo');
+    foreach (array('byoe', 'promo') as $field) {
+        // Return if discount is not enabled
+        if (!isset($_POST["$field-enable"])) {
+            return;
+        }
+
+        // Return if using 0 discount
+        if (isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
+            return;
+        }
+
+        $resource = $_POST['wc_bookings_field_resource'];
+        $price = get_resource_price(SINGULAR_ID, $resource);
+
+        // Discount quantity will be 1 if no select dropdown
+        $qty = !isset($_POST["$field-qty"]) ? 1 : $_POST["$field-qty"];
+
+        $price_off = 0;
+        $discount_type = '';
+        if ($field === 'byoe') {
+            $discount_type = 'Bring Your Own Equipment';
+            $price_off = get_resource_price_off(SINGULAR_ID, $resource);
+        }
+        if ($field === 'promo') {
+            $discount_type = 'Use Promo';
+            $price_off = $price;
+        }
+
+        $cart_item_data['discount'][] = array(
+            'type' => $discount_type,
+            'price_off' => $price_off,
+            'qty' => $qty,
+        );
+    }
 
     return $cart_item_data;
 }
