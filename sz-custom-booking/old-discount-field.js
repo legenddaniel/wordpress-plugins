@@ -6,19 +6,6 @@ jQuery(document).ready(function ($) {
     // const [archeryID, airsoftID, comboID] = ['291', '292', '293'];
 
     /**
-     * @desc Toggle classes of the field
-     * @param {string} fieldShowed - Field being displayed
-     * @param {...string} fieldsHidden - Fields being hidden
-     * @return {undefined}
-     */
-    const toggleField = function (fieldShowed, ...fieldsHidden) {
-        $(fieldShowed).attr('class', 'sz-discount-field');
-        fieldsHidden.forEach(function (field) {
-            $(field).attr('class', 'sz-discount-field d-none');
-        });
-    };
-
-    /**
      * @desc Calculate discount for byoe and promo
      * @param {string} field - 'byoe' or 'promo'
      * @return {number} - Discount
@@ -29,8 +16,6 @@ jQuery(document).ready(function ($) {
 
         const $price = $input.length ? $input.attr('data-price') : 0;
         const $qty = $select.length ? $select.val() : 1;
-
-        console.log($price, '*', $qty)
 
         const $discount = $input.is(':checked') && $price * $qty;
         return $discount;
@@ -74,7 +59,7 @@ jQuery(document).ready(function ($) {
         const mutationObserver = new MutationObserver(function (mutations, observer) {
             mutations.forEach(function (mutation) {
 
-                // Uncheck all discount options when booking changes
+                // Uncheck all discount options when booking changes, except for VIP
                 checkboxes.forEach(function (checkbox) {
                     checkbox.checked = false;
                 })

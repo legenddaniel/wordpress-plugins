@@ -1,0 +1,57 @@
+{
+    "discount": [
+        {
+            "type": "Bring Your Own Equipment",
+            "price_off": 17.5,
+            "qty": 2
+        },
+        {
+            "type": "Use Promo",
+            "price_off": 35,
+            "qty": 1
+        }
+    ],
+    "booking": {
+        "_year": "2020",
+        "_month": "10",
+        "_day": "29",
+        "_persons": [
+            3
+        ],
+        "_date": "2020-10-29",
+        "date": "October 29, 2020",
+        "_time": "13:00",
+        "time": "1:00 pm",
+        "_qty": 3,
+        "Persons": 3,
+        "_start_date": 1603976400,
+        "_end_date": 1603980000,
+        "_all_day": 0,
+        "_resource_id": 68059,
+        "type": "Archery",
+        "_local_timezone": "",
+        "_cost": 105,
+        "_booking_id": 68589
+    },
+    "key": "910ec0977b9782dc8a918184d6643fd6",
+    "product_id": 68051,
+    "variation_id": 0,
+    "variation": [],
+    "quantity": 1,
+    "data_hash": "70fbd381c354ab9d174c2a17a55bda58",
+    "line_tax_data": {
+        "subtotal": {
+            "3": 4.55
+        },
+        "total": {
+            "3": 4.55
+        }
+    },
+    "line_subtotal": 35,
+    "line_subtotal_tax": 4.55,
+    "line_total": 35,
+    "line_tax": 4.55,
+    "data": {
+        "availability_rules": []
+    }
+}

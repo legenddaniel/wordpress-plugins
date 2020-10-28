@@ -23,6 +23,8 @@ define('PROMO_ID', 68067);
 define('ARCHERY_ID', 68059);
 define('AIRSOFT_ID', 68060);
 define('COMBO_ID', 68062);
+define('VIP_ANNUAL_ID', 68456);
+define('VIP_SEMIANNUAL_ID', 68463);
 
 // For test
 // define('SINGULAR_ID', 304);
@@ -154,20 +156,20 @@ function init_assets()
         rand(111, 9999)
     );
 
-    $title_nonce = wp_create_nonce('discount_prices');
     wp_localize_script(
         'discount_ajax',
         'my_ajax_obj',
         array(
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => $title_nonce,
+            'discount_nonce' => wp_create_nonce('discount_prices'),
+            'vip_nonce' => wp_create_nonce('vip_count'),
         )
     );
 }
 add_action('wp_enqueue_scripts', 'init_assets');
 
 /**
- * @desc Fetch discount prices for 'Singular Passes'
+ * Process discount query ajax for 'Singular Passes'
  * @return void
  */
 function fetch_discount_prices()
@@ -202,50 +204,54 @@ function render_summary()
     if (!is_singular_pass()) {
         return;
     }?>
-<div class="mtb-25 promoQuestion">
-    <p><span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you buy the promo
-        package!</p>
-    <a href="<?php echo get_permalink(PROMO_ID) ?>"><button>Take me to
-            Promo!</button></a>
-</div>
-
-<hr>
-
-<div class="mtb-25">
-    <p class="sz-sum-head">
-        You are a few clicks away from booking your session at
-        <span class="sz-text-highlight-green">Solely
-            Outdoors</span>
-        located at
-        <span class="sz-text-highlight-green">101 - 8365 Woodbine Avenue, Markham ON</span>. <br>
-        We are open by reservation only. For same day booking, please call first to check availability: (905) 882-8629.
-        <br>
-        You may also book over the phone. See you soon!
-    </p>
-    <div class="sz-sum-sub-desc">
-        <div class="mlr-10">
-            <p class="sz-sum-title">Check-in</p>
-            <p>
-                Check-in starts 10 minutes prior to your booked session time. If you book for 4:30, please arrive at
-                4:20 for check-in. </p>
-        </div>
-        <div class="mlr-10">
-            <p class="sz-sum-title">Duration</p>
-            <p>
-
-                The session is 60 minutes long and includes expert shooting instructions from your instructor.
-            </p>
-        </div>
-        <div class="mlr-10">
-            <p class="sz-sum-title">Age</p>
-            <p>
-
-                There are no age restrictions but children under 16 years old must be accompanied by an adult.
-
-            </p>
+    <div class="mtb-25 promoQuestion">
+	    <div class="row">
+	        <div class="column">
+                <p class="p-question">
+                    <span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you buy the promo package!
+                </p>
+            </div>
+            <div class="column">
+                <a class="a-question" href="<?php echo get_permalink(PROMO_ID) ?>"><button>Take me to Promo!</button></a>
+            </div>
         </div>
     </div>
-</div>
+
+    <hr>
+
+    <div class="mtb-25">
+        <p class="sz-sum-head">
+            You are a few clicks away from booking your session at
+            <span class="sz-text-highlight-green">Solely Outdoors</span> located at
+            <span class="sz-text-highlight-green">101 - 8365 Woodbine Avenue, Markham ON</span>. <br>
+            We are open by reservation only. For same day booking, please call first to check availability: (905) 882-8629.
+            <br>
+            You may also book over the phone. See you soon!
+        </p>
+        <div class="sz-sum-sub-desc">
+            <div class="mlr-10">
+                <h4 class="sz-sum-title">Check-in</h4>
+                <p class="p-content">
+                    Check-in starts 10 minutes prior to your booked session time. If you book for 4:30, please arrive at
+                    4:20 for check-in. </p>
+            </div>
+            <div class="mlr-10">
+                <h4 class="sz-sum-title">Duration</h4>
+                <p class="p-content">
+
+                    The session is 60 minutes long and includes expert shooting instructions from your instructor.
+                </p>
+            </div>
+            <div class="mlr-10">
+                <h4 class="sz-sum-title">Age</h4>
+                <p class="p-content">
+
+                    There are no age restrictions but children under 16 years old must be accompanied by an adult.
+
+                </p>
+            </div>
+        </div>
+    </div>
 <?php
 }
 add_action('woocommerce_single_product_summary', 'render_summary');
@@ -263,7 +269,6 @@ function render_discount_field()
     // Render Archery info by default.
     $price = get_resource_price(SINGULAR_ID, ARCHERY_ID);
     $price_off = get_resource_price_off(SINGULAR_ID, ARCHERY_ID);
-    $archery_promo_count = query_promo_times('Archery');
     ?>
 
     <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?php echo $price; ?>>
@@ -285,12 +290,31 @@ function render_discount_field()
         echo '</div>';
         return;
     }
+    $promo_count = query_promo_times('Archery');
+
     ?>
 
         <div>
             <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?php echo $price; ?>>
-            <label for="promo-enable">Use Promo (<?php echo $archery_promo_count; ?>
-                left)</label>
+            <label for="promo-enable">Use Promo (<?php echo $promo_count; ?> left)</label>
+        </div>
+
+
+    <?php
+
+    $user = get_current_user_id();
+    $isVIP = wc_memberships_is_user_active_member($user, VIP_ANNUAL_ID) || wc_memberships_is_user_active_member($user, VIP_SEMIANNUAL_ID);
+    if (!$isVIP) {
+        echo '</div>';
+        return;
+    }
+    $vip_count = 2; // SHould be from the database.
+
+    ?>
+
+        <div>
+            <input type="radio" id="vip-enable" name="vip-enable" data-price=<?php echo $price; ?> checked>
+            <label for="vip-enable">Use VIP (<?php echo $vip_count; ?> left)</label>
         </div>
     </div>
 
@@ -306,7 +330,7 @@ add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
  * @param string $variation
  * @return array
  */
-function add_discount_info_into_data($cart_item_data, $product, $variation)
+function add_discount_info_into_cart($cart_item_data, $product, $variation)
 {
     $cart_item_data['discount'] = array();
 
@@ -325,7 +349,7 @@ function add_discount_info_into_data($cart_item_data, $product, $variation)
         $price = get_resource_price(SINGULAR_ID, $resource);
 
         // Discount quantity will be 1 if no select dropdown
-        $qty = !isset($_POST["$field-qty"]) ? 1 : $_POST["$field-qty"];
+        $qty = !isset($_POST["$field-qty"]) ? 1 : +$_POST["$field-qty"];
 
         $price_off = 0;
         $discount_type = '';
@@ -347,17 +371,17 @@ function add_discount_info_into_data($cart_item_data, $product, $variation)
 
     return $cart_item_data;
 }
-add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_data', 10, 3);
+add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_cart', 10, 3);
 
 /**
  * Add discount information field in the cart as well as the cart preview in the product page
- * @param mixed? $cart_item_data
- * @param mixed? $cart_item?
+ * @param array $cart_item_data
+ * @param mixed $cart_item?
  * @return mixed?
  */
 function render_discount_field_in_cart($cart_item_data, $cart_item)
 {
-    if (!count($cart_item['discount'])) {
+    if (empty($cart_item['discount'])) {
         return;
     }
 
@@ -378,7 +402,7 @@ add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
 
 /**
  * Re-calculate the prices in the cart
- * @param mixed? $cart
+ * @param mixed $cart
  * @return null
  */
 function recalculate_total($cart)
@@ -391,41 +415,38 @@ function recalculate_total($cart)
     }
 
     foreach ($cart->get_cart() as $cart_item) {
-        if (count($cart_item['discount'])) {
-            $total = $cart_item['booking']['_cost'];
-            $price_off = 0;
-            foreach ($cart_item['discount'] as $discount) {
-                $price_off += $discount['price_off'] * $discount['qty'];
-            }
-            $total -= $price_off;
-            $total = $total > 0 ? $total : 0;
-            $cart_item['data']->set_price($total);
+        if (empty($cart_item['discount'])) {
+            continue;
         }
+
+        $total = $cart_item['booking']['_cost'];
+        $price_off = 0;
+        foreach ($cart_item['discount'] as $discount) {
+            $price_off += $discount['price_off'] * $discount['qty'];
+        }
+        $total -= $price_off;
+        $total = $total > 0 ? $total : 0;
+        $cart_item['data']->set_price($total);
     }
 }
 add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 
-// add_action('woocommerce_add_order_item_meta', 'add_order_item_meta', 10, 2);
-// function add_order_item_meta($item_id, $values)
-// {
-//     echo '<script>console.log('.json_encode($values).')</script>';
-//     if (isset($values['discount_type'])) {
-//         $discount_type  = $values['discount_type'];
-//         wc_add_order_item_meta($item_id, 'discount_type', $discount_type);
-//     }
-// }
-//
-// add_action( 'woocommerce_before_order_notes', 'add_checkout_custom_text_fields', 20, 1 );
-//
-function add_discount_info_into_booking_data($data)
+/**
+ * Add the entries of discounts in the order meta data.
+ * @param mixed $item
+ * @param string $cart_item_key
+ * @param mixed $values
+ * @param mixed $order
+ * @return null
+ */
+function add_discount_info_into_order($item, $cart_item_key, $values, $order)
 {
-    //     if (isset($cart_item_data['discount_type']) && count($cart_item_data['discount_type'])) {
-    //         $booking = WC_Booking_Cart_Manager()::create_booking_from_cart_data();
-    //         $data['aaaaa'] = 'aaaaa';
-    array_merge($data, array('aaaaa' => 'aaaaa'));
-    return $data;
-    //     }
-}
-// add_filter('woocommerce_new_booking_data', 'add_discount_info_into_booking_data');
+    $discount_data = $values['discount'];
+    if (empty($discount_data)) {
+        return;
+    }
 
-// Daniel's new modification below
+    // Serialized data
+    $item->update_meta_data('discount', $discount_data);
+}
+add_action('woocommerce_checkout_create_order_line_item', 'add_discount_info_into_order', 10, 4);

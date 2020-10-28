@@ -34,7 +34,7 @@
 }
 
 .sz-sum-head {
-    font-size: 20px;
+    color: #1D1E23;
 }
 
 .sz-sum-sub-desc {
@@ -43,11 +43,48 @@
 
 .sz-sum-title {
     margin: initial;
-    color: white;
+    color: #75B647 !important;
     text-align: center;
-    font-size: 24px;
-    font-weight: 500;
 }
+
+.p-content {
+	color: #1D1E23;
+}
+
+.p-question {
+	margin-top: 0.7em !important;
+}
+
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+@media screen and (max-width: 576px) {
+  .column {
+    width: 100%;
+  }
+}
+
+.b-question {
+	background-color: #f6f6f6 !important;
+	color: #1D1E23 !important;
+	border-color: #bdbdbd !important;
+}
+
+.b-question:hover {
+	background-color: #bdbdbd !important;
+	color:white !important;
+}
+
+
+
 
 /* Custom styles ends */
 
