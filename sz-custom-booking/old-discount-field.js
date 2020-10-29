@@ -39,8 +39,7 @@ jQuery(document).ready(function ($) {
         const $promoDiscount = calculateDiscount('promo');
 
         let $total = $qty * $price;
-        $total = $total - $byoeDiscount - $promoDiscount;
-        $total = $total > 0 ? $total : 0;
+        $total = Math.max($total - $byoeDiscount - $promoDiscount, 0);
 
         bdiHtml += $total.toFixed(2);
         $('#booking-cost bdi').html(bdiHtml);

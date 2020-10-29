@@ -43,12 +43,32 @@ define('VIP_SEMIANNUAL_ID', 68463);
 // ---------------Config Area Ends
 
 /**
- * Check if the current product is 'Singular Passes'
+ *
+ *
+ * May move utilities to a new file with namespace
+ *
+ *
+ */
+
+/**
+ * Check if the current user is a VIP
+ * @param integer,... $memberships
  * @return boolean
  */
-function is_singular_pass()
+function is_vip(...$memberships)
 {
-    return get_the_ID() === SINGULAR_ID;
+    if (!is_user_logged_in()) {
+        return;
+    }
+
+    $user = get_current_user_id();
+    foreach ($memberships as $membership) {
+        if (wc_memberships_is_user_active_member($user, $membership)) {
+            return true;
+        }
+
+    }
+    return false;
 }
 
 /**
@@ -99,9 +119,26 @@ function get_resource_price_off($product_id, $resource_id)
 }
 
 /**
+ * Get title for a resource of a product
+ * @param string $product_id
+ * @param integer $resource_id
+ * @return string
+ */
+function get_resource_title($product_id, $resource_id)
+{
+    $product = wc_get_product($product_id);
+    if (!$product->has_resources()) {
+        return;
+    }
+
+    $title = $product->get_resource($resource_id)->get_title();
+    return $title;
+}
+
+/**
  * Query the promo remaining for the given type
  * @param string $type
- * @return string
+ * @return integer
  */
 function query_promo_times($type)
 {
@@ -113,10 +150,23 @@ function query_promo_times($type)
              FROM $wpdb->usermeta
              WHERE meta_key LIKE %s
              AND user_id = %d",
-            array("%$type%", $user)
+            ["%$type%", $user]
         )
     );
     return $promo_times ?? 0;
+}
+
+/**
+ * Query the vip remaining for the given types
+ * @param string,... $types
+ * @return integer
+ */
+function query_vip_times(...$types)
+{
+    if (!is_vip(...$types)) {
+        return null;
+    }
+    return 2;
 }
 
 /**
@@ -125,7 +175,7 @@ function query_promo_times($type)
  */
 function init_assets()
 {
-    if (!is_singular_pass()) {
+    if (!is_single(SINGULAR_ID)) {
         return;
     }
     $plugin_url = plugin_dir_url(__FILE__);
@@ -133,37 +183,36 @@ function init_assets()
     wp_enqueue_style(
         'style',
         "{$plugin_url}style.css",
-        array(),
+        [],
         rand(111, 9999)
     );
 
     wp_enqueue_script(
         'discount_ajax',
         "{$plugin_url}discount-ajax.js",
-        array('jquery'),
+        ['jquery'],
         rand(111, 9999)
     );
     wp_enqueue_script(
         'discount_field',
         "{$plugin_url}old-discount-field.js",
-        array('jquery'),
+        ['jquery'],
         rand(111, 9999)
     );
     wp_enqueue_script(
         'select',
         "{$plugin_url}select.js",
-        array('jquery'),
+        ['jquery'],
         rand(111, 9999)
     );
 
     wp_localize_script(
         'discount_ajax',
         'my_ajax_obj',
-        array(
+        [
             'ajax_url' => admin_url('admin-ajax.php'),
             'discount_nonce' => wp_create_nonce('discount_prices'),
-            'vip_nonce' => wp_create_nonce('vip_count'),
-        )
+        ]
     );
 }
 add_action('wp_enqueue_scripts', 'init_assets');
@@ -180,12 +229,22 @@ function fetch_discount_prices()
         $resource = $_POST['resource_id'];
         $price = get_resource_price(SINGULAR_ID, $resource);
         $price_off = get_resource_price_off(SINGULAR_ID, $resource);
+        $resource_name = get_resource_title(SINGULAR_ID, $resource);
 
-        $res = array(
+        $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+        $promo_count = query_promo_times($resource_name);
+        $total_promo_count = $promo_count + $vip_count;
+
+        $promo_label = "Use Promo ($total_promo_count left";
+        $promo_label .= is_null($vip_count) ? ")" : ", including $vip_count free VIP discount)";
+
+        $res = [
             'resource' => $resource,
             'price' => $price,
             'price_off' => $price_off,
-        );
+            'promo_label' => $promo_label,
+        ];
+
         wp_send_json_success($res);
 
     } catch (Exception $e) {
@@ -201,9 +260,11 @@ add_action('wp_ajax_nopriv_fetch_discount_prices', 'fetch_discount_prices');
  */
 function render_summary()
 {
-    if (!is_singular_pass()) {
+    if (!is_single(SINGULAR_ID)) {
         return;
-    }?>
+    }
+    ?>
+
     <div class="mtb-25 promoQuestion">
 	    <div class="row">
 	        <div class="column">
@@ -212,7 +273,7 @@ function render_summary()
                 </p>
             </div>
             <div class="column">
-                <a class="a-question" href="<?php echo get_permalink(PROMO_ID) ?>"><button>Take me to Promo!</button></a>
+                <a class="a-question" href="<?=get_permalink(PROMO_ID)?>"><button>Take me to Promo!</button></a>
             </div>
         </div>
     </div>
@@ -252,6 +313,7 @@ function render_summary()
             </div>
         </div>
     </div>
+
 <?php
 }
 add_action('woocommerce_single_product_summary', 'render_summary');
@@ -262,7 +324,7 @@ add_action('woocommerce_single_product_summary', 'render_summary');
  */
 function render_discount_field()
 {
-    if (!is_singular_pass()) {
+    if (!is_single(SINGULAR_ID)) {
         return;
     }
 
@@ -271,9 +333,9 @@ function render_discount_field()
     $price_off = get_resource_price_off(SINGULAR_ID, ARCHERY_ID);
     ?>
 
-    <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?php echo $price; ?>>
+    <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?=$price;?>>
         <div>
-            <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?php echo $price_off; ?>>
+            <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?=$price_off;?>>
             <label for="byoe-enable">Bring Your Own Equipment</label>
         </div>
 
@@ -292,31 +354,19 @@ function render_discount_field()
     }
     $promo_count = query_promo_times('Archery');
 
-    ?>
+    // Should be from the database.
+    $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+    $total_promo_count = $promo_count + $vip_count;
 
-        <div>
-            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?php echo $price; ?>>
-            <label for="promo-enable">Use Promo (<?php echo $promo_count; ?> left)</label>
-        </div>
-
-
-    <?php
-
-    $user = get_current_user_id();
-    $isVIP = wc_memberships_is_user_active_member($user, VIP_ANNUAL_ID) || wc_memberships_is_user_active_member($user, VIP_SEMIANNUAL_ID);
-    if (!$isVIP) {
-        echo '</div>';
-        return;
-    }
-    $vip_count = 2; // SHould be from the database.
+    $input_label = "Use Promo ($total_promo_count left";
+    $input_label .= is_null($vip_count) ? ")" : ", including $vip_count free VIP discount)";
 
     ?>
 
         <div>
-            <input type="radio" id="vip-enable" name="vip-enable" data-price=<?php echo $price; ?> checked>
-            <label for="vip-enable">Use VIP (<?php echo $vip_count; ?> left)</label>
+            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=$price;?> <?=$total_promo_count ? '' : 'disabled';?>>
+            <label for="promo-enable"><?=$input_label?></label>
         </div>
-    </div>
 
     <?php
 }
@@ -324,7 +374,7 @@ function render_discount_field()
 add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
 
 /**
- * Add the entries of discounts in the cart item data. Fire at the beginning of $cart_item_data initialization?
+ * Add the entries of discounts in the cart item data with validation. Fire at the beginning of $cart_item_data initialization?
  * @param array? $cart_item_data
  * @param int? $product
  * @param string $variation
@@ -332,25 +382,33 @@ add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
  */
 function add_discount_info_into_cart($cart_item_data, $product, $variation)
 {
-    $cart_item_data['discount'] = array();
+    $cart_item_data['discount'] = [];
 
-    foreach (array('byoe', 'promo') as $field) {
+    // Must match the input name at the client side
+    $fields = ['byoe', 'promo'];
+    foreach ($fields as $field) {
+
         // Return if discount is not enabled
         if (!isset($_POST["$field-enable"])) {
             return;
         }
 
-        // Return if using 0 discount
+        // Return if not using discount or using 0 discount
         if (isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
             return;
         }
 
         $resource = $_POST['wc_bookings_field_resource'];
         $price = get_resource_price(SINGULAR_ID, $resource);
+        $resource_name = get_resource_title(SINGULAR_ID, $resource);
+
+        // Discount validation. $vip_count should be also from the database
+        $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+        $promo_count = query_promo_times($resource_name);
+        $total_promo_count = $promo_count + $vip_count;
 
         // Discount quantity will be 1 if no select dropdown
-        $qty = !isset($_POST["$field-qty"]) ? 1 : +$_POST["$field-qty"];
-
+        $qty = +$_POST["$field-qty"] || 1;
         $price_off = 0;
         $discount_type = '';
         if ($field === 'byoe') {
@@ -358,15 +416,25 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
             $price_off = get_resource_price_off(SINGULAR_ID, $resource);
         }
         if ($field === 'promo') {
-            $discount_type = 'Use Promo';
+            switch ($vip_count) {
+                case null:
+                    $discount_type = 'Use Promo';
+                    break;
+                case 0:
+                    $discount_type = 'Use Promo (no valid VIP)';
+                    break;
+                default:
+                    $discount_type = 'Use VIP';
+                    break;
+            }
             $price_off = $price;
         }
 
-        $cart_item_data['discount'][] = array(
+        $cart_item_data['discount'][] = [
             'type' => $discount_type,
             'price_off' => $price_off,
-            'qty' => $qty,
-        );
+            'qty' => min($qty, $total_promo_count),
+        ];
     }
 
     return $cart_item_data;
@@ -381,6 +449,7 @@ add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_cart', 10, 
  */
 function render_discount_field_in_cart($cart_item_data, $cart_item)
 {
+    // No rendering if no discount applied
     if (empty($cart_item['discount'])) {
         return;
     }
@@ -392,10 +461,10 @@ function render_discount_field_in_cart($cart_item_data, $cart_item)
     }
     $display = ltrim($display, "\n");
 
-    $cart_item_data[] = array(
+    $cart_item_data[] = [
         'name' => __("Discount Info", "woocommerce"),
         'value' => __($display, "woocommerce"),
-    );
+    ];
     return $cart_item_data;
 }
 add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
@@ -424,8 +493,7 @@ function recalculate_total($cart)
         foreach ($cart_item['discount'] as $discount) {
             $price_off += $discount['price_off'] * $discount['qty'];
         }
-        $total -= $price_off;
-        $total = $total > 0 ? $total : 0;
+        $total = max($total - $price_off, 0);
         $cart_item['data']->set_price($total);
     }
 }
