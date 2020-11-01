@@ -226,7 +226,7 @@ function fetch_discount_prices()
     try {
         check_ajax_referer('discount_prices');
 
-        $resource = $_POST['resource_id'];
+        $resource = sanitize_text_field($_POST['resource_id']);
         $price = get_resource_price(SINGULAR_ID, $resource);
         $price_off = get_resource_price_off(SINGULAR_ID, $resource);
         $resource_name = get_resource_title(SINGULAR_ID, $resource);
@@ -333,9 +333,9 @@ function render_discount_field()
     $price_off = get_resource_price_off(SINGULAR_ID, ARCHERY_ID);
     ?>
 
-    <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?=$price;?>>
+    <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?=esc_attr($price);?>>
         <div>
-            <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?=$price_off;?>>
+            <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?=esc_attr($price_off);?>>
             <label for="byoe-enable">Bring Your Own Equipment</label>
         </div>
 
@@ -364,8 +364,8 @@ function render_discount_field()
     ?>
 
         <div>
-            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=$price;?> <?=$total_promo_count ? '' : 'disabled';?>>
-            <label for="promo-enable"><?=$input_label?></label>
+            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=esc_attr($price);?> <?=esc_attr($total_promo_count ? '' : 'disabled');?>>
+            <label for="promo-enable"><?=esc_html__($input_label);?></label>
         </div>
 
     <?php
@@ -388,7 +388,7 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         return $cart_item_data;
     }
 
-    $resource = $_POST['wc_bookings_field_resource'];
+    $resource = sanitize_text_field($_POST['wc_bookings_field_resource']);
     $price = get_resource_price(SINGULAR_ID, $resource);
     $resource_name = get_resource_title(SINGULAR_ID, $resource);
 
@@ -407,12 +407,13 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         }
 
         // Return if using 0 discount
-        if (isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
+        $qty = $_POST["$field-qty"];
+        if (isset($qty) && empty($qty)) {
             continue;
         }
 
         // Discount quantity will be 1 if no select dropdown
-        $qty = $_POST["$field-qty"] ?? 1;
+        $qty = +sanitize_text_field($qty) ?: 1;
         $price_off = 0;
         $discount_type = '';
         if ($field === 'byoe') {
@@ -437,7 +438,7 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         $cart_item_data['discount'][] = [
             'type' => $discount_type,
             'price_off' => $price_off,
-            'qty' => min(+$qty, $total_promo_count),
+            'qty' => min($qty, $total_promo_count),
         ];
     }
 

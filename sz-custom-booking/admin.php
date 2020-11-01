@@ -36,7 +36,7 @@ add_action('admin_enqueue_scripts', 'init_admin_assets');
  */
 function create_admin_byoe_enabling_checkbox($resource, $product)
 {
-    if ($product !== strval(SINGULAR_ID)) {
+    if ($product != SINGULAR_ID) {
         return;
     }
     
@@ -74,7 +74,7 @@ function create_admin_byoe_enabling_checkbox($resource, $product)
  */
 function create_admin_byoe_input_field($resource, $product)
 {
-    if ($product !== strval(SINGULAR_ID)) {
+    if ($product != SINGULAR_ID) {
         return;
     }
 
@@ -114,7 +114,7 @@ function create_admin_byoe_input_field($resource, $product)
 function admin_byoe_field($resource, $product)
 {
     // Return if not the exact product types
-    if ($product !== strval(SINGULAR_ID)) {
+    if ($product != SINGULAR_ID) {
         return;
     }
     
