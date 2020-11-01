@@ -384,31 +384,35 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
 {
     $cart_item_data['discount'] = [];
 
+    if (!isset($_POST["byoe-enable"]) && !isset($_POST["promo-enable"])) {
+        return $cart_item_data;
+    }
+
+    $resource = $_POST['wc_bookings_field_resource'];
+    $price = get_resource_price(SINGULAR_ID, $resource);
+    $resource_name = get_resource_title(SINGULAR_ID, $resource);
+
+    // Discount validation. $vip_count should be also from the database
+    $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+    $promo_count = query_promo_times($resource_name);
+    $total_promo_count = $promo_count + $vip_count;
+
     // Must match the input name at the client side
     $fields = ['byoe', 'promo'];
     foreach ($fields as $field) {
 
         // Return if discount is not enabled
         if (!isset($_POST["$field-enable"])) {
-            return;
+            continue;
         }
 
-        // Return if not using discount or using 0 discount
+        // Return if using 0 discount
         if (isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
-            return;
+            continue;
         }
-
-        $resource = $_POST['wc_bookings_field_resource'];
-        $price = get_resource_price(SINGULAR_ID, $resource);
-        $resource_name = get_resource_title(SINGULAR_ID, $resource);
-
-        // Discount validation. $vip_count should be also from the database
-        $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
-        $promo_count = query_promo_times($resource_name);
-        $total_promo_count = $promo_count + $vip_count;
 
         // Discount quantity will be 1 if no select dropdown
-        $qty = +$_POST["$field-qty"] || 1;
+        $qty = $_POST["$field-qty"] ?? 1;
         $price_off = 0;
         $discount_type = '';
         if ($field === 'byoe') {
@@ -433,7 +437,7 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         $cart_item_data['discount'][] = [
             'type' => $discount_type,
             'price_off' => $price_off,
-            'qty' => min($qty, $total_promo_count),
+            'qty' => min(+$qty, $total_promo_count),
         ];
     }
 
@@ -451,7 +455,7 @@ function render_discount_field_in_cart($cart_item_data, $cart_item)
 {
     // No rendering if no discount applied
     if (empty($cart_item['discount'])) {
-        return;
+        return $cart_item_data;
     }
 
     $display = '';
