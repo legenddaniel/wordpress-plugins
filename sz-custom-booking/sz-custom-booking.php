@@ -159,14 +159,27 @@ function query_promo_times($type)
 /**
  * Query the vip remaining for the given types
  * @param string,... $types
- * @return integer
+ * @return integer|null
  */
 function query_vip_times(...$types)
 {
+    global $wpdb;
+    $user = get_current_user_id();
+    $vip_count = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT meta_value
+             FROM $wpdb->usermeta
+             WHERE meta_key = %s
+             AND user_id = %d",
+            ["VIP", $user]
+        )
+    );
+    return $vip_count;
+    /*
     if (!is_vip(...$types)) {
         return null;
     }
-    return 2;
+    return 2;*/
 }
 
 /**
@@ -263,17 +276,19 @@ function render_summary()
     if (!is_single(SINGULAR_ID)) {
         return;
     }
+
+    $btn_text = is_user_logged_in() ? 'Take me to Promo!' : 'Get me in first! (wrong url now)'
     ?>
 
     <div class="mtb-25 promoQuestion">
 	    <div class="row">
 	        <div class="column">
                 <p class="p-question">
-                    <span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you buy the promo package!
+                    <span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you <?=is_user_logged_in() ? '' : 'become a member and ';?>buy the promo package!
                 </p>
             </div>
             <div class="column">
-                <a class="a-question" href="<?=get_permalink(PROMO_ID)?>"><button>Take me to Promo!</button></a>
+                <a class="a-question" href="<?=get_permalink(PROMO_ID)?>"><button><?=$btn_text;?></button></a>
             </div>
         </div>
     </div>
