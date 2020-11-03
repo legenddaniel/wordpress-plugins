@@ -176,10 +176,10 @@ function query_vip_times(...$types)
     );
     return $vip_count;
     /*
-    if (!is_vip(...$types)) {
-        return null;
-    }
-    return 2;*/
+if (!is_vip(...$types)) {
+return null;
+}
+return 2;*/
 }
 
 /**
@@ -404,13 +404,6 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
     }
 
     $resource = sanitize_text_field($_POST['wc_bookings_field_resource']);
-    $price = get_resource_price(SINGULAR_ID, $resource);
-    $resource_name = get_resource_title(SINGULAR_ID, $resource);
-
-    // Discount validation. $vip_count should be also from the database
-    $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
-    $promo_count = query_promo_times($resource_name);
-    $total_promo_count = $promo_count + $vip_count;
 
     // Must match the input name at the client side
     $fields = ['byoe', 'promo'];
@@ -431,11 +424,21 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         $qty = +sanitize_text_field($qty) ?: 1;
         $price_off = 0;
         $discount_type = '';
+
         if ($field === 'byoe') {
             $discount_type = 'Bring Your Own Equipment';
             $price_off = get_resource_price_off(SINGULAR_ID, $resource);
+            $qty = min($qty, +sanitize_text_field($_POST['wc_bookings_field_persons']));
         }
+
         if ($field === 'promo') {
+            $resource_name = get_resource_title(SINGULAR_ID, $resource);
+
+            // Discount validation. $vip_count should be also from the database
+            $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+            $promo_count = query_promo_times($resource_name);
+            $total_promo_count = $promo_count + $vip_count;
+
             switch ($vip_count) {
                 case null:
                     $discount_type = 'Use Promo';
@@ -447,13 +450,14 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
                     $discount_type = 'Use VIP';
                     break;
             }
-            $price_off = $price;
+            $price_off = get_resource_price(SINGULAR_ID, $resource);
+            $qty = min($qty, $total_promo_count);
         }
 
         $cart_item_data['discount'][] = [
             'type' => $discount_type,
             'price_off' => $price_off,
-            'qty' => min($qty, $total_promo_count),
+            'qty' => $qty,
         ];
     }
 
