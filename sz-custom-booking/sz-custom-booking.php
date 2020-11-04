@@ -75,7 +75,7 @@ function is_vip(...$memberships)
  * Get price for a resource of a product
  * @param string $product_id
  * @param integer $resource_id
- * @return integer
+ * @return integer|null
  */
 function get_resource_price($product_id, $resource_id)
 {
@@ -92,7 +92,7 @@ function get_resource_price($product_id, $resource_id)
  * Get price off for a resource of a product
  * @param string $product_id
  * @param integer $resource_id
- * @return integer
+ * @return integer|null
  */
 function get_resource_price_off($product_id, $resource_id)
 {
@@ -122,7 +122,7 @@ function get_resource_price_off($product_id, $resource_id)
  * Get title for a resource of a product
  * @param string $product_id
  * @param integer $resource_id
- * @return string
+ * @return string|null
  */
 function get_resource_title($product_id, $resource_id)
 {
@@ -138,7 +138,7 @@ function get_resource_title($product_id, $resource_id)
 /**
  * Query the promo remaining for the given type
  * @param string $type
- * @return integer
+ * @return integer|null
  */
 function query_promo_times($type)
 {
@@ -163,6 +163,10 @@ function query_promo_times($type)
  */
 function query_vip_times(...$types)
 {
+    if (!is_VIP(...$types)) {
+        return;
+    }
+
     global $wpdb;
     $user = get_current_user_id();
     $vip_count = $wpdb->get_var(
@@ -175,11 +179,6 @@ function query_vip_times(...$types)
         )
     );
     return $vip_count;
-    /*
-if (!is_vip(...$types)) {
-return null;
-}
-return 2;*/
 }
 
 /**
