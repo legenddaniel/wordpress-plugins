@@ -1,7 +1,7 @@
 <?php
 
 // Exit if accessed directly
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -56,7 +56,7 @@ function remake_layout()
 }
 add_action('template_redirect', 'remake_layout');
 
- /**
+/**
  * Remove 'Additional Information' in Promo Passes 10 + 1 page
  * @return array
  */
@@ -70,9 +70,35 @@ function remove_add_info($tabs)
 }
 add_filter('woocommerce_product_tabs', 'remove_add_info');
 
+/*add_filter('get_terms', 'ts_get_subcategory_terms', 10, 3);
+function ts_get_subcategory_terms($terms, $taxonomies, $args)
+{
+$new_terms = array();
+if (in_array('product_cat', $taxonomies) && !is_admin() && is_product_category()) {
+foreach ($terms as $key => $term) {
+if (!in_array($term->slug, array('hidden'))) {
+$new_terms[] = $term;
+}}
+$terms = $new_terms;
+}
+return $terms;
+}*/
 
-
-
+function exclude_product_cat_children($wp_query)
+{
+    if (isset($wp_query->query_vars['hidden']) && $wp_query->is_main_query()) {
+        $wp_query->set('tax_query', array(
+            array(
+                'taxonomy' => 'hidden',
+                'field' => 'slug',
+                'terms' => $wp_query->query_vars['hidden'],
+                'include_children' => false,
+            ),
+        )
+        );
+    }
+}
+add_filter('pre_get_posts', 'exclude_product_cat_children');
 
 //Do not touch please
 
@@ -81,7 +107,7 @@ function add_my_script()
 {
     wp_enqueue_script(
         'checkScript', // name your script so that you can attach other scripts and de-register, etc.
-       get_stylesheet_directory_uri() . '/js/checkScript.js', // this is the location of your script file
+        get_stylesheet_directory_uri() . '/js/checkScript.js', // this is the location of your script file
         array('jquery'), // this array lists the scripts upon which your script depends
         rand(111, 9999) // If on your side everything works great you can remove this anti-caching code, but I suggest adding this
     );
@@ -92,7 +118,7 @@ function add_my_script2()
 {
     wp_enqueue_script(
         'formScript', // name your script so that you can attach other scripts and de-register, etc.
-       get_stylesheet_directory_uri() . '/js/formScript.js', // this is the location of your script file
+        get_stylesheet_directory_uri() . '/js/formScript.js', // this is the location of your script file
         array('jquery') // this array lists the scripts upon which your script depends
     );
 }
@@ -102,7 +128,7 @@ function add_my_script3()
 {
     wp_enqueue_script(
         'passesTestScript', // name your script so that you can attach other scripts and de-register, etc.
-       get_stylesheet_directory_uri() . '/passesTestScript.js', // this is the location of your script file
+        get_stylesheet_directory_uri() . '/passesTestScript.js', // this is the location of your script file
         array('jquery') // this array lists the scripts upon which your script depends
     );
 }

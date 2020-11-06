@@ -287,7 +287,7 @@ function render_summary()
                 </p>
             </div>
             <div class="column">
-                <a class="a-question" href="<?=get_permalink(PROMO_ID)?>"><button><?=$btn_text;?></button></a>
+                <a class="a-question" href="<?=get_permalink(PROMO_ID)?>"><button class="b-question"><?=$btn_text;?></button></a>
             </div>
         </div>
     </div>
