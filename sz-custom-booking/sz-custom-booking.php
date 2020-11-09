@@ -52,7 +52,7 @@ define('VIP_SEMIANNUAL_ID', 68463);
 
 /**
  * Check if the current user is a VIP
- * @param integer,... $memberships
+ * @param Integer,... $memberships
  * @return boolean
  */
 function is_vip(...$memberships)
@@ -73,9 +73,9 @@ function is_vip(...$memberships)
 
 /**
  * Get price for a resource of a product
- * @param string $product_id
- * @param integer $resource_id
- * @return integer|null
+ * @param String $product_id
+ * @param Integer $resource_id
+ * @return Integer|null
  */
 function get_resource_price($product_id, $resource_id)
 {
@@ -90,9 +90,9 @@ function get_resource_price($product_id, $resource_id)
 
 /**
  * Get price off for a resource of a product
- * @param string $product_id
- * @param integer $resource_id
- * @return integer|null
+ * @param String $product_id
+ * @param Integer $resource_id
+ * @return Integer|null
  */
 function get_resource_price_off($product_id, $resource_id)
 {
@@ -120,9 +120,9 @@ function get_resource_price_off($product_id, $resource_id)
 
 /**
  * Get title for a resource of a product
- * @param string $product_id
- * @param integer $resource_id
- * @return string|null
+ * @param String $product_id
+ * @param Integer $resource_id
+ * @return String|null
  */
 function get_resource_title($product_id, $resource_id)
 {
@@ -137,8 +137,8 @@ function get_resource_title($product_id, $resource_id)
 
 /**
  * Query the promo remaining for the given type
- * @param string $type
- * @return integer|null
+ * @param String $type
+ * @return Integer|null
  */
 function query_promo_times($type)
 {
@@ -158,8 +158,8 @@ function query_promo_times($type)
 
 /**
  * Query the vip remaining for the given types
- * @param string,... $types
- * @return integer|null
+ * @param String,... $types
+ * @return Integer|null
  */
 function query_vip_times(...$types)
 {
@@ -183,7 +183,7 @@ function query_vip_times(...$types)
 
 /**
  * Load CSS and JavaScript
- * @return null
+ * @return Null
  */
 function init_assets()
 {
@@ -268,7 +268,7 @@ add_action('wp_ajax_nopriv_fetch_discount_prices', 'fetch_discount_prices');
 
 /**
  * Add html templates of access to 'Promo Passes' in 'Singular Passes'
- * @return null
+ * @return Null
  */
 function render_summary()
 {
@@ -334,7 +334,7 @@ add_action('woocommerce_single_product_summary', 'render_summary');
 
 /**
  * Add discount field in 'Singular Passes'
- * @return null
+ * @return Null
  */
 function render_discount_field()
 {
@@ -388,11 +388,34 @@ function render_discount_field()
 add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
 
 /**
+ * Validate the discount quantity
+ * @param Array $passed
+ * @param Integer $product_id
+ * @param Boolean $quantity
+ */
+function validate_discount_qty($passed, $product_id, $quantity)
+{
+    if ($product_id !== SINGULAR_ID) {
+        return $passed;
+    }
+
+    foreach (['byoe', 'promo'] as $field) {
+        if (isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
+            $passed = false;
+            wc_add_notice(__('Please input the discount quantity you want to use!', 'woocommerce'), 'error');
+            break;
+        }
+    }
+    return $passed;
+}
+add_filter('woocommerce_add_to_cart_validation', 'validate_discount_qty', 10, 3);
+
+/**
  * Add the entries of discounts in the cart item data with validation. Fire at the beginning of $cart_item_data initialization?
- * @param array? $cart_item_data
- * @param int? $product
- * @param string $variation
- * @return array
+ * @param Array? $cart_item_data
+ * @param Integer? $product
+ * @param String $variation
+ * @return Array
  */
 function add_discount_info_into_cart($cart_item_data, $product, $variation)
 {
@@ -466,9 +489,9 @@ add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_cart', 10, 
 
 /**
  * Add discount information field in the cart as well as the cart preview in the product page
- * @param array $cart_item_data
- * @param mixed $cart_item?
- * @return mixed?
+ * @param Array $cart_item_data
+ * @param Mixed $cart_item?
+ * @return Mixed?
  */
 function render_discount_field_in_cart($cart_item_data, $cart_item)
 {
@@ -494,8 +517,8 @@ add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
 
 /**
  * Re-calculate the prices in the cart
- * @param mixed $cart
- * @return null
+ * @param Mixed $cart
+ * @return Null
  */
 function recalculate_total($cart)
 {
@@ -524,11 +547,11 @@ add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 
 /**
  * Add the entries of discounts in the order meta data.
- * @param mixed $item
- * @param string $cart_item_key
- * @param mixed $values
- * @param mixed $order
- * @return null
+ * @param Mixed $item
+ * @param String $cart_item_key
+ * @param Mixed $values
+ * @param Mixed $order
+ * @return Null
  */
 function add_discount_info_into_order($item, $cart_item_key, $values, $order)
 {

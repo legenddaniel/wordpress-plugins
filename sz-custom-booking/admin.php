@@ -1,16 +1,14 @@
 <?php
 // Admin Dashboard Components
 
+is_admin() or exit;
+
 /**
  * Load CSS and JavaScript
  * @return null
  */
 function init_admin_assets()
 {
-    // Now it's loaded globally within all the admin dashboards, will make it only be loaded in specific product editing admin pages
-    if (!is_admin()) {
-        return;
-    }
     $plugin_url = plugin_dir_url(__FILE__);
 
     wp_enqueue_style(
@@ -97,11 +95,11 @@ function create_admin_byoe_input_field($resource, $product)
 
     $field = array(
         'id'                => $id,
-        'label'             => __("BYOE Price" . " resource_id:" . $resource . ":" . gettype($resource) . " product_id:" . $product . ":" . gettype($product), "woocommerce"),
+        'label'             => __('BYOE Price', 'woocommerce'),
         'type'              => 'number',
         'class'             => 'sz-admin-byoe-input',
         'data_type'         => 'price',
-        'wrapper_class'     => 'form-row',
+        'wrapper_class'     => 'form-row form-row-first',
         'value'             => $value,
     );
     return $field;
