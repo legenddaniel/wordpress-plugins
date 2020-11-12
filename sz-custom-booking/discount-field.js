@@ -1,10 +1,6 @@
 // Checkbox area before add_to_cart button layout and functionalities
 jQuery(document).ready(function ($) {
 
-    // Should not hard coded
-    const [archeryID, airsoftID, comboID] = ['68059', '68060', '68062'];
-    // const [archeryID, airsoftID, comboID] = ['291', '292', '293'];
-
     /**
      * @desc Calculate discount for byoe and promo
      * @param {string} field - 'byoe' or 'promo'
@@ -23,11 +19,6 @@ jQuery(document).ready(function ($) {
 
     // Add an anchor to the booking cost div as a ref
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
-
-    // Hide BYOE field for Airsoft. Should not hard code it.
-    $('#wc_bookings_field_resource').on('change', function () {
-        $('#sz-discount-field div').slice(0, 2).toggle(this.value !== airsoftID);
-    })
 
     // Change price displayed according the discount options
     $('input[name$="-enable"], select[name$="-qty"]').on('change', function () {

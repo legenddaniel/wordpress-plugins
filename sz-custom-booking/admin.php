@@ -7,7 +7,7 @@ is_admin() or exit;
  * Load CSS and JavaScript
  * @return Null
  */
-function init_admin_assets()
+function admin_init_assets()
 {
     $plugin_url = plugin_dir_url(__FILE__);
 
@@ -24,90 +24,7 @@ function init_admin_assets()
         rand(111, 9999)
     );
 }
-add_action('admin_enqueue_scripts', 'init_admin_assets');
-
-/**
- * Template of byoe enabling checkboxes
- * @param Integer $resource
- * @param String $product
- * @return Array
- */
-function create_admin_byoe_enabling_checkbox($resource, $product)
-{
-    if ($product != SINGULAR_ID) {
-        return;
-    }
-
-    switch ($resource) {
-        case ARCHERY_ID:
-            $type = 'archery';
-            break;
-        case AIRSOFT_ID:
-            $type = 'airsoft';
-            break;
-        case COMBO_ID:
-            $type = 'combo';
-            break;
-    }
-    $id = 'admin_byoe_enable_' . $type;
-
-    $field = [
-        'id' => $id,
-        'label' => __("Enable BYOE Discount", "woocommerce"),
-        'class' => 'sz-admin-byoe-enable',
-        'wrapper_class' => 'form-row form-row-first',
-        'value' => true,
-        'custom_attributes' => [
-            'checked' => true, // will retrieve from database
-        ],
-    ];
-    return $field;
-}
-
-/**
- * Template of byoe text fields
- * @param Integer $resource
- * @param String $product
- * @return Array
- */
-function create_admin_byoe_input_field($resource, $product)
-{
-    if ($product != SINGULAR_ID) {
-        return;
-    }
-
-    // Value come from the database in the future
-    switch ($resource) {
-        case ARCHERY_ID:
-            $type = 'archery';
-            $value = '17.5';
-            break;
-        case AIRSOFT_ID:
-            $type = 'airsoft';
-            $value = '';
-            break;
-        case COMBO_ID:
-            $type = 'combo';
-            $value = '57.25';
-            break;
-    }
-    $id = "admin_byoe_price_$type";
-
-    $field = [
-        'id' => $id,
-        'label' => __('BYOE Price', 'woocommerce'),
-        'type' => 'number',
-        'class' => 'sz-admin-byoe-input',
-        'data_type' => 'price',
-        'wrapper_class' => 'form-row form-row-first',
-        'value' => $value,
-        'custom_attributes' => [
-            'step' => 0.01,
-            'min' => 0,
-        ],
-    ];
-    return $field;
-}
+add_action('admin_enqueue_scripts', 'admin_init_assets');
 
 /**
  * Add BYOE price setting field
@@ -133,7 +50,7 @@ add_action('woocommerce_bookings_after_resource_cost', 'admin_byoe_field', 10, 2
  * @param Integer $post_id
  * @return Null
  */
-function save_byoe_field($post_id)
+function admin_save_byoe_field($post_id)
 {
     if ($post_id !== SINGULAR_ID) {
         return;
@@ -145,50 +62,48 @@ function save_byoe_field($post_id)
         'combo' => COMBO_ID,
     ];
 
+    global $wpdb;
+
     foreach ($resources as $type => $id) {
-        $byoe_enable = !!$_POST["admin_byoe_enable_$type"];
-        $byoe_price = number_format($_POST["admin_byoe_price_$type"], 2);
+        $byoe_enable = sanitize_text_field($_POST["admin_byoe_enable_$type"]);
+        $byoe_price = sanitize_text_field($_POST["admin_byoe_price_$type"]);
 
-        $fields = [
-            'byoe_enable' => $byoe_enable,
-            'byoe_price' => $byoe_price,
-        ];
+        if ($byoe_enable) {
+            if ($byoe_price === '') {
+                continue;
+            } else {
+                $byoe_price = number_format($byoe_price, 2);
+            }
+        } else {
+            $byoe_price = 'N/A';
+        }
 
-        global $wpdb;
-
-        foreach ($fields as $field => $value) {
-            $byoe_db = $wpdb->get_var(
+        $byoe_db = get_byoe_price($id, true);
+        if (is_null($byoe_db)) {
+            $wpdb->query(
                 $wpdb->prepare(
-                    "SELECT meta_value
-                    FROM $wpdb->postmeta
-                    WHERE post_id = %d AND meta_key = %s",
-                    [$id, $field]
+                    "INSERT INTO $wpdb->postmeta
+                    (post_id, meta_key, meta_value)
+                    VALUES (%d, %s, %s)",
+                    [$id, 'byoe_price', $byoe_price]
                 )
             );
-
-            if (is_null($byoe_db)) {
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "INSERT INTO $wpdb->postmeta
-                        (post_id, meta_key, meta_value)
-                        VALUES (%d, %s, %s)",
-                        [$id, $field, $value]
-                    )
-                );
-            } elseif (+$byoe_db !== $value) {
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "UPDATE $wpdb->postmeta
-                        SET meta_value = %s
-                        WHERE post_id = %d AND meta_key = %s",
-                        [$value, $id, $field]
-                    )
-                );
-            }
+            return;
+        }
+        if ($byoe_db !== $byoe_price) {
+            $wpdb->query(
+                $wpdb->prepare(
+                    "UPDATE $wpdb->postmeta
+                    SET meta_value = %s
+                    WHERE post_id = %d AND meta_key = %s",
+                    [$byoe_price, $id, 'byoe_price']
+                )
+            );
+            return;
         }
     }
 }
-add_action('woocommerce_process_product_meta', 'save_byoe_field');
+add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
 
 /*function admin_add_booking_details($booking_id)
 {

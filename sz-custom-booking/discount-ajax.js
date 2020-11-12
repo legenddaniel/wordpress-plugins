@@ -10,8 +10,8 @@ jQuery(document).ready(function ($) {
                 action: 'fetch_discount_prices',
                 resource_id,
             },
-            res => { // Must be arrow function
-                const { resource, price, price_off, promo_label } = res.data;
+            function (res) {
+                const { resource, byoe_enable, price, price_off, promo_label } = res.data;
 
                 if (resource_id !== resource) return;
 
@@ -19,9 +19,10 @@ jQuery(document).ready(function ($) {
                 $('#byoe-enable').attr('data-price', price_off);
                 $('#promo-enable').attr('data-price', price);
                 $('#promo-enable').next('label').text(promo_label);
+                $('#sz-discount-field div').slice(0, 2).toggle(byoe_enable);
             }
         ).fail(function (error) {
-            console.log('Fetching discount info failed: ' + error);
+            console.log('Fetching discount info failed: ' + JSON.stringify(error));
         });
     })
 })
