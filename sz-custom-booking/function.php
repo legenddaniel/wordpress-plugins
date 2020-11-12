@@ -8,7 +8,7 @@
  * @param Boolean $separate - Count 'N/A' as null or not
  * @return String|Null
  */
-function get_byoe_price($resource, $separate = false)
+function get_byoe_price($resource)
 {
     global $wpdb;
     $byoe_info = $wpdb->get_var(
@@ -20,9 +20,7 @@ function get_byoe_price($resource, $separate = false)
         )
     );
 
-    $condition = $separate ? is_null($byoe_info) : (is_null($byoe_info) || $byoe_info === 'N/A');
-
-    return $condition ? null : sanitize_text_field($byoe_info);
+    return (is_null($byoe_info) || $byoe_info === 'N/A') ? null : sanitize_text_field($byoe_info);
 }
 
 /**
@@ -48,11 +46,11 @@ function create_admin_byoe_enabling_checkbox($resource, $product)
             $type = 'combo';
             break;
     }
-    $id = 'admin_byoe_enable_' . $type;
+    $id = 'admin-byoe-enable-' . $type;
 
     $field = [
         'id' => $id,
-        'label' => esc_html__("Enable BYOE Discount", "woocommerce"),
+        'label' => esc_html__("Enable Bring Your Own Equipment Discount", "woocommerce"),
         'class' => 'sz-admin-byoe-enable',
         'wrapper_class' => 'form-row form-row-first',
         'value' => true,
@@ -86,13 +84,13 @@ function create_admin_byoe_input_field($resource, $product)
             $type = 'combo';
             break;
     }
-    $id = "admin_byoe_price_$type";
+    $id = "admin-byoe-price-$type";
     $value = get_byoe_price($resource);
     $value = is_null($value) ? '' : $value;
 
     $field = [
         'id' => $id,
-        'label' => esc_html__('BYOE Price', 'woocommerce'),
+        'label' => esc_html__('Bring Your Own Equipment Price', 'woocommerce'),
         'type' => 'number',
         'class' => 'sz-admin-byoe-input',
         'data_type' => 'price',
@@ -102,6 +100,30 @@ function create_admin_byoe_input_field($resource, $product)
             'step' => 0.01,
             'min' => 0,
         ],
+    ];
+    return $field;
+}
+
+/**
+ * Template of discount info checkboxes in booking
+ * @param Array $discount
+ * @return Array
+ */
+function create_admin_booking_discount_checkbox_field($discount)
+{
+    $type = $discount['type'];
+    $id = str_replace(' ', '-', $type);
+    $id = preg_replace('/\(|\)/m', '', $id);
+    $id = strtolower($id);
+
+    $field = [
+        'id' => $id,
+        'label' => esc_html__($type, 'woocommerce'),
+        'class' => '',
+        'style' => '',
+        'wrapper_class' => '',
+        'value' => '',
+        'custom_attributes' => '',
     ];
     return $field;
 }

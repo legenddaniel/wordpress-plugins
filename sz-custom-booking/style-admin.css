@@ -1,7 +1,9 @@
 /* Admin styles starts */
 
-.sz-admin-byoe-input {
-
+.woocommerce_booking_resource p[class*="admin_byoe_"].form-row.form-row-first {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100%;
 }
 
 .sz-admin-byoe-enable {

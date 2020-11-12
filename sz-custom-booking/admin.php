@@ -65,8 +65,8 @@ function admin_save_byoe_field($post_id)
     global $wpdb;
 
     foreach ($resources as $type => $id) {
-        $byoe_enable = sanitize_text_field($_POST["admin_byoe_enable_$type"]);
-        $byoe_price = sanitize_text_field($_POST["admin_byoe_price_$type"]);
+        $byoe_enable = sanitize_text_field($_POST["admin-byoe-enable-$type"]);
+        $byoe_price = sanitize_text_field($_POST["admin-byoe-price-$type"]);
 
         if ($byoe_enable) {
             if ($byoe_price === '') {
@@ -78,36 +78,26 @@ function admin_save_byoe_field($post_id)
             $byoe_price = 'N/A';
         }
 
-        $byoe_db = get_byoe_price($id, true);
-        if (is_null($byoe_db)) {
-            $wpdb->query(
-                $wpdb->prepare(
-                    "INSERT INTO $wpdb->postmeta
-                    (post_id, meta_key, meta_value)
-                    VALUES (%d, %s, %s)",
-                    [$id, 'byoe_price', $byoe_price]
-                )
-            );
-            return;
-        }
-        if ($byoe_db !== $byoe_price) {
-            $wpdb->query(
-                $wpdb->prepare(
-                    "UPDATE $wpdb->postmeta
-                    SET meta_value = %s
-                    WHERE post_id = %d AND meta_key = %s",
-                    [$byoe_price, $id, 'byoe_price']
-                )
-            );
-            return;
-        }
+        update_post_meta($id, 'byoe_price', $byoe_price);
     }
 }
 add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
 
 /*function admin_add_booking_details($booking_id)
 {
-$booking = new WC_Booking($booking_id);
-echo 'Will add discount info here';
+    $order = new WC_Booking($booking_id);
+    $id = $order->get_order_item_id();
+    $discounts = wc_get_order_item_meta($id, 'discount');
+
+    if (empty($discounts)) {
+        echo 'No discount applied to this booking.';
+        return;
+    }
+
+    foreach ($discounts as $discount) {
+        // $text_field = create_admin_byoe_input_field($resource, $product);
+        // woocommerce_wp_text_input($text_field);
+    }
+
 }
 add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');*/

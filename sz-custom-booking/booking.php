@@ -176,7 +176,7 @@ function render_discount_field()
     ?>
 
     <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?=esc_attr($price);?>>
-        <div style=<?=$byoe_display;?>>
+        <div style=<?=esc_attr($byoe_display);?>>
             <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?=esc_attr($price_off);?>>
             <label for="byoe-enable">Bring Your Own Equipment</label>
         </div>
