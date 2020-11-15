@@ -73,32 +73,32 @@ add_filter('woocommerce_product_tabs', 'remove_add_info');
 /*add_filter('get_terms', 'ts_get_subcategory_terms', 10, 3);
 function ts_get_subcategory_terms($terms, $taxonomies, $args)
 {
-$new_terms = array();
-if (in_array('product_cat', $taxonomies) && !is_admin() && is_product_category()) {
-foreach ($terms as $key => $term) {
-if (!in_array($term->slug, array('hidden'))) {
-$new_terms[] = $term;
-}}
-$terms = $new_terms;
-}
-return $terms;
+    $new_terms = array();
+    if (in_array('product_cat', $taxonomies) && !is_admin()) {
+        foreach ($terms as $key => $term) {
+            if (!in_array($term->slug, array('firearms'))) {
+                $new_terms[] = $term;
+            }}
+        $terms = $new_terms;
+    }
+    return $terms;
 }*/
-
+/*
 function exclude_product_cat_children($wp_query)
 {
-    if (isset($wp_query->query_vars['hidden']) && $wp_query->is_main_query()) {
-        $wp_query->set('tax_query', array(
-            array(
-                'taxonomy' => 'hidden',
-                'field' => 'slug',
-                'terms' => $wp_query->query_vars['hidden'],
-                'include_children' => false,
-            ),
-        )
-        );
-    }
+if (isset($wp_query->query_vars['hidden']) && $wp_query->is_main_query()) {
+$wp_query->set('tax_query', array(
+array(
+'taxonomy' => 'hidden',
+'field' => 'slug',
+'terms' => $wp_query->query_vars['hidden'],
+'include_children' => false,
+),
+)
+);
 }
-add_filter('pre_get_posts', 'exclude_product_cat_children');
+}
+add_filter('pre_get_posts', 'exclude_product_cat_children');*/
 
 //Do not touch please
 
