@@ -51,7 +51,7 @@ function create_admin_byoe_enabling_checkbox($resource, $product)
     $field = [
         'id' => $id,
         'label' => esc_html__("Enable Bring Your Own Equipment Discount", "woocommerce"),
-        'class' => 'sz-admin-byoe-enable',
+        'class' => 'sz-admin-checkbox-enable',
         'wrapper_class' => 'form-row form-row-first',
         'value' => true,
         'custom_attributes' => is_null(get_byoe_price($resource)) ? '' : [
@@ -106,12 +106,11 @@ function create_admin_byoe_input_field($resource, $product)
 
 /**
  * Template of discount info checkboxes in booking
- * @param Array $discount
+ * @param String $type
  * @return Array
  */
-function create_admin_booking_discount_checkbox_field($discount)
+function create_admin_booking_discount_checkbox_field($type)
 {
-    $type = $discount['type'];
     $id = str_replace(' ', '-', $type);
     $id = preg_replace('/\(|\)/m', '', $id);
     $id = strtolower($id);
@@ -119,11 +118,37 @@ function create_admin_booking_discount_checkbox_field($discount)
     $field = [
         'id' => $id,
         'label' => esc_html__($type, 'woocommerce'),
-        'class' => '',
+        'class' => 'sz-admin-checkbox-enable',
         'style' => '',
         'wrapper_class' => '',
         'value' => '',
-        'custom_attributes' => '',
+        'custom_attributes' => [
+            'checked' => true,
+            'onclick' => 'return false;'
+        ],
+    ];
+    return $field;
+}
+
+/**
+ * Template of discount info input in booking
+ * @param Integer $qty
+ * @return Array
+ */
+function create_admin_booking_discount_input_field($qty)
+{
+    $qty = +$qty;
+
+    $field = [
+        'id' => 'discount-qty',
+        'label' => esc_html__('Quantity', 'woocommerce'),
+        'type' => 'number',
+        'class' => '',
+        'wrapper_class' => '',
+        'value' => $qty,
+        'custom_attributes' => [
+            'readonly' => true,
+        ],
     ];
     return $field;
 }

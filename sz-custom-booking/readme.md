@@ -1,5 +1,5 @@
     Plugin Name: Custom Booking
-    Version: 0.0.0
+    Version: 1.0.0
     Plugin URI: null
     Description: Custom booking
     Author: Siyuan Zuo

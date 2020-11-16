@@ -18,19 +18,24 @@ require_once $plugin_dir . 'function.php';
 
 // Admin Dashboard
 is_admin() and
-require_once $plugin_dir . 'admin.php';
+require_once $plugin_dir . 'includes/admin.php';
 
 // Booking
-require_once $plugin_dir . 'booking.php';
+require_once $plugin_dir . 'includes/booking.php';
+
+// VIP
+require_once $plugin_dir . 'includes/vip.php';
 
 // ---------------Config Area Starts
 
 // For real
 define('SINGULAR_ID', 68051);
 define('PROMO_ID', 68067);
+
 define('ARCHERY_ID', 68059);
 define('AIRSOFT_ID', 68060);
 define('COMBO_ID', 68062);
+
 define('VIP_ANNUAL_ID', 68456);
 define('VIP_SEMIANNUAL_ID', 68463);
 

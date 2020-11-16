@@ -9,17 +9,17 @@ is_admin() or exit;
  */
 function admin_init_assets()
 {
-    $plugin_url = plugin_dir_url(__FILE__);
+    $plugin_url = plugin_dir_url(__DIR__);
 
     wp_enqueue_style(
         'style',
-        "{$plugin_url}style-admin.css",
+        $plugin_url . 'css/style-admin.css',
         [],
         rand(111, 9999)
     );
     wp_enqueue_script(
         'admin',
-        "{$plugin_url}admin.js",
+        $plugin_url . 'js/admin.js',
         ['jquery'],
         rand(111, 9999)
     );
@@ -83,10 +83,10 @@ function admin_save_byoe_field($post_id)
 }
 add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
 
-/*function admin_add_booking_details($booking_id)
+function admin_add_booking_details($booking_id)
 {
-    $order = new WC_Booking($booking_id);
-    $id = $order->get_order_item_id();
+    $booking = new WC_Booking($booking_id);
+    $id = $booking->get_order_item_id();
     $discounts = wc_get_order_item_meta($id, 'discount');
 
     if (empty($discounts)) {
@@ -95,9 +95,12 @@ add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
     }
 
     foreach ($discounts as $discount) {
-        // $text_field = create_admin_byoe_input_field($resource, $product);
-        // woocommerce_wp_text_input($text_field);
+        $checkbox_field = create_admin_booking_discount_checkbox_field($discount['type']);
+        $text_field = create_admin_booking_discount_input_field($discount['qty']);
+
+        woocommerce_wp_checkbox($checkbox_field);
+        woocommerce_wp_text_input($text_field);
     }
 
 }
-add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');*/
+add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');

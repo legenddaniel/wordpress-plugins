@@ -11,30 +11,30 @@ function init_assets()
     if (!is_single(SINGULAR_ID)) {
         return;
     }
-    $plugin_url = plugin_dir_url(__FILE__);
+    $plugin_url = plugin_dir_url(__DIR__);
 
     wp_enqueue_style(
         'style',
-        "{$plugin_url}style.css",
+        $plugin_url . 'css/style.css',
         [],
         rand(111, 9999)
     );
 
     wp_enqueue_script(
         'discount_ajax',
-        "{$plugin_url}discount-ajax.js",
+        $plugin_url . 'js/discount-ajax.js',
         ['jquery'],
         rand(111, 9999)
     );
     wp_enqueue_script(
         'discount_field',
-        "{$plugin_url}discount-field.js",
+        $plugin_url . 'js/discount-field.js',
         ['jquery'],
         rand(111, 9999)
     );
     wp_enqueue_script(
         'select',
-        "{$plugin_url}select.js",
+        $plugin_url . 'js/select.js',
         ['jquery'],
         rand(111, 9999)
     );
