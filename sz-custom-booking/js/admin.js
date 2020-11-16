@@ -1,7 +1,7 @@
 jQuery(document).ready(function ($) {
 
     // Only in product editing page
-    if (!/post\.php\?post=\d+&action=edit/.test(window.location.pathname)) {
+    if (!/post\.php\?post=\d+&action=edit/.test(window.location.href)) {
         return;
     }
 
