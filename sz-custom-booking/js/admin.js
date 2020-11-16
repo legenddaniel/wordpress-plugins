@@ -5,15 +5,23 @@ jQuery(document).ready(function ($) {
         return;
     }
 
-    // Toggle the discount field in product editing page
-    $('.sz-admin-checkbox-enable').on('change', function () {
-        const $textfield = $(this).closest('.form-field').next('.form-field');
-        if (this.checked) {
+    /**
+     * @desc Toggle discount field in admin product editing
+     * @param {interface} e - Event
+     * @return {undefined}
+     */
+    const toggleDiscountField = function (e) {
+        const that = e.currentTarget;
+        const $textfield = $(that).closest('.form-field').next('.form-field');
+        if (that.checked) {
             $textfield.removeClass('d-none');
         } else {
             $textfield.addClass('d-none');
         }
-    });
+    }
+
+    // Toggle the discount field in product editing page
+    $('.sz-admin-checkbox-enable').on('change', toggleDiscountField);
 
     // Change the display and styling of discount field in booking details page
     const $discountInfoLabel = $('#booking_data .booking_data_column_container .booking_data_column:first-of-type .form-field:nth-of-type(5) label');

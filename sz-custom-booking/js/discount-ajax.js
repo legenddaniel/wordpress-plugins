@@ -1,8 +1,12 @@
 jQuery(document).ready(function ($) {
 
-    // Fetch discount data for various resources
-    $('#wc_bookings_field_resource').on('change', function () {
-        const resource_id = this.value;
+    /**
+     * @desc Fetch discount data for various resources
+     * @param {interface} e - Event
+     * @return {undefined}
+     */
+    const getDiscountPrices = function (e) {
+        const resource_id = e.currentTarget.value;
         $.post(
             my_ajax_obj.ajax_url,
             {
@@ -24,5 +28,7 @@ jQuery(document).ready(function ($) {
         ).fail(function (error) {
             console.log('Fetching discount info failed: ' + JSON.stringify(error));
         });
-    })
+    }
+
+    $('#wc_bookings_field_resource').on('change', getDiscountPrices);
 })
