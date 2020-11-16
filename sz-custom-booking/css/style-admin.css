@@ -11,6 +11,11 @@
     min-width: initial !important;
 }
 
+.sz-admin-booking-subtitle {
+    font-weight: 600;
+    color: #333;
+}
+
 .d-none {
     display: none;
 }
