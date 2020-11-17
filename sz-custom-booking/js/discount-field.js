@@ -17,12 +17,6 @@ jQuery(document).ready(function ($) {
         return $discount;
     };
 
-    // Add an anchor to the booking cost div as a ref
-    $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
-
-    // Change price displayed according the discount options
-    $('input[name$="-enable"], select[name$="-qty"]').on('change', toggleDisplayByOption);
-
     const toggleDisplayByOption = function () {
         let bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         const $qty = $('#wc_bookings_field_persons').val();
@@ -96,6 +90,12 @@ jQuery(document).ready(function ($) {
             console.log(error);
         }
     }
+
+    // Add an anchor to the booking cost div as a ref
+    $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost');
+
+    // Change price displayed according the discount options
+    $('input[name$="-enable"], select[name$="-qty"]').on('change', toggleDisplayByOption);
 
     toggleDisplayByStock();
 })

@@ -38,6 +38,12 @@ function init_assets()
         ['jquery'],
         rand(111, 9999)
     );
+    wp_enqueue_script(
+        'intro',
+        $plugin_url . 'js/intro.js',
+        ['jquery'],
+        rand(111, 9999)
+    );
 
     wp_localize_script(
         'discount_ajax',
@@ -101,7 +107,9 @@ function render_summary()
         return;
     }
 
-    $btn_text = is_user_logged_in() ? 'Take me to Promo!' : 'Get me in first! (wrong url now)'
+    $is_logged_in = is_user_logged_in();
+    $btn_text = $is_logged_in ? 'Take me to Promo!' : 'Get me in first!';
+    $href = $is_logged_in ? 'href="' .get_permalink(PROMO_ID) .'"' : '';
     ?>
 
     <div class="mtb-25 promoQuestion">
@@ -112,7 +120,7 @@ function render_summary()
                 </p>
             </div>
             <div class="column">
-                <a class="a-question" href="<?=get_permalink(PROMO_ID)?>"><button class="b-question"><?=$btn_text;?></button></a>
+                <a class="a-question" <?=$href;?>><button class="b-question"><?=$btn_text;?></button></a>
             </div>
         </div>
     </div>
