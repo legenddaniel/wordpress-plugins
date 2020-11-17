@@ -4,6 +4,25 @@
 is_admin() or exit;
 
 /**
+ * Transpile scripts by Babel
+ * @param String $tag
+ * @param String $handle
+ * @param String $src
+ * @return String
+ */
+function sz_admin_babelize_script($tag, $handle, $src)
+{
+    $scripts = ['admin'];
+
+    if (in_array($handle, $scripts)) {
+        $tag = '<script type="text/babel" src="' . esc_url($src) . '" id="' . $handle . '-js"></script>';
+    }
+
+    return $tag;
+}
+add_filter('script_loader_tag', 'sz_admin_babelize_script', 10, 3);
+
+/**
  * Load CSS and JavaScript
  * @return Null
  */
@@ -16,6 +35,11 @@ function admin_init_assets()
         $plugin_url . 'css/style-admin.css',
         [],
         rand(111, 9999)
+    );
+
+    wp_enqueue_script(
+        'babel',
+        'https://unpkg.com/@babel/standalone/babel.min.js',
     );
     wp_enqueue_script(
         'admin',

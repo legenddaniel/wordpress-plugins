@@ -1,4 +1,6 @@
 jQuery(document).ready(function ($) {
+
+    // Display login modal
     $('.a-question').on('click', function (e) {
         if (e.currentTarget.href) {
             return;
