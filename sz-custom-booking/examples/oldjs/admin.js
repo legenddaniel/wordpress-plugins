@@ -10,20 +10,21 @@ jQuery(document).ready(function ($) {
      * @param {interface} e - Event
      * @return {undefined}
      */
-    var toggleDiscountField = function toggleDiscountField(e) {
-        var that = e.currentTarget;
-        var $textfield = $(that).closest('.form-field').next('.form-field');
-
+    const toggleDiscountField = function (e) {
+        const that = e.currentTarget;
+        const $textfield = $(that).closest('.form-field').next('.form-field');
         if (that.checked) {
             $textfield.removeClass('d-none');
         } else {
             $textfield.addClass('d-none');
         }
-    }; // Toggle the discount field in product editing page
+    }
 
+    // Toggle the discount field in product editing page
+    $('.sz-admin-checkbox-enable').on('change', toggleDiscountField);
 
-    $('.sz-admin-checkbox-enable').on('change', toggleDiscountField); // Change the display and styling of discount field in booking details page
+    // Change the display and styling of discount field in booking details page
+    const $discountInfoLabel = $('#booking_data .booking_data_column_container .booking_data_column:first-of-type .form-field:nth-of-type(5) label');
 
-    var $discountInfoLabel = $('#booking_data .booking_data_column_container .booking_data_column:first-of-type .form-field:nth-of-type(5) label');
     $discountInfoLabel.text('Discount Info: ').attr('class', 'sz-admin-booking-subtitle');
-});
+})

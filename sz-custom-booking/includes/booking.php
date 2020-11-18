@@ -3,25 +3,6 @@
 // Main functionalties of custom booking
 
 /**
- * Transpile scripts by Babel
- * @param String $tag
- * @param String $handle
- * @param String $src
- * @return String
- */
-/*function sz_babelize_script($tag, $handle, $src)
-{
-    $scripts = ['discount_ajax', 'discount_field', 'intro', 'select'];
-
-    if (in_array($handle, $scripts)) {
-        $tag = '<script type="text/babel" src="' . esc_url($src) . '" id="' . $handle . '-js"></script>';
-    }
-
-    return $tag;
-}
-add_filter('script_loader_tag', 'sz_babelize_script', 10, 3);*/
-
-/**
  * Load CSS and JavaScript
  * @return Null
  */
@@ -39,10 +20,10 @@ function init_assets()
         rand(111, 9999)
     );
 
-    /*wp_enqueue_script(
-        'babel',
-        'https://unpkg.com/@babel/standalone/babel.min.js',
-    );*/
+    wp_enqueue_script(
+        'polyfill',
+        'https://polyfill.io/v3/polyfill.min.js?features=NodeList.prototype.forEach%2CMutationObserver',
+    );
     wp_enqueue_script(
         'discount_ajax',
         $plugin_url . 'js/discount-ajax.js',
