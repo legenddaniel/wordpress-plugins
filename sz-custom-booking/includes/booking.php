@@ -9,7 +9,7 @@
  * @param String $src
  * @return String
  */
-function sz_babelize_script($tag, $handle, $src)
+/*function sz_babelize_script($tag, $handle, $src)
 {
     $scripts = ['discount_ajax', 'discount_field', 'intro', 'select'];
 
@@ -19,7 +19,7 @@ function sz_babelize_script($tag, $handle, $src)
 
     return $tag;
 }
-add_filter('script_loader_tag', 'sz_babelize_script', 10, 3);
+add_filter('script_loader_tag', 'sz_babelize_script', 10, 3);*/
 
 /**
  * Load CSS and JavaScript
@@ -39,10 +39,10 @@ function init_assets()
         rand(111, 9999)
     );
 
-    wp_enqueue_script(
+    /*wp_enqueue_script(
         'babel',
         'https://unpkg.com/@babel/standalone/babel.min.js',
-    );
+    );*/
     wp_enqueue_script(
         'discount_ajax',
         $plugin_url . 'js/discount-ajax.js',

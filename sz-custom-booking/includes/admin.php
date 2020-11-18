@@ -10,7 +10,7 @@ is_admin() or exit;
  * @param String $src
  * @return String
  */
-function sz_admin_babelize_script($tag, $handle, $src)
+/*function sz_admin_babelize_script($tag, $handle, $src)
 {
     $scripts = ['admin'];
 
@@ -20,7 +20,7 @@ function sz_admin_babelize_script($tag, $handle, $src)
 
     return $tag;
 }
-add_filter('script_loader_tag', 'sz_admin_babelize_script', 10, 3);
+add_filter('script_loader_tag', 'sz_admin_babelize_script', 10, 3);*/
 
 /**
  * Load CSS and JavaScript
