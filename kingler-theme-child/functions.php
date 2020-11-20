@@ -132,3 +132,44 @@ function add_my_script3()
         array('jquery') // this array lists the scripts upon which your script depends
     );
 }
+
+
+add_action('get_header', function() {
+    if(is_page('1489')) {
+
+        function sp_enqueue_script() {
+            wp_enqueue_script(
+                'sp-custom-script',
+                get_stylesheet_directory_uri() . '/searchCartIcon.js',
+                array( 'jquery' ), '1.0', true
+            );
+        }
+
+        add_action( 'wp_enqueue_scripts', 'sp_enqueue_script' );
+    }
+});
+
+
+add_action('wp_enqueue_scripts', 'add_my_script4');
+function add_my_script4()
+{
+    wp_enqueue_script(
+        'timer', // name your script so that you can attach other scripts and de-register, etc.
+        get_stylesheet_directory_uri() . '/timer.js', // this is the location of your script file
+        array('jquery') // this array lists the scripts upon which your script depends
+    );
+}
+
+
+add_action('wp_enqueue_scripts', 'add_my_script5');
+function add_my_script5()
+{
+    wp_enqueue_script(
+        'whichRow', // name your script so that you can attach other scripts and de-register, etc.
+        get_stylesheet_directory_uri() . '/js/check-which-row-is-selected.js', // this is the location of your script file
+        array('jquery') // this array lists the scripts upon which your script depends
+    );
+}
+
+
+

@@ -21,6 +21,15 @@ Text Domain: kingler-theme-child
 	width: auto !important;
 }
 
+#wc-moneris-account-number {
+	height: 54px !important;
+}
+
+.lcx-widget.lcx iframe {
+    width: 100% !important;
+	height: 100% !important;
+}
+
 /* Calendar date block text */
 .wc-bookings-booking-form .block-picker a {
     color: rgb(43, 43, 43);
