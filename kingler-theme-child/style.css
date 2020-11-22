@@ -14,6 +14,10 @@ Text Domain: kingler-theme-child
 } */
 
 /* Singular & Promo main body */
+#menu-item-69810 .sf-with-ul {
+	cursor: pointer;
+}
+
 #product-68067 .summary,
 #product-68051 .summary {
 	float: none !important;
@@ -25,14 +29,65 @@ Text Domain: kingler-theme-child
 	height: 54px !important;
 }
 
+/* Back to top button */
+a.scroll_to_top.show {
+	bottom: 10em;
+}
+
+/* Screets icon */
 .lcx-widget.lcx iframe {
-    width: 100% !important;
+	width: 100% !important;
 	height: 100% !important;
+}
+@media (max-width: 1135px) and (min-width: 960px) {
+	#lcx-widget {
+		right: 15px;
+	}
+	#lcx-widget:not(.lcx--open) {
+		width: 93px;
+		height: 93px;
+	}
+}
+@media (max-width: 959px) and (min-width: 768px) {
+	#lcx-widget {
+		right: 0px;
+	}
+	#lcx-widget:not(.lcx--open) {
+		width: 93px;
+		height: 93px;
+	}
+}
+@media (max-width: 767px) and (min-width: 451px) {
+	#lcx-widget {
+		right: -55px;
+	}
+	#lcx-widget:not(.lcx--open) {
+		width: 86px;
+		height: 86px;
+		transition: right 0.5s;
+	}
+	#lcx-widget:hover,
+	#lcx-widget.lcx--open {
+		right: 2px;
+	}
+}
+@media (max-width: 450px) {
+	#lcx-widget {
+		right: 2px;
+	}
+	#lcx-widget:not(.lcx--open) {
+		width: 86px;
+		height: 86px;
+	}
+	#lcx-widget.lcx--open {
+		right: 0;
+		bottom: 0;
+	}
 }
 
 /* Calendar date block text */
 .wc-bookings-booking-form .block-picker a {
-    color: rgb(43, 43, 43);
+	color: rgb(43, 43, 43);
 }
 
 /* Cart and checkout item details table*/
@@ -42,7 +97,7 @@ Text Domain: kingler-theme-child
 }
 
 /* Cart and checkout item details table row title */
-.woocommerce-cart-form__cart-item .product-name dt, 
+.woocommerce-cart-form__cart-item .product-name dt,
 .woocommerce-checkout-review-order .product-name dt {
 	width: 100px;
 }

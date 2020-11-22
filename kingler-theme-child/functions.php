@@ -28,6 +28,13 @@ function init_styles()
         rand(111, 9999)
     );
 
+    wp_enqueue_script(
+        'screets-icon-style',
+        get_stylesheet_directory_uri() . '/screets-icon-style.js',
+        [],
+        rand(111, 9999)
+    );
+
     if (is_single(68051)) {
         wp_enqueue_script(
             'layout',
