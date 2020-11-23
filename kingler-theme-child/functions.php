@@ -178,5 +178,14 @@ function add_my_script5()
     );
 }
 
+add_action('wp_enqueue_scripts', 'add_my_script6');
+function add_my_script6()
+{
+    wp_enqueue_script(
+        'searchButton', // name your script so that you can attach other scripts and de-register, etc.
+        get_stylesheet_directory_uri() . '/js/searchButtonDisabled.js', // this is the location of your script file
+        array('jquery') // this array lists the scripts upon which your script depends
+    );
+}
 
 

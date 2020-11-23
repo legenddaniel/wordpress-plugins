@@ -42,12 +42,6 @@ function init_assets()
         ['jquery'],
         rand(111, 9999)
     );
-    wp_enqueue_script(
-        'intro',
-        $plugin_url . 'js/intro.js',
-        ['jquery'],
-        rand(111, 9999)
-    );
 
     wp_localize_script(
         'discount_ajax',
@@ -113,18 +107,18 @@ function render_summary()
 
     $is_logged_in = is_user_logged_in();
     $btn_text = $is_logged_in ? 'Take me to Promo!' : 'Get me in first!';
-    $href = $is_logged_in ? 'href="' . get_permalink(PROMO_ID) . '"' : '';
+    $href = $is_logged_in ? PROMO_ID : get_option('woocommerce_myaccount_page_id');
     ?>
 
     <div class="mtb-25 promoQuestion">
 	    <div class="row">
 	        <div class="column">
                 <p class="p-question">
-                    <span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you <?=is_user_logged_in() ? '' : 'become a member and ';?>buy the promo package!
+                    <span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you <?=$is_logged_in ? '' : 'become a member and ';?>buy the promo package!
                 </p>
             </div>
             <div class="column">
-                <a class="a-question" <?=$href;?>><button class="b-question"><?=$btn_text;?></button></a>
+                <a class="a-question" href=<?=get_permalink($href);?>><button class="b-question"><?=$btn_text;?></button></a>
             </div>
         </div>
     </div>
