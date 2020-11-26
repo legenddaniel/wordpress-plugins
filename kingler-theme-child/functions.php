@@ -129,7 +129,7 @@ function add_my_script2()
         array('jquery') // this array lists the scripts upon which your script depends
     );
 }
-
+/*
 add_action('wp_enqueue_scripts', 'add_my_script3');
 function add_my_script3()
 {
@@ -138,7 +138,7 @@ function add_my_script3()
         get_stylesheet_directory_uri() . '/passesTestScript.js', // this is the location of your script file
         array('jquery') // this array lists the scripts upon which your script depends
     );
-}
+}*/
 
 
 add_action('get_header', function() {

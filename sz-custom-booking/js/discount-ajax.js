@@ -33,5 +33,5 @@ jQuery(document).ready(function ($) {
             });
     };
 
-    $('#wc_bookings_field_resource').on('change', getDiscountPrices);
+    $('#sz-resources').on('change', getDiscountPrices);
 });

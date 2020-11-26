@@ -5,7 +5,6 @@
 /**
  * Fetch BYOE enability or discount price in the admin
  * @param Integer $resource
- * @param Boolean $separate - Count 'N/A' as null or not
  * @return String|Null
  */
 function get_byoe_price($resource)
@@ -124,7 +123,7 @@ function create_admin_booking_discount_checkbox_field($type)
         'value' => '',
         'custom_attributes' => [
             'checked' => true,
-            'onclick' => 'return false;'
+            'onclick' => 'return false;',
         ],
     ];
     return $field;
@@ -154,7 +153,7 @@ function create_admin_booking_discount_input_field($qty)
 }
 
 /**
- * Get price for a resource of a product
+ * Get price for a person resource of a product
  * @param String $product_id
  * @param Integer $resource_id
  * @return Double|Integer|Null
@@ -162,16 +161,25 @@ function create_admin_booking_discount_input_field($qty)
 function get_resource_price($product_id, $resource_id)
 {
     $product = wc_get_product($product_id);
-    if (!$product->has_resources()) {
+    if (!$product->has_person_types()) {
         return;
     }
 
-    $price = $product->get_resource($resource_id)->get_base_cost();
-    return $price;
+    global $wpdb;
+    $price = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT meta_value
+            FROM $wpdb->postmeta
+            WHERE post_id = %d AND meta_key = %s",
+            [$resource_id, 'cost']
+        )
+    );
+
+    return sanitize_text_field($price);
 }
 
 /**
- * Get BYOE price for a resource of a product, if enabled
+ * Get BYOE price for a person resource of a product, if enabled
  * @param String $product_id
  * @param Integer $resource_id
  * @return Double|Integer|Null
@@ -179,7 +187,7 @@ function get_resource_price($product_id, $resource_id)
 function get_resource_byoe_price($product_id, $resource_id)
 {
     $product = wc_get_product($product_id);
-    if (!$product->has_resources()) {
+    if (!$product->has_person_types()) {
         return;
     }
 
@@ -189,7 +197,7 @@ function get_resource_byoe_price($product_id, $resource_id)
 }
 
 /**
- * Get title for a resource of a product
+ * Get title for a person resource of a product
  * @param String $product_id
  * @param Integer $resource_id
  * @return String|Null
@@ -197,12 +205,21 @@ function get_resource_byoe_price($product_id, $resource_id)
 function get_resource_title($product_id, $resource_id)
 {
     $product = wc_get_product($product_id);
-    if (!$product->has_resources()) {
+    if (!$product->has_person_types()) {
         return;
     }
 
-    $title = $product->get_resource($resource_id)->get_title();
-    return $title;
+    global $wpdb;
+    $title = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT post_title
+            FROM $wpdb->posts
+            WHERE ID = %d",
+            $resource_id
+        )
+    );
+
+    return sanitize_text_field($title);
 }
 
 /**

@@ -32,9 +32,9 @@ require_once $plugin_dir . 'includes/vip.php';
 define('SINGULAR_ID', 68051);
 define('PROMO_ID', 68067);
 
-define('ARCHERY_ID', 68059);
-define('AIRSOFT_ID', 68060);
-define('COMBO_ID', 68062);
+define('ARCHERY_ID', 70541);
+define('AIRSOFT_ID', 70542);
+define('COMBO_ID', 70543);
 
 define('VIP_ANNUAL_ID', 68456);
 define('VIP_SEMIANNUAL_ID', 68463);

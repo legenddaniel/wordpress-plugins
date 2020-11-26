@@ -5,7 +5,7 @@ jQuery(document).ready(function ($) {
      * @return {undefined}
      */
     var renderSelectOptions = function renderSelectOptions(field) {
-        var $numOfPersons = +$('#wc_bookings_field_persons').val();
+        var $numOfPersons = +$('#wc-bookings-booking-form > p:visible input').val();
         var $select = $("#".concat(field, "-qty"));
         var $numOfOptions;
 
@@ -31,5 +31,5 @@ jQuery(document).ready(function ($) {
     renderSelectOptions('byoe'); // renderSelectOptions('promo');
     // When persons and/or resource type changes
 
-    $('#wc_bookings_field_persons, #wc_bookings_field_resource').on('change', renderSelectOptions.bind(this, 'byoe')); // $('#wc_bookings_field_persons, #wc_bookings_field_resource').on('change', renderSelectOptions.bind(this, 'promo'));
+    $('#wc-bookings-booking-form > p, #sz-resources').on('change', renderSelectOptions.bind(this, 'byoe')); // $('#wc_bookings_field_persons, #wc_bookings_field_resource').on('change', renderSelectOptions.bind(this, 'promo'));
 });

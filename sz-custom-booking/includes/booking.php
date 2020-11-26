@@ -20,9 +20,15 @@ function init_assets()
         rand(111, 9999)
     );
 
-    wp_enqueue_script(
+    wp_enqueue_script( // Must be first
         'polyfill',
         'https://polyfill.io/v3/polyfill.min.js?features=NodeList.prototype.forEach%2CMutationObserver',
+    );
+    wp_enqueue_script( // Must be right after the polyfill
+        'resource',
+        $plugin_url . 'js/resource.js',
+        ['jquery'],
+        rand(111, 9999)
     );
     wp_enqueue_script(
         'discount_ajax',
@@ -260,7 +266,7 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         return $cart_item_data;
     }
 
-    $resource = sanitize_text_field($_POST['wc_bookings_field_resource']);
+    $resource = sanitize_text_field($_POST['sz-resources']);
 
     // Must match the input name at the client side
     $fields = ['byoe', 'promo'];
@@ -289,7 +295,17 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
             $byoe_price = get_resource_byoe_price(SINGULAR_ID, $resource);
             $final_price = $byoe_price ?? $price;
             $price_off = $price - $final_price;
-            $qty = min($qty, +sanitize_text_field($_POST['wc_bookings_field_persons']));
+
+            $persons = 0;
+            foreach ([ARCHERY_ID, AIRSOFT_ID, COMBO_ID] as $type) {
+                $person = +sanitize_text_field($_POST["wc_bookings_field_persons_$type"]);
+                if ($person > $persons) {
+                    $persons = $person;
+                    break;
+                }
+            }
+
+            $qty = min($qty, $persons);
         }
 
         if ($field === 'promo') {

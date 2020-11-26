@@ -29,6 +29,8 @@ add_action('admin_enqueue_scripts', 'admin_init_assets');
 
 /**
  * Add BYOE price setting field
+ * @param Integer $resource (person)
+ * @param Integer $product
  * @return Null
  */
 function admin_byoe_field($resource, $product)
@@ -44,7 +46,7 @@ function admin_byoe_field($resource, $product)
     woocommerce_wp_checkbox($checkbox_field);
     woocommerce_wp_text_input($text_field);
 }
-add_action('woocommerce_bookings_after_resource_cost', 'admin_byoe_field', 10, 2);
+add_action('woocommerce_bookings_after_person_block_cost', 'admin_byoe_field', 10, 2);
 
 /**
  * Save BYOE info in the database

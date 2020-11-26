@@ -17,7 +17,7 @@ jQuery(document).ready(function ($) {
 
     var toggleDisplayByOption = function toggleDisplayByOption() {
         var bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
-        var $qty = $('#wc_bookings_field_persons').val();
+        var $qty = $('#wc-bookings-booking-form > p:visible input').val();
         var $price = $('#sz-discount-field').attr('data-price'); // Original base cost
 
         var $byoeDiscount = calculateDiscount('byoe');
