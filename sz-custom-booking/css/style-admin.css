@@ -1,6 +1,6 @@
 /* Admin styles starts */
 
-.woocommerce_booking_resource p[class*="admin-byoe-"].form-row.form-row-first {
+.woocommerce_booking_person p[class*="admin-byoe-"].form-row.form-row-first {
     padding-left: 0 !important;
     padding-right: 0 !important;
     width: 100%;

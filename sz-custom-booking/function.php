@@ -28,12 +28,8 @@ function get_byoe_price($resource)
  * @param String $product
  * @return Array
  */
-function create_admin_byoe_enabling_checkbox($resource, $product)
+function create_admin_byoe_enabling_checkbox($resource)
 {
-    if ($product != SINGULAR_ID) {
-        return;
-    }
-
     switch ($resource) {
         case ARCHERY_ID:
             $type = 'archery';
@@ -66,12 +62,8 @@ function create_admin_byoe_enabling_checkbox($resource, $product)
  * @param String $product
  * @return Array
  */
-function create_admin_byoe_input_field($resource, $product)
+function create_admin_byoe_input_field($resource)
 {
-    if ($product != SINGULAR_ID) {
-        return;
-    }
-
     switch ($resource) {
         case ARCHERY_ID:
             $type = 'archery';

@@ -1,0 +1,43 @@
+{
+    "discount": [
+        {
+            "type": "Bring Your Own Equipment",
+            "price_off": 15,
+            "qty": 2
+        },
+        {
+            "type": "Use VIP",
+            "price_off": "70",
+            "qty": 1
+        }
+    ],
+    "booking": {
+        "_year": "2020",
+        "_month": "11",
+        "_day": "30",
+        "_persons": {
+            "70543": 3
+        },
+        "_date": "2020-11-30",
+        "date": "November 30, 2020",
+        "_time": "16:00",
+        "time": "4:00 pm",
+        "_qty": 3,
+        "Combo": 3,
+        "_start_date": 1606752000,
+        "_end_date": 1606755600,
+        "_all_day": 0,
+        "_local_timezone": "",
+        "_cost": 210,
+        "_booking_id": 70564
+    },
+    "key": "8eb80e0b02308597d99b3ded715b0171",
+    "product_id": 68051,
+    "variation_id": 0,
+    "variation": [],
+    "quantity": 1,
+    "data": {
+        "availability_rules": []
+    },
+    "data_hash": "70fbd381c354ab9d174c2a17a55bda58"
+}

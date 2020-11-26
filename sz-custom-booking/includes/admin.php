@@ -33,15 +33,14 @@ add_action('admin_enqueue_scripts', 'admin_init_assets');
  * @param Integer $product
  * @return Null
  */
-function admin_byoe_field($resource, $product)
+function admin_byoe_field($resource)
 {
-    // Return if not the exact product types
-    if ($product != SINGULAR_ID) {
+    if (!in_array($resource, [ARCHERY_ID, AIRSOFT_ID, COMBO_ID])) {
         return;
     }
 
-    $checkbox_field = create_admin_byoe_enabling_checkbox($resource, $product);
-    $text_field = create_admin_byoe_input_field($resource, $product);
+    $checkbox_field = create_admin_byoe_enabling_checkbox($resource);
+    $text_field = create_admin_byoe_input_field($resource);
 
     woocommerce_wp_checkbox($checkbox_field);
     woocommerce_wp_text_input($text_field);

@@ -5,7 +5,7 @@ jQuery(document).ready(function ($) {
      * @return {undefined}
      */
     var renderSelectOptions = function renderSelectOptions(field) {
-        var $numOfPersons = +$('#wc-bookings-booking-form > p:visible input').val();
+        var $numOfPersons = +$('#wc-bookings-booking-form > p:visible input').val() || 1;
         var $select = $("#".concat(field, "-qty"));
         var $numOfOptions;
 
