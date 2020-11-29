@@ -22,7 +22,7 @@ function init_assets()
 
     wp_enqueue_script( // Must be first
         'polyfill',
-        'https://polyfill.io/v3/polyfill.min.js?features=NodeList.prototype.forEach%2CMutationObserver',
+        'https://polyfill.io/v3/polyfill.min.js?features=NodeList.prototype.forEach%2CMutationObserver'
     );
     wp_enqueue_script( // Must be right after the polyfill
         'resource',
