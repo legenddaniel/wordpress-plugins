@@ -20,11 +20,13 @@ function init_assets()
         rand(111, 9999)
     );
 
-    wp_enqueue_script( // Must be first
+    // Must be first
+    wp_enqueue_script(
         'polyfill',
         'https://polyfill.io/v3/polyfill.min.js?features=NodeList.prototype.forEach%2CMutationObserver'
     );
-    wp_enqueue_script( // Must be right after the polyfill
+    // Must be right after the polyfill
+    wp_enqueue_script( 
         'resource',
         $plugin_url . 'js/resource.js',
         ['jquery'],
