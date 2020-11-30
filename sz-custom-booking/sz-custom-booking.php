@@ -29,6 +29,8 @@ require_once $plugin_dir . 'includes/vip.php';
 // ---------------Config Area Starts
 
 // For real
+// define('DOMAIN_URL', 'https://solelyana.com/');
+
 // define('SINGULAR_ID', 68051);
 // define('PROMO_ID', 68067);
 
@@ -48,6 +50,8 @@ require_once $plugin_dir . 'includes/vip.php';
 // define('VIP_SEMIANNUAL_ID', 68463);
 
 // For test
+define('DOMAIN_URL', 'http://tests.itcg.ca/');
+
 define('SINGULAR_ID', 2996);
 define('PROMO_ID', 3004);
 
@@ -55,9 +59,9 @@ define('ARCHERY_ID', 2997);
 define('AIRSOFT_ID', 2998);
 define('COMBO_ID', 2999);
 
-define('ARCHERY_ACT_ID', 3015);
-define('AIRSOFT_ACT_ID', 3016);
-define('COMBO_ACT_ID', 3017);
+define('ARCHERY_ACT_ID', 3018);
+define('AIRSOFT_ACT_ID', 3019);
+define('COMBO_ACT_ID', 3020);
 
 define('ARCHERY_PROMO_ID', 3005);
 define('AIRSOFT_PROMO_ID', 3006);

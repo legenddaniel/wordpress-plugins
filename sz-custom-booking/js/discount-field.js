@@ -49,22 +49,25 @@ jQuery(document).ready(function ($) {
                     // Uncheck all discount options when booking changes, except for VIP
                     checkboxes.forEach(function (checkbox) {
                         checkbox.checked = false;
-                    }); // Reset all select values to the initial
-
+                    }); 
+                    
+                    // Reset all select values to the initial
                     selects.forEach(function (select) {
                         select.value = '';
-                    }); // Hide all select fields
-
+                    });
+                     
+                    // Hide all select fields
                     selectFields.forEach(function (selectField) {
                         selectField.style.display = 'none';
-                    }); // Observe booking cost div display change
-
+                    }); 
+                    
+                    // Observe booking cost div display change
                     if (mutation.type === 'attributes') {
                         targetNode.className = mutation.target.style.getPropertyValue('display') === 'none' ? 'sz-discount-field d-none' : 'sz-discount-field';
                         return;
-                    } // Observe booking validity
-
-
+                    } 
+                    
+                    // Observe booking validity
                     if (mutation.type === 'childList') {
                         targetNode.className = mutation.addedNodes.length === 2 ? 'sz-discount-field' : 'sz-discount-field d-none';
                         return;

@@ -35,7 +35,7 @@ function init_styles()
         rand(111, 9999)
     );
 
-    if (is_single(68051)) {
+    if (is_single(SINGULAR_ID)) {
         wp_enqueue_script(
             'layout',
             get_stylesheet_directory_uri() . '/js/layout.js',
@@ -126,7 +126,8 @@ function add_my_script2()
     wp_enqueue_script(
         'formScript', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/js/formScript.js', // this is the location of your script file
-        array('jquery') // this array lists the scripts upon which your script depends
+        array('jquery'), // this array lists the scripts upon which your script depends
+ 	rand(111, 9999)
     );
 }
 /*
@@ -136,7 +137,8 @@ function add_my_script3()
     wp_enqueue_script(
         'passesTestScript', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/passesTestScript.js', // this is the location of your script file
-        array('jquery') // this array lists the scripts upon which your script depends
+        array('jquery'),
+	rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }*/
 
@@ -163,7 +165,8 @@ function add_my_script4()
     wp_enqueue_script(
         'timer', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/timer.js', // this is the location of your script file
-        array('jquery') // this array lists the scripts upon which your script depends
+        array('jquery'),
+	rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }
 
@@ -174,7 +177,8 @@ function add_my_script5()
     wp_enqueue_script(
         'whichRow', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/js/check-which-row-is-selected.js', // this is the location of your script file
-        array('jquery') // this array lists the scripts upon which your script depends
+        array('jquery'),
+	rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }
 
@@ -184,7 +188,8 @@ function add_my_script6()
     wp_enqueue_script(
         'searchButton', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/js/searchButtonDisabled.js', // this is the location of your script file
-        array('jquery') // this array lists the scripts upon which your script depends
+        array('jquery'),
+	rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }
 

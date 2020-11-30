@@ -1,3 +1,10 @@
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v7.0.29,
+* Autoprefixer: v9.7.6
+* Browsers: last 4 version
+*/
+
 /* Custom styles starts */
 
 .sz-text-highlight-red {
@@ -34,57 +41,56 @@
 }
 
 .sz-sum-head {
-    color: #1D1E23;
+    color: #1d1e23;
 }
 
 .sz-sum-sub-desc {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
 }
 
 .sz-sum-title {
     margin: initial;
-    color: #75B647 !important;
+    color: #75b647 !important;
     text-align: center;
 }
 
 .p-content {
-	color: #1D1E23;
+    color: #1d1e23;
 }
 
 .p-question {
-	margin-top: 0.7em !important;
+    margin-top: 0.7em !important;
 }
 
 .column {
-  float: left;
-  width: 50%;
+    float: left;
+    width: 50%;
 }
 
 /* Clear floats after the columns */
 .row:after {
-  content: "";
-  display: table;
-  clear: both;
+    content: "";
+    display: table;
+    clear: both;
 }
 @media screen and (max-width: 576px) {
-  .column {
-    width: 100%;
-  }
+    .column {
+        width: 100%;
+    }
 }
 
 .b-question {
-	background-color: #f6f6f6 !important;
-	color: #1D1E23 !important;
-	border-color: #bdbdbd !important;
+    background-color: #f6f6f6 !important;
+    color: #1d1e23 !important;
+    border-color: #bdbdbd !important;
 }
 
 .b-question:hover {
-	background-color: #bdbdbd !important;
-	color:white !important;
+    background-color: #bdbdbd !important;
+    color: white !important;
 }
-
-
-
 
 /* Custom styles ends */
 

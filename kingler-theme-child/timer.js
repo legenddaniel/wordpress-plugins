@@ -1,11 +1,15 @@
 // Set the date we're counting down to
 
 function timer(time) {
-var countDownDate = new Date("2021-10-27T04:00:18").getTime();
+
+var replaced = time.split(' ').join('T');
+var countDownDate = new Date(replaced ).getTime();
 
 
 // Update the count down every 1 second
 var x = setInterval(function() {
+
+
 
   // Get today's date and time
   var now = new Date().getTime();

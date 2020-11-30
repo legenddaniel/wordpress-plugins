@@ -6,6 +6,36 @@
     width: 100%;
 }
 
+.calendar_month_event .components-popover.wc-bookings-calendar-popover {
+    position: absolute;
+    left: 50% !important;
+    top: 50% !important;
+}
+
+/* .current_month .components-popover.wc-bookings-datepicker-popover {
+    position: absolute;
+    top: 100% !important;
+    left: 50% !important;
+}
+@media screen and (max-width: 782px) {
+    .current_month .components-popover.wc-bookings-datepicker-popover {
+        top: 100% !important;
+        left: 50% !important;
+    }
+} */
+
+.wc-bookings-calendar-popover .components-popover__content {
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+/* .wc-bookings-datepicker-popover > .components-popover__content {
+    -webkit-transform: translate(-110%, -20%);
+    -ms-transform: translate(-110%, -20%);
+    transform: translate(-110%, -20%);
+} */
+
 .sz-admin-checkbox-enable {
     width: 16px !important;
     min-width: initial !important;
