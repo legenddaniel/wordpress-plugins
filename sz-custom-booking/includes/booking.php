@@ -26,7 +26,7 @@ function init_assets()
         'https://polyfill.io/v3/polyfill.min.js?features=NodeList.prototype.forEach%2CMutationObserver'
     );
     // Must be right after the polyfill
-    wp_enqueue_script( 
+    wp_enqueue_script(
         'resource',
         $plugin_url . 'js/resource.js',
         ['jquery'],
@@ -47,6 +47,12 @@ function init_assets()
     wp_enqueue_script(
         'select',
         $plugin_url . 'js/select.js',
+        ['jquery'],
+        rand(111, 9999)
+    );
+    wp_enqueue_script(
+        'mini_cart',
+        $plugin_url . 'js/mini-cart.js',
         ['jquery'],
         rand(111, 9999)
     );
@@ -86,12 +92,48 @@ function fetch_discount_prices()
         $promo_label = "Use Promo ($total_promo_count left";
         $promo_label .= is_null($vip_count) ? ")" : ", including $vip_count free VIP discount)";
 
+        // Get used discounts from cart items
+        $promo_cart_count = 0;
+        $vip_cart_count = 0;
+
+        foreach (WC()->cart->get_cart() as $cart_item) {
+            if ($cart_item['product_id'] !== SINGULAR_ID) {
+                continue;
+            }
+
+            // Count VIP and Promo for specific resource
+            foreach ($cart_item['discount'] as $discount) {
+                $cart_discount_type = $discount['type'];
+                $cart_discount_qty = $discount['qty'];
+                if (strpos($cart_discount_type, 'Use VIP') !== false) {
+                    $vip_cart_count += $cart_discount_qty;
+                    break;
+                }
+                if (strpos($cart_discount_type, 'Use Promo') !== false && $cart_item['booking']['_persons'][$resource]) {
+                    $promo_cart_count += $cart_discount_qty;
+                    break;
+                }
+            }
+        }
+
+        // Append extra discount info in the cart to the label
+        if ($promo_cart_count xor $vip_cart_count) {
+            $cart_discount_type = $promo_cart_count > $vip_cart_count ? 'Promo' : 'VIP';
+            $cart_discount_qty = max($promo_cart_count, $vip_cart_count);
+            $promo_label .= " ($cart_discount_qty $cart_discount_type being deducted in the cart)";
+        }
+        if ($promo_cart_count && $vip_cart_count) {
+            $promo_label .= " ($promo_cart_count Promo, $vip_cart_count VIP being deducted in the cart)";
+        }
+        $available_promo_count = $total_promo_count - $promo_cart_count - $vip_cart_count;
+
         $res = [
             'resource' => $resource,
             'byoe_enable' => !is_null($byoe_price),
             'price' => $price,
             'price_off' => $price_off,
             'promo_label' => $promo_label,
+            'has_promo' => !!$available_promo_count,
         ];
 
         wp_send_json_success($res);
@@ -208,20 +250,56 @@ function render_discount_field()
         echo '</div>';
         return;
     }
-    $promo_count = query_promo_times('Archery');
 
-    // Should be from the database.
+    // Get available discounts from the db
+    $promo_count = query_promo_times('Archery');
     $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+
     $total_promo_count = $promo_count + $vip_count;
 
-    $input_label = "Use Promo ($total_promo_count left";
-    $input_label .= is_null($vip_count) ? ")" : ", including $vip_count free VIP discount)";
+    $promo_label = "Use Promo ($total_promo_count left";
+    $promo_label .= is_null($vip_count) ? ")" : ", including $vip_count free VIP discount)";
+
+    // Get used discounts from cart items
+    $promo_cart_count = 0;
+    $vip_cart_count = 0;
+
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        if ($cart_item['product_id'] !== SINGULAR_ID) {
+            continue;
+        }
+
+        // Count VIP and Promo for specific resource
+        foreach ($cart_item['discount'] as $discount) {
+            $cart_discount_type = $discount['type'];
+            $cart_discount_qty = $discount['qty'];
+            if (strpos($cart_discount_type, 'Use VIP') !== false) {
+                $vip_cart_count += $cart_discount_qty;
+                break;
+            }
+            if (strpos($cart_discount_type, 'Use Promo') !== false && $cart_item['booking']['_persons'][ARCHERY_ID]) {
+                $promo_cart_count += $cart_discount_qty;
+                break;
+            }
+        }
+    }
+
+    // Append extra discount info in the cart to the label
+    if ($promo_cart_count xor $vip_cart_count) {
+        $cart_discount_type = $promo_cart_count > $vip_cart_count ? 'Promo' : 'VIP';
+        $cart_discount_qty = max($promo_cart_count, $vip_cart_count);
+        $promo_label .= " ($cart_discount_qty $cart_discount_type being deducted in the cart)";
+    }
+    if ($promo_cart_count && $vip_cart_count) {
+        $promo_label .= " ($promo_cart_count Promo, $vip_cart_count VIP being deducted in the cart)";
+    }
+    $available_promo_count = $total_promo_count - $promo_cart_count - $vip_cart_count;
 
     ?>
 
         <div>
-            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=esc_attr($price);?> <?=esc_attr($total_promo_count ? '' : 'disabled');?>>
-            <label for="promo-enable"><?=esc_html__($input_label);?></label>
+            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=esc_attr($price);?> data-passes=<?=esc_attr($available_promo_count);?> <?=esc_attr($available_promo_count ? '' : 'disabled');?>>
+            <label for="promo-enable"><?=esc_html__($promo_label);?></label>
         </div>
 
     <?php
@@ -260,8 +338,12 @@ add_filter('woocommerce_add_to_cart_validation', 'validate_discount_qty', 10, 3)
  * @param String $variation
  * @return Array
  */
-function add_discount_info_into_cart($cart_item_data, $product, $variation)
+function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
 {
+    if ($product_id != SINGULAR_ID) {
+        return $cart_item_data;
+    }
+
     $cart_item_data['discount'] = [];
 
     if (!isset($_POST["byoe-enable"]) && !isset($_POST["promo-enable"])) {
@@ -288,7 +370,7 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
         $price = get_resource_price(SINGULAR_ID, $resource);
 
         // Discount quantity will be 1 if no select dropdown
-        $qty = +sanitize_text_field($qty) ?: 1;
+        $qty = sanitize_text_field($qty) ? +sanitize_text_field($qty) : 1;
         $price_off = 0;
         $discount_type = '';
 
@@ -318,19 +400,55 @@ function add_discount_info_into_cart($cart_item_data, $product, $variation)
             $promo_count = query_promo_times($resource_name);
             $total_promo_count = $promo_count + $vip_count;
 
-            switch ($vip_count) {
-                case null:
-                    $discount_type = 'Use Promo';
-                    break;
-                case 0:
-                    $discount_type = 'Use Promo (no valid VIP)';
-                    break;
-                default:
-                    $discount_type = 'Use VIP';
-                    break;
+            // Get used discounts from cart items
+            $promo_cart_count = 0;
+            $vip_cart_count = 0;
+
+            foreach (WC()->cart->get_cart() as $cart_item) {
+                if ($cart_item['product_id'] !== SINGULAR_ID) {
+                    continue;
+                }
+
+                // Skip self
+                if ($cart_item_data['key'] === $cart_item['key']) {
+                    continue;
+                }
+
+                // Count VIP and Promo for specific resource
+                foreach ($cart_item['discount'] as $discount) {
+                    $cart_discount_type = $discount['type'];
+                    $cart_discount_qty = $discount['qty'];
+                    if (strpos($cart_discount_type, 'Use VIP') !== false) {
+                        $vip_cart_count += $cart_discount_qty;
+                        break;
+                    }
+                    if (strpos($cart_discount_type, 'Use Promo') !== false && $cart_item['booking']['_persons'][$resource]) {
+                        $promo_cart_count += $cart_discount_qty;
+                        break;
+                    }
+                }
             }
+
+            $available_vip_count = max($vip_count - $vip_cart_count, 0);
+            $available_promo_count = max($promo_count - $promo_cart_count, 0);
+
+            if ($available_vip_count >= $qty) {
+                $discount_type = 'Use VIP';
+            } else {
+                if ($available_promo_count >= $qty) {
+                    if (is_null($vip_count)) {
+                        $discount_type = 'Use Promo';
+                    } else {
+                        $discount_type = 'Use Promo (no valid VIP)';
+                    }
+                } else {
+                    // wc_add_notice(__('Selected discount type not valid!', 'woocommerce'), 'notice');
+                    return $cart_item_data;
+                }
+            }
+
             $price_off = $price;
-            $qty = min($qty, $total_promo_count);
+            //$qty = min($qty, $total_promo_count);
         }
 
         $cart_item_data['discount'][] = [

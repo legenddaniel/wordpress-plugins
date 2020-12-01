@@ -19,15 +19,18 @@ jQuery(document).ready(function ($) {
                     byoe_enable = _res$data.byoe_enable,
                     price = _res$data.price,
                     price_off = _res$data.price_off,
-                    promo_label = _res$data.promo_label;
+                    promo_label = _res$data.promo_label,
+                    has_promo = _res$data.has_promo;
 
                 if (resource_id !== resource) return;
 
+                $('#promo-enable').prop('disabled', !has_promo);
+                $('#promo-enable').next('label').text(promo_label);
+                $('#sz-discount-field div').eq(0).toggle(byoe_enable);
                 $('#sz-discount-field').attr('data-price', price);
                 $('#byoe-enable').attr('data-price', price_off);
                 $('#promo-enable').attr('data-price', price);
-                $('#promo-enable').next('label').text(promo_label);
-                $('#sz-discount-field div').eq(0).toggle(byoe_enable);
+
             }).fail(function (error) {
                 console.log('Fetching discount info failed: ' + JSON.stringify(error));
             });

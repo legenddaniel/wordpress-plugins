@@ -25,11 +25,14 @@ jQuery(document).ready(function ($) {
         }
 
         $select.html(selectHtml);
-    }; // When page initialize
+    };
 
+    // When page initialize
+    renderSelectOptions('byoe');
 
-    renderSelectOptions('byoe'); // renderSelectOptions('promo');
+    // renderSelectOptions('promo');
     // When persons and/or resource type changes
 
-    $('#wc-bookings-booking-form > p, #sz-resources').on('change', renderSelectOptions.bind(this, 'byoe')); // $('#wc_bookings_field_persons, #wc_bookings_field_resource').on('change', renderSelectOptions.bind(this, 'promo'));
+    $('#wc-bookings-booking-form > p, #sz-resources').on('change', renderSelectOptions.bind(this, 'byoe'));
+    // $('#wc_bookings_field_persons, #wc_bookings_field_resource').on('change', renderSelectOptions.bind(this, 'promo'));
 });
