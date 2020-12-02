@@ -77,6 +77,8 @@ function fetch_discount_prices()
     try {
         check_ajax_referer('discount_prices');
 
+        $user = get_current_user_id();
+
         $resource = sanitize_text_field($_POST['resource_id']);
         $resource_name = get_resource_title(SINGULAR_ID, $resource);
 
@@ -85,8 +87,8 @@ function fetch_discount_prices()
         $final_price = $byoe_price ?? $price;
         $price_off = $price - $final_price;
 
-        $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
-        $promo_count = query_promo_times($resource_name);
+        $vip_count = query_vip_times($user, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+        $promo_count = query_promo_times($user, $resource_name);
         $total_promo_count = $promo_count + $vip_count;
 
         $promo_label = "Use Promo ($total_promo_count left";
@@ -251,9 +253,11 @@ function render_discount_field()
         return;
     }
 
+    $user = get_current_user_id();
+
     // Get available discounts from the db
-    $promo_count = query_promo_times('Archery');
-    $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+    $promo_count = query_promo_times($user, 'Archery');
+    $vip_count = query_vip_times($user, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
 
     $total_promo_count = $promo_count + $vip_count;
 
@@ -393,11 +397,12 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
         }
 
         if ($field === 'promo') {
+            $user = get_current_user_id();
             $resource_name = get_resource_title(SINGULAR_ID, $resource);
 
             // Discount validation. $vip_count should be also from the database
-            $vip_count = query_vip_times(VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
-            $promo_count = query_promo_times($resource_name);
+            $vip_count = query_vip_times($user, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+            $promo_count = query_promo_times($user, $resource_name);
             $total_promo_count = $promo_count + $vip_count;
 
             // Get used discounts from cart items

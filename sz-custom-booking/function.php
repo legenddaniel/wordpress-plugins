@@ -215,17 +215,17 @@ function get_resource_title($product_id, $resource_id)
 }
 
 /**
- * Check if the current user is a VIP
+ * Check if a user is a VIP
+ * @param Integer $user
  * @param Integer,... $memberships
  * @return boolean
  */
-function is_vip(...$memberships)
+function is_vip($user, ...$memberships)
 {
     if (!is_user_logged_in()) {
         return;
     }
 
-    $user = get_current_user_id();
     foreach ($memberships as $membership) {
         if (wc_memberships_is_user_active_member($user, $membership)) {
             return true;
@@ -237,13 +237,13 @@ function is_vip(...$memberships)
 
 /**
  * Query the promo remaining for the given type
+ * @param Integer $user
  * @param String $type
  * @return Integer|Null
  */
-function query_promo_times($type)
+function query_promo_times($user, $type)
 {
     global $wpdb;
-    $user = get_current_user_id();
     $promo_times = $wpdb->get_var(
         $wpdb->prepare(
             "SELECT meta_value
@@ -258,17 +258,17 @@ function query_promo_times($type)
 
 /**
  * Query the vip remaining for the given types
+ * @param Integer $user
  * @param String,... $types
  * @return Integer|Null
  */
-function query_vip_times(...$types)
+function query_vip_times($user, ...$types)
 {
-    if (!is_VIP(...$types)) {
+    if (!is_VIP($user, ...$types)) {
         return;
     }
 
     global $wpdb;
-    $user = get_current_user_id();
     $vip_count = $wpdb->get_var(
         $wpdb->prepare(
             "SELECT meta_value

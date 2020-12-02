@@ -29,46 +29,46 @@ require_once $plugin_dir . 'includes/vip.php';
 // ---------------Config Area Starts
 
 // For real
-define('DOMAIN_URL', 'https://solelyana.com/');
+// define('DOMAIN_URL', 'https://solelyana.com/');
 
-define('SINGULAR_ID', 68051);
-define('PROMO_ID', 68067);
+// define('SINGULAR_ID', 68051);
+// define('PROMO_ID', 68067);
 
-define('ARCHERY_ID', 70541);
-define('AIRSOFT_ID', 70542);
-define('COMBO_ID', 70543);
+// define('ARCHERY_ID', 70541);
+// define('AIRSOFT_ID', 70542);
+// define('COMBO_ID', 70543);
 
-define('ARCHERY_ACT_ID', 70057);
-define('AIRSOFT_ACT_ID', 70055);
-define('COMBO_ACT_ID', 70056);
+// define('ARCHERY_ACT_ID', 70057);
+// define('AIRSOFT_ACT_ID', 70055);
+// define('COMBO_ACT_ID', 70056);
 
-define('ARCHERY_PROMO_ID', 68068);
-define('AIRSOFT_PROMO_ID', 68069);
-define('COMBO_PROMO_ID', 68070);
+// define('ARCHERY_PROMO_ID', 68068);
+// define('AIRSOFT_PROMO_ID', 68069);
+// define('COMBO_PROMO_ID', 68070);
 
-define('VIP_ANNUAL_ID', 68456);
-define('VIP_SEMIANNUAL_ID', 68463);
+// define('VIP_ANNUAL_ID', 68456);
+// define('VIP_SEMIANNUAL_ID', 68463);
 
 // For test
-// define('DOMAIN_URL', 'http://tests.itcg.ca/');
+define('DOMAIN_URL', 'https://tests.itcg.ca/');
 
-// define('SINGULAR_ID', 2996);
-// define('PROMO_ID', 3004);
+define('SINGULAR_ID', 2996);
+define('PROMO_ID', 3004);
 
-// define('ARCHERY_ID', 2997);
-// define('AIRSOFT_ID', 2998);
-// define('COMBO_ID', 2999);
+define('ARCHERY_ID', 2997);
+define('AIRSOFT_ID', 2998);
+define('COMBO_ID', 2999);
 
-// define('ARCHERY_ACT_ID', 3018);
-// define('AIRSOFT_ACT_ID', 3019);
-// define('COMBO_ACT_ID', 3020);
+define('ARCHERY_ACT_ID', 3018);
+define('AIRSOFT_ACT_ID', 3019);
+define('COMBO_ACT_ID', 3020);
 
-// define('ARCHERY_PROMO_ID', 3005);
-// define('AIRSOFT_PROMO_ID', 3006);
-// define('COMBO_PROMO_ID', 3007);
+define('ARCHERY_PROMO_ID', 3005);
+define('AIRSOFT_PROMO_ID', 3006);
+define('COMBO_PROMO_ID', 3007);
 
-// define('VIP_ANNUAL_ID', 3001);
-// define('VIP_SEMIANNUAL_ID', 3002);
+define('VIP_ANNUAL_ID', 3001);
+define('VIP_SEMIANNUAL_ID', 3002);
 
 // For local
 // define('SINGULAR_ID', 7);

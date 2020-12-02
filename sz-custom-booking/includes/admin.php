@@ -85,6 +85,11 @@ function admin_save_byoe_field($post_id)
 }
 add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
 
+/**
+ * Display booking discount info in booking page in admin
+ * @param Integer $booking_id
+ * @return Null
+ */
 function admin_add_booking_details($booking_id)
 {
     $booking = new WC_Booking($booking_id);
@@ -106,3 +111,75 @@ function admin_add_booking_details($booking_id)
 
 }
 add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');
+
+/**
+ * Display Pass and VIP info in the admin->user->edit profile
+ * @param WP_User
+ * @return Null
+ */
+function admin_add_user_passes_field($user)
+{
+    ?>
+
+        <h3><?=esc_html__('Promo Passes', 'woocommerce');?></h3>
+        <table class="form-table">
+            <tbody>
+                <?php
+$user_id = $user->ID;
+    foreach (['Archery', 'Airsoft', 'Combo'] as $pass) {
+        ?>
+
+                <tr>
+                    <th>
+                        <label for="<?="edit$pass"?>"><?=esc_html__($pass, 'woocommerce');?></label>
+                    </th>
+                    <td>
+                        <input type="number" min="0" name="<?="edit$pass"?>" id="<?="edit$pass"?>" value="<?=esc_attr(query_promo_times($user_id, $pass));?>" class="regular-text">
+                    </td>
+                </tr>
+
+                <?php
+}
+    if (is_vip($user_id, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID)) {
+        ?>
+                        <tr>
+                            <th>
+                                <label for="editVIP">VIP</label>
+                            </th>
+                            <td>
+                                <input type="number" min="0" max="2" name="editVIP" id="editVIP" value="<?=esc_attr(query_vip_times($user_id, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID));?>" class="regular-text">
+                            </td>
+                        </tr>
+                <?php
+}
+    ?>
+
+            </tbody>
+        </table>
+
+    <?php
+}
+add_action('show_user_profile', 'admin_add_user_passes_field');
+add_action('edit_user_profile', 'admin_add_user_passes_field');
+
+/**
+ * Save Pass and VIP info in the admin->user->edit profile to the db
+ * @param Integer $user_id
+ * @return Null
+ */
+function admin_save_user_passes_field($user_id)
+{
+    if (!current_user_can('edit_user', $user_id)) {
+        return false;
+    }
+
+    foreach (['Archery', 'Airsoft', 'Combo', 'VIP'] as $pass) {
+        $qty = sanitize_text_field($_POST["edit$pass"]);
+        if ($qty !== '') {
+            $key = $pass === 'VIP' ? $pass : "Promo Passes 10+1 - $pass";
+            update_user_meta($user_id, $key, $qty);
+        }
+    }
+}
+add_action('personal_options_update', 'admin_save_user_passes_field');
+add_action('edit_user_profile_update', 'admin_save_user_passes_field');

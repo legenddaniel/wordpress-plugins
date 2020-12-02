@@ -43,6 +43,7 @@ jQuery(document).ready(function ($) {
         }
 
         var newLabel = label.replace(labelEnd, newLabelEnd);
+        $promoEnable.prop('disabled', false);
         $promoEnable.next('label').text(newLabel); 
         
         // change data-passes even useless for now
