@@ -259,12 +259,11 @@ function query_promo_times($user, $type)
 /**
  * Query the vip remaining for the given types
  * @param Integer $user
- * @param String,... $types
  * @return Integer|Null
  */
-function query_vip_times($user, ...$types)
+function query_vip_times($user)
 {
-    if (!is_VIP($user, ...$types)) {
+    if (!is_VIP($user, VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID)) {
         return;
     }
 

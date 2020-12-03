@@ -28,9 +28,12 @@ require_once $plugin_dir . 'includes/vip.php';
 
 // ---------------Config Area Starts
 
-// For real
-// define('DOMAIN_URL', 'https://solelyana.com/');
+// For all
+define('PASS_QTY', 11);
+define('VIP_REG_QTY', 2);
+define('VIP_888_QTY', 8);
 
+// For real
 // define('SINGULAR_ID', 68051);
 // define('PROMO_ID', 68067);
 
@@ -48,10 +51,9 @@ require_once $plugin_dir . 'includes/vip.php';
 
 // define('VIP_ANNUAL_ID', 68456);
 // define('VIP_SEMIANNUAL_ID', 68463);
+// define('VIP_888_ANNUAL_ID', 70749);
 
 // For test
-define('DOMAIN_URL', 'https://tests.itcg.ca/');
-
 define('SINGULAR_ID', 2996);
 define('PROMO_ID', 3004);
 
@@ -69,6 +71,7 @@ define('COMBO_PROMO_ID', 3007);
 
 define('VIP_ANNUAL_ID', 3001);
 define('VIP_SEMIANNUAL_ID', 3002);
+define('VIP_888_ANNUAL_ID', 3093);
 
 // For local
 // define('SINGULAR_ID', 7);

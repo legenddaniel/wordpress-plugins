@@ -140,14 +140,15 @@ $user_id = $user->ID;
 
                 <?php
 }
-    if (is_vip($user_id, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID)) {
+    if (is_vip($user_id, VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID)) {
+        $max = wc_memberships_is_user_active_member($user_id, VIP_888_ANNUAL_ID) ? VIP_888_QTY : VIP_REG_QTY;
         ?>
                         <tr>
                             <th>
                                 <label for="editVIP">VIP</label>
                             </th>
                             <td>
-                                <input type="number" min="0" max="2" name="editVIP" id="editVIP" value="<?=esc_attr(query_vip_times($user_id, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID));?>" class="regular-text">
+                                <input type="number" min="0" max="<?=esc_attr($max);?>" name="editVIP" id="editVIP" value="<?=esc_attr(query_vip_times($user_id));?>" class="regular-text">
                             </td>
                         </tr>
                 <?php

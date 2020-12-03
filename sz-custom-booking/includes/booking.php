@@ -87,7 +87,7 @@ function fetch_discount_prices()
         $final_price = $byoe_price ?? $price;
         $price_off = $price - $final_price;
 
-        $vip_count = query_vip_times($user, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+        $vip_count = query_vip_times($user);
         $promo_count = query_promo_times($user, $resource_name);
         $total_promo_count = $promo_count + $vip_count;
 
@@ -257,7 +257,7 @@ function render_discount_field()
 
     // Get available discounts from the db
     $promo_count = query_promo_times($user, 'Archery');
-    $vip_count = query_vip_times($user, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+    $vip_count = query_vip_times($user);
 
     $total_promo_count = $promo_count + $vip_count;
 
@@ -401,7 +401,7 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
             $resource_name = get_resource_title(SINGULAR_ID, $resource);
 
             // Discount validation. $vip_count should be also from the database
-            $vip_count = query_vip_times($user, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID);
+            $vip_count = query_vip_times($user);
             $promo_count = query_promo_times($user, $resource_name);
             $total_promo_count = $promo_count + $vip_count;
 
