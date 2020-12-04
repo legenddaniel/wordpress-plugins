@@ -1,6 +1,6 @@
 // Checkbox area before add_to_cart button layout and functionalities
 jQuery(document).ready(function ($) {
-    
+
     /**
      * @desc Calculate discount for byoe and promo
      * @param {string} field - 'byoe' or 'promo'
@@ -15,17 +15,24 @@ jQuery(document).ready(function ($) {
         return $discount;
     };
 
+    /**
+     * @desc Recalculate and display cost
+     * @return {undefined}
+     */
     var toggleDisplayByOption = function toggleDisplayByOption() {
         var bdiHtml = '<span class="woocommerce-Price-currencySymbol">$</span>';
         var $qty = $('#wc-bookings-booking-form > p:visible input').val();
         var $price = $('#sz-discount-field').attr('data-price'); // Original base cost
 
-        var $byoeDiscount = calculateDiscount('byoe');
-        var $promoDiscount = calculateDiscount('promo');
-        var $total = $qty * $price;
-        $total = $total - $byoeDiscount - $promoDiscount;
-        $total = $total > 0 ? $total : 0;
-        bdiHtml += $total.toFixed(2);
+        var discount = 0;
+
+        for (var _i = 0, _arr = ['byoe', 'promo', 'guest']; _i < _arr.length; _i++) {
+            var i = _arr[_i];
+            discount += calculateDiscount(i);
+        }
+
+        var total = Math.max($qty * $price - discount, 0).toFixed(2);
+        bdiHtml += total;
         $('#booking-cost bdi').html(bdiHtml);
     };
 
@@ -37,8 +44,8 @@ jQuery(document).ready(function ($) {
         try {
             var observedNode = document.getElementById('booking-cost');
             var targetNode = document.getElementById('sz-discount-field');
-            var checkboxes = document.querySelectorAll('#byoe-enable, #promo-enable');
-            var selects = document.querySelectorAll('#byoe-qty, #promo-qty');
+            var checkboxes = document.querySelectorAll('#sz-discount-field input[name$="-enable"]');
+            var selects = document.querySelectorAll('#sz-discount-field input[name$="-qty"]');
             var selectFields = document.querySelectorAll('.sz-select-field');
             var config = {
                 attributes: true,
@@ -49,24 +56,24 @@ jQuery(document).ready(function ($) {
                     // Uncheck all discount options when booking changes, except for VIP
                     checkboxes.forEach(function (checkbox) {
                         checkbox.checked = false;
-                    }); 
-                    
+                    });
+
                     // Reset all select values to the initial
                     selects.forEach(function (select) {
                         select.value = '';
                     });
-                     
+
                     // Hide all select fields
                     selectFields.forEach(function (selectField) {
                         selectField.style.display = 'none';
-                    }); 
-                    
+                    });
+
                     // Observe booking cost div display change
                     if (mutation.type === 'attributes') {
                         targetNode.className = mutation.target.style.getPropertyValue('display') === 'none' ? 'sz-discount-field d-none' : 'sz-discount-field';
                         return;
-                    } 
-                    
+                    }
+
                     // Observe booking validity
                     if (mutation.type === 'childList') {
                         targetNode.className = mutation.addedNodes.length === 2 ? 'sz-discount-field' : 'sz-discount-field d-none';
@@ -84,6 +91,6 @@ jQuery(document).ready(function ($) {
     $('.wc-bookings-booking-cost').eq(0).attr('id', 'booking-cost'); // Change price displayed according the discount options
 
     $('input[name$="-enable"], select[name$="-qty"]').on('change', toggleDisplayByOption);
-    
+
     toggleDisplayByStock();
 });

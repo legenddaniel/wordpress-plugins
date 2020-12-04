@@ -46,8 +46,7 @@ jQuery(document).ready(function ($) {
         $promoEnable.prop('disabled', false);
         $promoEnable.next('label').text(newLabel); 
         
-        // change data-passes even useless for now
-        var dataPasses = $promoEnable.attr('data-passes');
-        $promoEnable.attr('data-passes', dataPasses + qty);
+        var dataPasses = $promoEnable.attr('data-promo');
+        $promoEnable.attr('data-promo', dataPasses + qty);
     });
 });

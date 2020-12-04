@@ -9,30 +9,32 @@ jQuery(document).ready(function ($) {
         var $select = $("#".concat(field, "-qty"));
         var $numOfOptions;
 
-        if (field === 'byoe') {
-            $numOfOptions = $numOfPersons;
-        }
-
-        if (field === 'promo') {
-            var numOfPromo = +$select.attr('data-passes');
-            $numOfOptions = Math.min($numOfPersons, numOfPromo);
+        switch (field) {
+            case 'byoe':
+                $numOfOptions = $numOfPersons;
+                break;
+            default:
+                var numOfDiscount = +$("#".concat(field, "-enable")).attr("data-".concat(field));
+                $numOfOptions = Math.min($numOfPersons, numOfDiscount);
+                break;
         }
 
         var selectHtml = '<option selected></option>';
-
         for (var i = 1; i < $numOfOptions + 1; i++) {
             selectHtml += "<option>".concat(i, "</option>");
         }
-
         $select.html(selectHtml);
     };
 
-    // When page initialize
+    // For now only byoe and guest
     renderSelectOptions('byoe');
-
-    // renderSelectOptions('promo');
-    // When persons and/or resource type changes
+    renderSelectOptions('guest');
 
     $('#wc-bookings-booking-form > p, #sz-resources').on('change', renderSelectOptions.bind(this, 'byoe'));
-    // $('#wc_bookings_field_persons, #wc_bookings_field_resource').on('change', renderSelectOptions.bind(this, 'promo'));
+    $('#wc-bookings-booking-form > p, #sz-resources').on('change', renderSelectOptions.bind(this, 'guest'));
+
+    // Toggle select field
+    $('#sz-discount-field').on('change', 'input[name$="-enable"]', function (e) {
+        $(e.target).closest('div').next('.sz-select-field').toggle(e.target.checked);
+    })
 });

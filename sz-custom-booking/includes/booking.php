@@ -302,11 +302,33 @@ function render_discount_field()
     ?>
 
         <div>
-            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=esc_attr($price);?> data-passes=<?=esc_attr($available_promo_count);?> <?=esc_attr($available_promo_count ? '' : 'disabled');?>>
+            <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=esc_attr($price);?> data-promo=<?=esc_attr($available_promo_count);?> <?=esc_attr($available_promo_count ? '' : 'disabled');?>>
             <label for="promo-enable"><?=esc_html__($promo_label);?></label>
         </div>
 
     <?php
+
+    // Display Use Guest for VIP 888 only
+    if (!wc_memberships_is_user_active_member($user, VIP_888_ANNUAL_ID)) {
+        return;
+    }
+
+    ?>
+
+        <div>
+            <input type="checkbox" id="guest-enable" name="guest-enable" data-price=<?=esc_attr($price);?> data-guest="" <?=esc_attr(true ? '' : 'disabled');?>>
+            <label for="guest-enable">Pay For Guest</label>
+        </div>
+
+        <div class="sz-select-field" style="display:none">
+            <label for="guest-qty">Quantity:</label>
+            <select name="guest-qty" id="guest-qty">
+            </select>
+        </div>
+
+    <?php
+
+    echo '</div>';
 }
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
 add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
