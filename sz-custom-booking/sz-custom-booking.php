@@ -29,7 +29,8 @@ require_once $plugin_dir . 'includes/vip.php';
 // ---------------Config Area Starts
 
 // For all
-define('PASS_QTY', 11);
+define('PROMO_QTY', 11);
+define('GUEST_QTY', 10);
 define('VIP_REG_QTY', 2);
 define('VIP_888_QTY', 8);
 
@@ -54,43 +55,43 @@ define('VIP_888_QTY', 8);
 // define('VIP_888_ANNUAL_ID', 70749);
 
 // For test
-// define('SINGULAR_ID', 2996);
-// define('PROMO_ID', 3004);
+define('SINGULAR_ID', 2996);
+define('PROMO_ID', 3004);
 
-// define('ARCHERY_ID', 2997);
-// define('AIRSOFT_ID', 2998);
-// define('COMBO_ID', 2999);
+define('ARCHERY_ID', 2997);
+define('AIRSOFT_ID', 2998);
+define('COMBO_ID', 2999);
 
-// define('ARCHERY_ACT_ID', 3018);
-// define('AIRSOFT_ACT_ID', 3019);
-// define('COMBO_ACT_ID', 3020);
+define('ARCHERY_ACT_ID', 3018);
+define('AIRSOFT_ACT_ID', 3019);
+define('COMBO_ACT_ID', 3020);
 
-// define('ARCHERY_PROMO_ID', 3005);
-// define('AIRSOFT_PROMO_ID', 3006);
-// define('COMBO_PROMO_ID', 3007);
+define('ARCHERY_PROMO_ID', 3005);
+define('AIRSOFT_PROMO_ID', 3006);
+define('COMBO_PROMO_ID', 3007);
 
-// define('VIP_ANNUAL_ID', 3001);
-// define('VIP_SEMIANNUAL_ID', 3002);
-// define('VIP_888_ANNUAL_ID', 3093);
+define('VIP_ANNUAL_ID', 3001);
+define('VIP_SEMIANNUAL_ID', 3002);
+define('VIP_888_ANNUAL_ID', 3093);
 
 // For local
-define('SINGULAR_ID', 7);
-define('PROMO_ID', 8);
+// define('SINGULAR_ID', 7);
+// define('PROMO_ID', 8);
 
-define('ARCHERY_ID', 369);
-define('AIRSOFT_ID', 370);
-define('COMBO_ID', 371);
+// define('ARCHERY_ID', 369);
+// define('AIRSOFT_ID', 370);
+// define('COMBO_ID', 371);
 
-define('ARCHERY_ACT_ID', 377);
-define('AIRSOFT_ACT_ID', 378);
-define('COMBO_ACT_ID', 379);
+// define('ARCHERY_ACT_ID', 377);
+// define('AIRSOFT_ACT_ID', 378);
+// define('COMBO_ACT_ID', 379);
 
-define('ARCHERY_PROMO_ID', 9);
-define('AIRSOFT_PROMO_ID', 10);
-define('COMBO_PROMO_ID', 11);
+// define('ARCHERY_PROMO_ID', 9);
+// define('AIRSOFT_PROMO_ID', 10);
+// define('COMBO_PROMO_ID', 11);
 
-define('VIP_ANNUAL_ID', 380);
-define('VIP_SEMIANNUAL_ID', 381);
-define('VIP_888_ANNUAL_ID', 382);
+// define('VIP_ANNUAL_ID', 380);
+// define('VIP_SEMIANNUAL_ID', 381);
+// define('VIP_888_ANNUAL_ID', 382);
 
 // ---------------Config Area Ends

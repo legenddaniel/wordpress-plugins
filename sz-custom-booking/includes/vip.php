@@ -43,6 +43,14 @@ function manage_vip_field_in_db($user_membership, $old_status, $new_status)
     $user_plan = $user_membership->get_id();
     $args = [$user, $plan];
 
+    // Set up Guest Pass field for VIP 888 in db. So far only for the first time VIP
+    if (wc_memberships_is_user_active_member($user, VIP_888_ANNUAL_ID)) {
+        $is_new = get_post_meta($user, 'Guest', true);
+        if ($is_new) {
+            update_user_meta($user, 'Guest', GUEST_QTY);
+        }
+    }
+
     if (wc_memberships_is_user_active_member(...$args)) {
 
         // $user = get_current_user_id();

@@ -257,7 +257,7 @@ function query_promo_times($user, $type)
 }
 
 /**
- * Query the vip remaining for the given types
+ * Query the vip remaining for VIP
  * @param Integer $user
  * @return Integer|Null
  */
@@ -278,4 +278,28 @@ function query_vip_times($user)
         )
     );
     return $vip_count;
+}
+
+/**
+ * Query the guest passes remaining for vvVIP
+ * @param Integer $user
+ * @return Integer|Null
+ */
+function query_guest_times($user)
+{
+    if (!is_VIP($user, VIP_888_ANNUAL_ID)) {
+        return;
+    }
+
+    global $wpdb;
+    $guest_count = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT meta_value
+             FROM $wpdb->usermeta
+             WHERE meta_key = %s
+             AND user_id = %d",
+            ["Guest", $user]
+        )
+    );
+    return $guest_count;
 }

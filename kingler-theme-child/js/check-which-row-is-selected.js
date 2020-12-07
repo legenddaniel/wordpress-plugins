@@ -31,11 +31,11 @@ jQuery(document).ready(function ($) {
 		var val = this.value;
 		if (val.length > this.maxLength) {
 			val = this.value.slice(0, this.maxLength);
-			this.value = val;
 		}
-
-		var href = this.nextSibling.href.replace(/\d+$/, '');
-		this.nextSibling.href = href + val;
+		$(this).val(val);
+		
+		var href = $(this).next('.addToCart').attr('href').replace(/\d+$/, '');
+		$(this).next('.addToCart').attr('href', href + val);
 	})
 
 });

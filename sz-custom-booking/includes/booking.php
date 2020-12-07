@@ -346,7 +346,7 @@ function validate_discount_qty($passed, $product_id, $quantity)
         return $passed;
     }
 
-    foreach (['byoe', 'promo'] as $field) {
+    foreach (['byoe', 'promo', 'guest'] as $field) {
         if (isset($_POST["$field-enable"]) && isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
             $passed = false;
             wc_add_notice(__('Please input the discount quantity you want to use!', 'woocommerce'), 'error');
@@ -372,22 +372,22 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
 
     $cart_item_data['discount'] = [];
 
-    if (!isset($_POST["byoe-enable"]) && !isset($_POST["promo-enable"])) {
+    if (!isset($_POST["byoe-enable"]) && !isset($_POST["promo-enable"]) && !isset($_POST["guest-enable"])) {
         return $cart_item_data;
     }
 
     $resource = sanitize_text_field($_POST['sz-resources']);
 
     // Must match the input name at the client side
-    $fields = ['byoe', 'promo'];
+    $fields = ['byoe', 'promo', 'guest'];
     foreach ($fields as $field) {
 
-        // Return if discount is not enabled
+        // Continue if discount is not enabled
         if (!isset($_POST["$field-enable"])) {
             continue;
         }
 
-        // Return if using 0 discount
+        // Continue if using 0 discount
         $qty = $_POST["$field-qty"];
         if (isset($qty) && empty($qty)) {
             continue;
@@ -476,6 +476,10 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
 
             $price_off = $price;
             //$qty = min($qty, $total_promo_count);
+        }
+
+        if ($field === 'guest') {
+            
         }
 
         $cart_item_data['discount'][] = [

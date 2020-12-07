@@ -143,15 +143,27 @@ $user_id = $user->ID;
     if (is_vip($user_id, VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID)) {
         $max = wc_memberships_is_user_active_member($user_id, VIP_888_ANNUAL_ID) ? VIP_888_QTY : VIP_REG_QTY;
         ?>
-                        <tr>
-                            <th>
-                                <label for="editVIP">VIP</label>
-                            </th>
-                            <td>
-                                <input type="number" min="0" max="<?=esc_attr($max);?>" name="editVIP" id="editVIP" value="<?=esc_attr(query_vip_times($user_id));?>" class="regular-text">
-                            </td>
-                        </tr>
+                <tr>
+                    <th>
+                        <label for="editVIP">VIP</label>
+                    </th>
+                    <td>
+                        <input type="number" min="0" max="<?=esc_attr($max);?>" name="editVIP" id="editVIP" value="<?=esc_attr(query_vip_times($user_id));?>" class="regular-text">
+                    </td>
+                </tr>
                 <?php
+}
+    if (is_vip($user_id, VIP_888_ANNUAL_ID)) {
+        ?>
+                <tr>
+                    <th>
+                        <label for="editGuest">VIP</label>
+                    </th>
+                    <td>
+                        <input type="number" min="0" max="<?=esc_attr(GUEST_QTY);?>" name="editGuest" id="editGuest" value="<?=esc_attr(query_guest_times($user_id));?>" class="regular-text">
+                    </td>
+                </tr>
+        <?php
 }
     ?>
 
@@ -174,12 +186,27 @@ function admin_save_user_passes_field($user_id)
         return false;
     }
 
-    foreach (['Archery', 'Airsoft', 'Combo', 'VIP'] as $pass) {
+    foreach (['Archery', 'Airsoft', 'Combo', 'VIP', 'Guest'] as $pass) {
         $qty = sanitize_text_field($_POST["edit$pass"]);
-        if ($qty !== '') {
-            $key = $pass === 'VIP' ? $pass : "Promo Passes 10+1 - $pass";
-            update_user_meta($user_id, $key, $qty);
+        if (!$qty) {
+            continue;
         }
+
+        $key = '';
+        switch ($pass) {
+            case 'VIP':
+                $key = $pass;
+                break;
+            case 'Guest':
+                $key = $pass;
+                break;
+            default:
+                $key = "Promo Passes 10+1 - $pass";
+                break;
+        }
+
+        update_user_meta($user_id, $key, $qty);
+
     }
 }
 add_action('personal_options_update', 'admin_save_user_passes_field');
