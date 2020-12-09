@@ -30,7 +30,7 @@ add_action('sz_cron_vip', 'sz_renew_vip_in_db', 10, 2);
  *@type int|string $user_id user ID for the membership
  *@type int|string $user_membership_id post ID for the new user membership
  *@type bool $is_update true if the membership is being updated, false if new
- * Daniel: $is_update is always true?
+ * Daniel: $is_update is always tested true
  *}
  */
 function sz_manage_vip_field_in_db($membership_plan, $arguments)
@@ -47,12 +47,11 @@ function sz_manage_vip_field_in_db($membership_plan, $arguments)
 
     if (wc_memberships_is_user_active_member($user, $plan)) {
 
-        // Set up Guest Pass field for VIP 888 in db. So far only set up this field for the first time VIP888
-        if ($plan === VIP_888_ANNUAL_ID) {
-            $is_new = get_post_meta($user, 'Guest', true);
-            if ($is_new === '') {
-                update_user_meta($user, 'Guest', GUEST_QTY);
-            }
+        $last_deactivation_timestamp = get_post_meta($user_plan, 'activation_end', true);
+
+        // Set up Guest Pass field for VIP 888 in db. So far only set up this field when this user membership initialized
+        if ($plan === VIP_888_ANNUAL_ID && !$last_deactivation_timestamp) {
+            update_user_meta($user, 'Guest', GUEST_QTY);
         }
 
         if (!wp_next_scheduled('sz_cron_vip', $args)) {
@@ -61,7 +60,6 @@ function sz_manage_vip_field_in_db($membership_plan, $arguments)
         }
 
         // Renew the VIP times only if it was not just deactivated in the same week. This prevents from maliciously resetting the VIP count by simply pausing + resuming VIP.
-        $last_deactivation_timestamp = get_post_meta($user_plan, 'activation_end', true);
         if ($last_deactivation_timestamp && date('oW', $last_deactivation_timestamp) === date('oW', time())) {
             return;
         }
@@ -83,13 +81,6 @@ function sz_manage_vip_field_in_db($membership_plan, $arguments)
     }
 }
 add_action('wc_memberships_user_membership_saved', 'sz_manage_vip_field_in_db', 10, 2);
-
-function sz_remove_fields_from_db($user_membership_id)
-{
-    $user_membership = new WC_Memberships_User_Membership($user_membership_id);
-    
-}
-add_action('wc_memberships_cancelled_user_membership', 'sz_remove_fields_from_db');
 
 /**
  * Do not grant membership access to purchasers if they already hold an active membership

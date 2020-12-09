@@ -374,6 +374,7 @@ function validate_discount_qty($passed, $product_id, $quantity)
         return $passed;
     }
 
+    // Check if leaving a select dropdown blank
     foreach (['byoe', 'promo', 'guest'] as $field) {
         if (isset($_POST["$field-enable"]) && isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
             $passed = false;
@@ -381,6 +382,28 @@ function validate_discount_qty($passed, $product_id, $quantity)
             break;
         }
     }
+
+    // Check if #discounts is less than #persons
+    $discount = 0;
+    $persons = 0;
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'wc_bookings_field_persons_') !== false && +sanitize_text_field($value) > 0) {
+            $persons = +sanitize_text_field($value);
+            break;
+        }
+    }
+    foreach (['promo', 'guest'] as $field) {
+        if (isset($_POST["$field-enable"])) {
+            $qty = sanitize_text_field($_POST["$field-qty"]);
+            $discount += $qty ? +$qty : 1;
+        }
+        if ($discount > $persons) {
+            $passed = false;
+            wc_add_notice(__('The quantity of discounts exceeds the total booking quantity!', 'woocommerce'), 'error');
+            break;
+        }
+    }
+
     return $passed;
 }
 add_filter('woocommerce_add_to_cart_validation', 'validate_discount_qty', 10, 3);
