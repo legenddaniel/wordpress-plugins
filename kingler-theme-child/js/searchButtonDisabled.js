@@ -1,18 +1,12 @@
-jQuery(document).ready(function($){
+jQuery(document).ready(function ($) {
 
- $('.search-field').on('change', function (){ 
+    $('.search-field').on('change', function () {
+        $(this).focus();
 
-var searchstring = $('.search-field');
-searchstring.focus();
-
-
-if (searchstring.val() == 0 ) {
-
-$('.search-field').prop( "disabled", true );
-}
-
-else 
-
-$('.search-field').prop( "disabled", false );
-})
+        if ($(this).val() == 0) {
+            $('.search-field').prop("disabled", true);
+        } else {
+            $('.search-field').prop("disabled", false);
+        }
+    })
 })

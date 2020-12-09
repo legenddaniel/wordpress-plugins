@@ -25,35 +25,35 @@ function sz_renew_vip_in_db($user, $plan)
 add_action('sz_cron_vip', 'sz_renew_vip_in_db', 10, 2);
 
 /**
- * VIP scheduled task
- * @param Mixed $user_membership
- * @param String $old_status
- * @param String $new_status
- * @return Null
+ * @param WC_Memberships_Membership_Plan $membership_plan
+ * @param Array $arguments {
+ *@type int|string $user_id user ID for the membership
+ *@type int|string $user_membership_id post ID for the new user membership
+ *@type bool $is_update true if the membership is being updated, false if new
+ * Daniel: $is_update is always true?
+ *}
  */
-function manage_vip_field_in_db($user_membership, $old_status, $new_status)
+function sz_manage_vip_field_in_db($membership_plan, $arguments)
 {
     $plans = [VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID];
-    $plan = $user_membership->get_plan_id();
+    $plan = $membership_plan->id;
     if (!in_array($plan, $plans)) {
         return;
     }
 
-    $user = $user_membership->get_user_id();
-    $user_plan = $user_membership->get_id();
+    $user = $arguments['user_id'];
+    $user_plan = $arguments['user_membership_id'];
     $args = [$user, $plan];
 
-    // Set up Guest Pass field for VIP 888 in db. So far only for the first time VIP
-    if (wc_memberships_is_user_active_member($user, VIP_888_ANNUAL_ID)) {
-        $is_new = get_post_meta($user, 'Guest', true);
-        if ($is_new) {
-            update_user_meta($user, 'Guest', GUEST_QTY);
+    if (wc_memberships_is_user_active_member($user, $plan)) {
+
+        // Set up Guest Pass field for VIP 888 in db. So far only set up this field for the first time VIP888
+        if ($plan === VIP_888_ANNUAL_ID) {
+            $is_new = get_post_meta($user, 'Guest', true);
+            if ($is_new === '') {
+                update_user_meta($user, 'Guest', GUEST_QTY);
+            }
         }
-    }
-
-    if (wc_memberships_is_user_active_member(...$args)) {
-
-        // $user = get_current_user_id();
 
         if (!wp_next_scheduled('sz_cron_vip', $args)) {
             date_default_timezone_set('America/Toronto');
@@ -65,18 +65,10 @@ function manage_vip_field_in_db($user_membership, $old_status, $new_status)
         if ($last_deactivation_timestamp && date('oW', $last_deactivation_timestamp) === date('oW', time())) {
             return;
         }
-        sz_renew_vip_in_db(...$args);
+
+        sz_renew_vip_in_db($user, $plan);
 
     } else {
-
-        // Check if user has other memberships. VIP888 must be considered first as it's the most pricy
-        // foreach ($plans as $type) {
-        //     $new_arg = [$user, $type];
-        //     if (wc_memberships_is_user_active_member(...$new_arg) && !wp_next_scheduled('sz_cron_vip', $new_arg)) {
-        //         wp_schedule_event(strtotime('next Monday'), 'weekly', 'sz_cron_vip', $new_arg);
-        //         break;
-        //     }
-        // }
 
         // Remove the old CRON
         // remove_action('sz_cron_vip', 'sz_renew_vip_in_db');
@@ -90,7 +82,14 @@ function manage_vip_field_in_db($user_membership, $old_status, $new_status)
 
     }
 }
-add_action('wc_memberships_user_membership_status_changed', 'manage_vip_field_in_db', 10, 3);
+add_action('wc_memberships_user_membership_saved', 'sz_manage_vip_field_in_db', 10, 2);
+
+function sz_remove_fields_from_db($user_membership_id)
+{
+    $user_membership = new WC_Memberships_User_Membership($user_membership_id);
+    
+}
+add_action('wc_memberships_cancelled_user_membership', 'sz_remove_fields_from_db');
 
 /**
  * Do not grant membership access to purchasers if they already hold an active membership

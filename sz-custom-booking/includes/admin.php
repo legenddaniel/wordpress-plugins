@@ -157,7 +157,7 @@ $user_id = $user->ID;
         ?>
                 <tr>
                     <th>
-                        <label for="editGuest">VIP</label>
+                        <label for="editGuest">Guest</label>
                     </th>
                     <td>
                         <input type="number" min="0" max="<?=esc_attr(GUEST_QTY);?>" name="editGuest" id="editGuest" value="<?=esc_attr(query_guest_times($user_id));?>" class="regular-text">

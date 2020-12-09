@@ -313,11 +313,39 @@ function render_discount_field()
         return;
     }
 
+    $guest_count = query_guest_times($user);
+    $guest_label = "Pay For Guests ($guest_count left)";
+
+    // Get used discounts from cart items
+    $guest_cart_count = 0;
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        if ($cart_item['product_id'] !== SINGULAR_ID) {
+            continue;
+        }
+
+        // Count Guest Pass for specific resource
+        foreach ($cart_item['discount'] as $discount) {
+            $cart_discount_type = $discount['type'];
+            $cart_discount_qty = $discount['qty'];
+            if (strpos($cart_discount_type, 'Pay For Guests') !== false) {
+                $guest_cart_count += $cart_discount_qty;
+                break;
+            }
+        }
+    }
+
+    // Append extra discount info in the cart to the label
+    if ($guest_cart_count) {
+        $plural = $guest_cart_count === 1 ? '' : 'es';
+        $guest_label .= " ($guest_cart_count Guest Pass$plural being deducted in the cart)";
+    }
+    $available_guest_count = $guest_count - $guest_cart_count;
+
     ?>
 
         <div>
-            <input type="checkbox" id="guest-enable" name="guest-enable" data-price=<?=esc_attr($price);?> data-guest="" <?=esc_attr(true ? '' : 'disabled');?>>
-            <label for="guest-enable">Pay For Guest</label>
+            <input type="checkbox" id="guest-enable" name="guest-enable" data-price=<?=esc_attr($price);?> data-guest=<?=esc_attr($available_guest_count);?> <?=esc_attr($available_guest_count ? '' : 'disabled');?>>
+            <label for="guest-enable"><?=esc_html__($guest_label);?></label>
         </div>
 
         <div class="sz-select-field" style="display:none">
@@ -479,7 +507,41 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
         }
 
         if ($field === 'guest') {
-            
+            $user = get_current_user_id();
+            $guest_count = query_guest_times($user);
+
+            // Get used discounts from cart items
+            $guest_cart_count = 0;
+            foreach (WC()->cart->get_cart() as $cart_item) {
+                if ($cart_item['product_id'] !== SINGULAR_ID) {
+                    continue;
+                }
+
+                // Skip self
+                if ($cart_item_data['key'] === $cart_item['key']) {
+                    continue;
+                }
+
+                // Count Guest for specific resource
+                foreach ($cart_item['discount'] as $discount) {
+                    $cart_discount_type = $discount['type'];
+                    $cart_discount_qty = $discount['qty'];
+                    if (strpos($cart_discount_type, 'Pay For Guests') !== false) {
+                        $guest_cart_count += $cart_discount_qty;
+                        break;
+                    }
+                }
+            }
+
+            $available_guest_count = max($guest_count - $guest_cart_count, 0);
+
+            if ($available_guest_count >= $qty) {
+                $discount_type = 'Pay For Guests';
+            } else {
+                return $cart_item_data;
+            }
+
+            $price_off = $price;
         }
 
         $cart_item_data['discount'][] = [

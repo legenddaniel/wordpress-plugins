@@ -27,9 +27,8 @@ jQuery(document).ready(function ($) {
                 $('#promo-enable').prop('disabled', !has_promo);
                 $('#promo-enable').next('label').text(promo_label);
                 $('#sz-discount-field div').eq(0).toggle(byoe_enable);
-                $('#sz-discount-field').attr('data-price', price);
+                $('#sz-discount-field, #promo-enable, #guest-enable').attr('data-price', price);
                 $('#byoe-enable').attr('data-price', price_off);
-                $('#promo-enable').attr('data-price', price);
 
             }).fail(function (error) {
                 console.log('Fetching discount info failed: ' + JSON.stringify(error));

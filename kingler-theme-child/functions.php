@@ -109,17 +109,6 @@ add_filter('pre_get_posts', 'exclude_product_cat_children');*/
 
 //Do not touch please
 
-// add_action('wp_enqueue_scripts', 'add_my_script');
-// function add_my_script()
-// {
-//     wp_enqueue_script(
-//         'checkScript', // name your script so that you can attach other scripts and de-register, etc.
-//         get_stylesheet_directory_uri() . '/js/checkScript.js', // this is the location of your script file
-//         array('jquery'), // this array lists the scripts upon which your script depends
-//         rand(111, 9999) // If on your side everything works great you can remove this anti-caching code, but I suggest adding this
-//     );
-// }
-
 add_action('wp_enqueue_scripts', 'add_my_script2');
 function add_my_script2()
 {
@@ -130,17 +119,6 @@ function add_my_script2()
  	rand(111, 9999)
     );
 }
-/*
-add_action('wp_enqueue_scripts', 'add_my_script3');
-function add_my_script3()
-{
-    wp_enqueue_script(
-        'passesTestScript', // name your script so that you can attach other scripts and de-register, etc.
-        get_stylesheet_directory_uri() . '/passesTestScript.js', // this is the location of your script file
-        array('jquery'),
-	rand(111, 9999) // this array lists the scripts upon which your script depends
-    );
-}*/
 
 
 add_action('get_header', function() {
