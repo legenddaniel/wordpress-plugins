@@ -4,8 +4,8 @@
 
 /**
  * Fetch BYOE enability or discount price in the admin
- * @param Integer $resource
- * @return String|Null
+ * @param int $resource
+ * @return string|null
  */
 function get_byoe_price($resource)
 {
@@ -23,10 +23,19 @@ function get_byoe_price($resource)
 }
 
 /**
+ * Retrieve current cart items
+ * @return array cart items
+ */
+function sz_get_cart()
+{
+    return WC()->cart->get_cart();
+}
+
+/**
  * Template of byoe enabling checkboxes
- * @param Integer $resource
- * @param String $product
- * @return Array
+ * @param int $resource
+ * @param string $product
+ * @return array
  */
 function create_admin_byoe_enabling_checkbox($resource)
 {
@@ -58,9 +67,9 @@ function create_admin_byoe_enabling_checkbox($resource)
 
 /**
  * Template of byoe text fields
- * @param Integer $resource
- * @param String $product
- * @return Array
+ * @param int $resource
+ * @param string $product
+ * @return array
  */
 function create_admin_byoe_input_field($resource)
 {
@@ -97,8 +106,8 @@ function create_admin_byoe_input_field($resource)
 
 /**
  * Template of discount info checkboxes in booking
- * @param String $type
- * @return Array
+ * @param string $type
+ * @return array
  */
 function create_admin_booking_discount_checkbox_field($type)
 {
@@ -123,8 +132,8 @@ function create_admin_booking_discount_checkbox_field($type)
 
 /**
  * Template of discount info input in booking
- * @param Integer $qty
- * @return Array
+ * @param int $qty
+ * @return array
  */
 function create_admin_booking_discount_input_field($qty)
 {
@@ -146,9 +155,9 @@ function create_admin_booking_discount_input_field($qty)
 
 /**
  * Get price for a person resource of a product
- * @param String $product_id
- * @param Integer $resource_id
- * @return Double|Integer|Null
+ * @param string $product_id
+ * @param int $resource_id
+ * @return Double|int|null
  */
 function get_resource_price($product_id, $resource_id)
 {
@@ -172,9 +181,9 @@ function get_resource_price($product_id, $resource_id)
 
 /**
  * Get BYOE price for a person resource of a product, if enabled
- * @param String $product_id
- * @param Integer $resource_id
- * @return Double|Integer|Null
+ * @param string $product_id
+ * @param int $resource_id
+ * @return Double|int|null
  */
 function get_resource_byoe_price($product_id, $resource_id)
 {
@@ -190,9 +199,9 @@ function get_resource_byoe_price($product_id, $resource_id)
 
 /**
  * Get title for a person resource of a product
- * @param String $product_id
- * @param Integer $resource_id
- * @return String|Null
+ * @param string $product_id
+ * @param int $resource_id
+ * @return string|null
  */
 function get_resource_title($product_id, $resource_id)
 {
@@ -216,8 +225,8 @@ function get_resource_title($product_id, $resource_id)
 
 /**
  * Check if a user is a VIP
- * @param Integer $user
- * @param Integer,... $memberships
+ * @param int $user
+ * @param int,... $memberships
  * @return boolean
  */
 function is_vip($user, ...$memberships)
@@ -237,9 +246,9 @@ function is_vip($user, ...$memberships)
 
 /**
  * Query the promo remaining for the given type
- * @param Integer $user
- * @param String $type
- * @return Integer|Null
+ * @param int $user
+ * @param string $type
+ * @return int|null
  */
 function query_promo_times($user, $type)
 {
@@ -258,8 +267,8 @@ function query_promo_times($user, $type)
 
 /**
  * Query the vip remaining for VIP
- * @param Integer $user
- * @return Integer|Null
+ * @param int $user
+ * @return int|null
  */
 function query_vip_times($user)
 {
@@ -282,8 +291,8 @@ function query_vip_times($user)
 
 /**
  * Query the guest passes remaining for vvVIP
- * @param Integer $user
- * @return Integer|Null
+ * @param int $user
+ * @return int|null
  */
 function query_guest_times($user)
 {

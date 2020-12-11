@@ -5,7 +5,7 @@ is_admin() or exit;
 
 /**
  * Load CSS and JavaScript
- * @return Null
+ * @return null
  */
 function admin_init_assets()
 {
@@ -29,9 +29,9 @@ add_action('admin_enqueue_scripts', 'admin_init_assets');
 
 /**
  * Add BYOE price setting field
- * @param Integer $resource (person)
- * @param Integer $product
- * @return Null
+ * @param int $resource (person)
+ * @param int $product
+ * @return null
  */
 function admin_byoe_field($resource)
 {
@@ -49,8 +49,8 @@ add_action('woocommerce_bookings_after_person_block_cost', 'admin_byoe_field', 1
 
 /**
  * Save BYOE info in the database
- * @param Integer $post_id
- * @return Null
+ * @param int $post_id
+ * @return null
  */
 function admin_save_byoe_field($post_id)
 {
@@ -87,8 +87,8 @@ add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
 
 /**
  * Display booking discount info in booking page in admin
- * @param Integer $booking_id
- * @return Null
+ * @param int $booking_id
+ * @return null
  */
 function admin_add_booking_details($booking_id)
 {
@@ -115,7 +115,7 @@ add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_bo
 /**
  * Display Pass and VIP info in the admin->user->edit profile
  * @param WP_User
- * @return Null
+ * @return null
  */
 function admin_add_user_passes_field($user)
 {
@@ -177,8 +177,8 @@ add_action('edit_user_profile', 'admin_add_user_passes_field');
 
 /**
  * Save Pass and VIP info in the admin->user->edit profile to the db
- * @param Integer $user_id
- * @return Null
+ * @param int $user_id
+ * @return null
  */
 function admin_save_user_passes_field($user_id)
 {

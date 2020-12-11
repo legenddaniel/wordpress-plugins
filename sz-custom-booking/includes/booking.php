@@ -4,7 +4,7 @@
 
 /**
  * Load CSS and JavaScript
- * @return Null
+ * @return null
  */
 function init_assets()
 {
@@ -70,7 +70,7 @@ add_action('wp_enqueue_scripts', 'init_assets');
 
 /**
  * Process discount query ajax for 'Singular Passes'
- * @return Null
+ * @return null
  */
 function fetch_discount_prices()
 {
@@ -98,7 +98,7 @@ function fetch_discount_prices()
         $promo_cart_count = 0;
         $vip_cart_count = 0;
 
-        foreach (WC()->cart->get_cart() as $cart_item) {
+        foreach (sz_get_cart() as $cart_item) {
             if ($cart_item['product_id'] !== SINGULAR_ID) {
                 continue;
             }
@@ -149,7 +149,7 @@ add_action('wp_ajax_nopriv_fetch_discount_prices', 'fetch_discount_prices');
 
 /**
  * Add html templates of access to 'Promo Passes' in 'Singular Passes'
- * @return Null
+ * @return null
  */
 function render_summary()
 {
@@ -217,7 +217,7 @@ add_action('woocommerce_single_product_summary', 'render_summary');
 
 /**
  * Add discount field in 'Singular Passes'
- * @return Null
+ * @return null
  */
 function render_discount_field()
 {
@@ -268,7 +268,7 @@ function render_discount_field()
     $promo_cart_count = 0;
     $vip_cart_count = 0;
 
-    foreach (WC()->cart->get_cart() as $cart_item) {
+    foreach (sz_get_cart() as $cart_item) {
         if ($cart_item['product_id'] !== SINGULAR_ID) {
             continue;
         }
@@ -318,7 +318,7 @@ function render_discount_field()
 
     // Get used discounts from cart items
     $guest_cart_count = 0;
-    foreach (WC()->cart->get_cart() as $cart_item) {
+    foreach (sz_get_cart() as $cart_item) {
         if ($cart_item['product_id'] !== SINGULAR_ID) {
             continue;
         }
@@ -363,57 +363,56 @@ add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
 
 /**
  * Validate the discount quantity
- * @param Array $passed
- * @param Integer $product_id
- * @param Boolean $quantity
- * @return Array
+ * @param array $passed
+ * @param int $product_id
+ * @param int $quantity
+ * @return bool
  */
-function validate_discount_qty($passed, $product_id, $quantity)
+function sz_validate_discount_qty($passed, $product_id, $quantity)
 {
-    if ($product_id !== SINGULAR_ID) {
-        return $passed;
-    }
+    if ($product_id == SINGULAR_ID) {
 
-    // Check if leaving a select dropdown blank
-    foreach (['byoe', 'promo', 'guest'] as $field) {
-        if (isset($_POST["$field-enable"]) && isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
-            $passed = false;
-            wc_add_notice(__('Please input the discount quantity you want to use!', 'woocommerce'), 'error');
-            break;
+        // Check if leaving a select dropdown blank
+        foreach (['byoe', 'promo', 'guest'] as $field) {
+            if (isset($_POST["$field-enable"]) && isset($_POST["$field-qty"]) && empty($_POST["$field-qty"])) {
+                $passed = false;
+                wc_add_notice(__('Please input the discount quantity you want to use!', 'woocommerce'), 'error');
+                break;
+            }
         }
-    }
 
-    // Check if #discounts is less than #persons
-    $discount = 0;
-    $persons = 0;
-    foreach ($_POST as $key => $value) {
-        if (strpos($key, 'wc_bookings_field_persons_') !== false && +sanitize_text_field($value) > 0) {
-            $persons = +sanitize_text_field($value);
-            break;
+        // Check if #discounts is less than #persons
+        $discount = 0;
+        $persons = 0;
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'wc_bookings_field_persons_') !== false && +sanitize_text_field($value) > 0) {
+                $persons = +sanitize_text_field($value);
+                break;
+            }
         }
-    }
-    foreach (['promo', 'guest'] as $field) {
-        if (isset($_POST["$field-enable"])) {
-            $qty = sanitize_text_field($_POST["$field-qty"]);
-            $discount += $qty ? +$qty : 1;
-        }
-        if ($discount > $persons) {
-            $passed = false;
-            wc_add_notice(__('The quantity of discounts exceeds the total booking quantity!', 'woocommerce'), 'error');
-            break;
+        foreach (['promo', 'guest'] as $field) {
+            if (isset($_POST["$field-enable"])) {
+                $qty = sanitize_text_field($_POST["$field-qty"]);
+                $discount += $qty ? +$qty : 1;
+            }
+            if ($discount > $persons) {
+                $passed = false;
+                wc_add_notice(__('The quantity of discounts exceeds the total booking quantity!', 'woocommerce'), 'error');
+                break;
+            }
         }
     }
 
     return $passed;
 }
-add_filter('woocommerce_add_to_cart_validation', 'validate_discount_qty', 10, 3);
+add_filter('woocommerce_add_to_cart_validation', 'sz_validate_discount_qty', 10, 3);
 
 /**
  * Add the entries of discounts in the cart item data with validation. Fire at the beginning of $cart_item_data initialization?
- * @param Array? $cart_item_data
- * @param Integer? $product
- * @param String $variation
- * @return Array
+ * @param array? $cart_item_data
+ * @param int? $product
+ * @param string $variation
+ * @return array
  */
 function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
 {
@@ -482,7 +481,7 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
             $promo_cart_count = 0;
             $vip_cart_count = 0;
 
-            foreach (WC()->cart->get_cart() as $cart_item) {
+            foreach (sz_get_cart() as $cart_item) {
                 if ($cart_item['product_id'] !== SINGULAR_ID) {
                     continue;
                 }
@@ -535,7 +534,7 @@ function add_discount_info_into_cart($cart_item_data, $product_id, $variation)
 
             // Get used discounts from cart items
             $guest_cart_count = 0;
-            foreach (WC()->cart->get_cart() as $cart_item) {
+            foreach (sz_get_cart() as $cart_item) {
                 if ($cart_item['product_id'] !== SINGULAR_ID) {
                     continue;
                 }
@@ -580,9 +579,9 @@ add_filter('woocommerce_add_cart_item_data', 'add_discount_info_into_cart', 10, 
 
 /**
  * Add discount information field in the cart as well as the cart preview in the product page
- * @param Array $cart_item_data
- * @param Mixed $cart_item?
- * @return Mixed?
+ * @param array $cart_item_data
+ * @param mixed $cart_item?
+ * @return mixed?
  */
 function render_discount_field_in_cart($cart_item_data, $cart_item)
 {
@@ -608,8 +607,8 @@ add_filter('woocommerce_get_item_data', 'render_discount_field_in_cart', 10, 2);
 
 /**
  * Re-calculate the prices in the cart
- * @param Mixed $cart
- * @return Null
+ * @param mixed $cart
+ * @return null
  */
 function recalculate_total($cart)
 {
@@ -638,11 +637,11 @@ add_action('woocommerce_before_calculate_totals', 'recalculate_total');
 
 /**
  * Add the entries of discounts in the order meta data.
- * @param Mixed $item
- * @param String $cart_item_key
- * @param Mixed $values
- * @param Mixed $order
- * @return Null
+ * @param mixed $item
+ * @param string $cart_item_key
+ * @param mixed $values
+ * @param mixed $order
+ * @return null
  */
 function add_discount_info_into_order($item, $cart_item_key, $values, $order)
 {

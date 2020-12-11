@@ -4,9 +4,9 @@
 
 /**
  * Renew VIP scheduled task
- * @param Integer $user
- * @param Integer $plan
- * @return Null
+ * @param int $user
+ * @param int $plan
+ * @return null
  */
 function sz_renew_vip_in_db($user, $plan)
 {
@@ -26,7 +26,7 @@ add_action('sz_cron_vip', 'sz_renew_vip_in_db', 10, 2);
 
 /**
  * @param WC_Memberships_Membership_Plan $membership_plan
- * @param Array $arguments {
+ * @param array $arguments {
  *@type int|string $user_id user ID for the membership
  *@type int|string $user_membership_id post ID for the new user membership
  *@type bool $is_update true if the membership is being updated, false if new
@@ -84,20 +84,52 @@ add_action('wc_memberships_user_membership_saved', 'sz_manage_vip_field_in_db', 
 
 /**
  * Do not grant membership access to purchasers if they already hold an active membership
- * @param Boolean $grant_access
- * @param Array $args {
+ * @param bool $grant_access
+ * @param array $args {
  *      @type int $user_id
  *      @type int $product_id
  *      @type int $order_id
  * }
- * @return Boolean $grant_access
+ * @return bool $grant_access
  */
 function sz_allow_only_one_active_membership($grant_access, $args)
 {
-    if (!wc_memberships_get_user_active_memberships($args['user_id'])) {
+    if (wc_memberships_get_user_active_memberships($args['user_id'])) {
         return false;
     }
 
     return $grant_access;
 }
 add_filter('wc_memberships_grant_access_from_new_purchase', 'sz_allow_only_one_active_membership', 10, 2);
+
+/**
+ * Add purchase restriction when purchasing membership
+ * @param array $passed
+ * @param int $product_id
+ * @param int $quantity
+ * @return bool
+ */
+function sz_add_membership_purchase_restriction($passed, $product_id, $quantity)
+{
+    if ($product_id == VIP_PURCHASE_ID) {
+
+        // Block purchase if holding an active membership
+        $membership = wc_memberships_get_user_active_memberships()[0];
+        if (!is_null($membership)) {
+            $plan_name = $membership->get_plan()->get_name();
+            wc_add_notice(__("You are holding an active membership: $plan_name. Only one active membership allowed.", 'woocommerce'), 'error');
+            return false;
+        }
+
+        // Allow only one membership per purchase
+        foreach (sz_get_cart() as $cart_item) {
+            if ($cart_item['product_id'] === VIP_PURCHASE_ID) {
+                wc_add_notice(__("Cannot purchase multiple memberships at the same time!"), 'error');
+                return false;
+            }
+        }
+    }
+
+    return $passed;
+}
+add_filter('woocommerce_add_to_cart_validation', 'sz_add_membership_purchase_restriction', 10, 3);
