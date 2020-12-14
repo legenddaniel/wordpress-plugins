@@ -47,48 +47,51 @@ function init_styles()
 add_action('wp_enqueue_scripts', 'init_styles');
 
 /**
- * Remove 'Singular Passes' product image
+ * Remove product image on single product pages
  * @return null
  */
-function remake_layout()
+function sz_remove_product_image()
 {
-    if (is_single(SINGULAR_ID)) {
-        // Remove product image
-        remove_action('woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20);
-    }
-    if (is_single(PROMO_ID)) {
-        // Remove product image
-        remove_action('woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20);
+    $pages_without_img = [SINGULAR_ID, PROMO_ID, VIP_PURCHASE_ID];
+    foreach ($pages_without_img as $page) {
+        if (is_single($page)) {
+            remove_action('woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20);
+            return;
+        }
     }
 }
-add_action('template_redirect', 'remake_layout');
+add_action('template_redirect', 'sz_remove_product_image');
 
 /**
- * Remove 'Additional Information' in Promo Passes 10 + 1 page
+ * Remove 'Additional Information'
  * @return array
  */
-function remove_add_info($tabs)
+function sz_remove_add_info($tabs)
 {
-    if (!is_single(PROMO_ID)) {
-        return $tabs;
+    $pages_without_add_info = [PROMO_ID, VIP_PURCHASE_ID];
+    foreach ($pages_without_add_info as $page) {
+        if (is_single($page)) {
+            unset($tabs['additional_information']);
+            break;
+        }
     }
-    unset($tabs['additional_information']);
+
     return $tabs;
 }
-add_filter('woocommerce_product_tabs', 'remove_add_info');
+add_filter('woocommerce_product_tabs', 'sz_remove_add_info');
 
 /*add_filter('get_terms', 'ts_get_subcategory_terms', 10, 3);
 function ts_get_subcategory_terms($terms, $taxonomies, $args)
 {
-    $new_terms = array();
-    if (in_array('product_cat', $taxonomies) && !is_admin()) {
-        foreach ($terms as $key => $term) {
-            if (!in_array($term->slug, array('firearms'))) {
-                $new_terms[] = $term;
-            }}
-        $terms = $new_terms;
-    }
-    return $terms;
+$new_terms = array();
+if (in_array('product_cat', $taxonomies) && !is_admin()) {
+foreach ($terms as $key => $term) {
+if (!in_array($term->slug, array('firearms'))) {
+$new_terms[] = $term;
+}}
+$terms = $new_terms;
+}
+return $terms;
 }*/
 /*
 function exclude_product_cat_children($wp_query)
@@ -116,26 +119,25 @@ function add_my_script2()
         'formScript', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/js/formScript.js', // this is the location of your script file
         array('jquery'), // this array lists the scripts upon which your script depends
- 	rand(111, 9999)
+        rand(111, 9999)
     );
 }
 
+add_action('get_header', function () {
+    if (is_page('1489')) {
 
-add_action('get_header', function() {
-    if(is_page('1489')) {
-
-        function sp_enqueue_script() {
+        function sp_enqueue_script()
+        {
             wp_enqueue_script(
                 'sp-custom-script',
                 get_stylesheet_directory_uri() . '/searchCartIcon.js',
-                array( 'jquery' ), '1.0', true
+                array('jquery'), '1.0', true
             );
         }
 
-        add_action( 'wp_enqueue_scripts', 'sp_enqueue_script' );
+        add_action('wp_enqueue_scripts', 'sp_enqueue_script');
     }
 });
-
 
 add_action('wp_enqueue_scripts', 'add_my_script4');
 function add_my_script4()
@@ -144,10 +146,9 @@ function add_my_script4()
         'timer', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/timer.js', // this is the location of your script file
         array('jquery'),
-	rand(111, 9999) // this array lists the scripts upon which your script depends
+        rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }
-
 
 add_action('wp_enqueue_scripts', 'add_my_script5');
 function add_my_script5()
@@ -156,7 +157,7 @@ function add_my_script5()
         'whichRow', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/js/check-which-row-is-selected.js', // this is the location of your script file
         array('jquery'),
-	rand(111, 9999) // this array lists the scripts upon which your script depends
+        rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }
 
@@ -167,8 +168,6 @@ function add_my_script6()
         'searchButton', // name your script so that you can attach other scripts and de-register, etc.
         get_stylesheet_directory_uri() . '/js/searchButtonDisabled.js', // this is the location of your script file
         array('jquery'),
-	rand(111, 9999) // this array lists the scripts upon which your script depends
+        rand(111, 9999) // this array lists the scripts upon which your script depends
     );
 }
-
-

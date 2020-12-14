@@ -180,9 +180,9 @@ function render_summary()
     <div class="mtb-25">
         <p class="sz-sum-head">
             You are a few clicks away from booking your session at
-            <span class="sz-text-highlight-green">Solely Outdoors</span> located at
+            <span class="sz-text-highlight-green">Solely Archery & Airsoft Club</span> located at
             <span class="sz-text-highlight-green">101 - 8365 Woodbine Avenue, Markham ON</span>. <br>
-            We are open by reservation only. For same day booking, please call first to check availability: (905) 882-8629.
+            We are open by reservation only. For same day booking, please call first to check availability: (905) 882-9629.
             <br>
             You may also book over the phone. See you soon!
         </p>
@@ -214,6 +214,38 @@ function render_summary()
 <?php
 }
 add_action('woocommerce_single_product_summary', 'render_summary');
+
+/**
+ * Set booking availability based on user type (member or not).
+ * @param array $availability_rules - Array of availability rules
+ * @param int $resource_id - Resource rules apply to, if resource is 0, then for the product itself
+ * @param WC_Product_Booking $product - Bookable product
+ */
+function sz_set_booking_availability($availability_rules, $resource_id, $product)
+{
+    /**
+     * 
+     * Temporarily fixed date and time for existing 3 memberships.
+     * 
+     * 
+     */
+
+    if ($product->get_id() == SINGULAR_ID) {
+        $memberships = [VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID];
+        $user = get_current_user_id();
+        if (!is_vip($user, ...$memberships)) {
+            return $availability_rules;
+        }
+
+        $l = count($availability_rules);
+        for ($i = 0; $i < $l; $i++) {
+            $availability_rules[$i]['range']['to'] = '21:00';
+        }
+    }
+
+    return $availability_rules;
+}
+add_filter('woocommerce_booking_get_availability_rules', 'sz_set_booking_availability', 10, 3);
 
 /**
  * Add discount field in 'Singular Passes'
