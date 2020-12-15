@@ -5,7 +5,6 @@
 /**
  * Fetch BYOE enability or discount price in the admin
  * @param int $resource
- * @return string|null
  */
 function get_byoe_price($resource)
 {
@@ -23,6 +22,29 @@ function get_byoe_price($resource)
 }
 
 /**
+ * Get short name of the resource in a quick manner. Do not need to visit db.
+ * @param int $resource
+ * @return string|null
+ */
+function sz_get_resource_short_slug($resource)
+{
+    switch ($resource) {
+        case ARCHERY_ID:
+            $slug = 'archery';
+            break;
+        case AIRSOFT_ID:
+            $slug = 'airsoft';
+            break;
+        case COMBO_ID:
+            $slug = 'combo';
+            break;
+        default:
+            return;
+    }
+    return $slug;
+}
+
+/**
  * Retrieve current cart items
  * @return array cart items
  */
@@ -32,24 +54,111 @@ function sz_get_cart()
 }
 
 /**
- * Template of byoe enabling checkboxes
- * @param int $resource
- * @param string $product
+ * Wrap a div around the output for styling
+ * @param function $callback - function to execute
+ * @return null
+ */
+function sz_wrap_admin_custom_field($callback)
+{
+    echo '<div class="admin-discount-field">';
+    $callback();
+    echo '</div>';
+}
+
+/**
+ * Template of morning/evening discount enabling checkboxes
+ * @param string $time - 'morning' | 'evening'
  * @return array
  */
-function create_admin_byoe_enabling_checkbox($resource)
+function sz_create_admin_time_discount_checkbox_field($time)
 {
-    switch ($resource) {
-        case ARCHERY_ID:
-            $type = 'archery';
-            break;
-        case AIRSOFT_ID:
-            $type = 'airsoft';
-            break;
-        case COMBO_ID:
-            $type = 'combo';
-            break;
+    if ($time !== 'morning' && $time !== 'evening') {
+        return;
     }
+
+    $id = "admin-$time-discount-enable";
+
+    $field = [
+        'id' => $id,
+        'label' => esc_html__('Enable ' . ucfirst($time) . ' Discount', 'woocommerce'),
+        'class' => 'sz-admin-checkbox-enable',
+        'style' => '',
+        'wrapper_class' => 'form-row form-row-first',
+        'value' => '',
+        'custom_attributes' => [
+            'checked' => true,
+        ],
+    ];
+    return $field;
+}
+
+/**
+ * Template of morning/evening discount info input in booking
+ * @param string $time - 'morning' | 'evening'
+ * @param string $side - 'from' | 'to'
+ * @return array
+ */
+function sz_create_admin_time_discount_time_input_field($time, $side)
+{
+    if ($time !== 'morning' && $time !== 'evening') {
+        return;
+    }
+    if ($side !== 'from' && $side !== 'to') {
+        return;
+    }
+
+    $id = "admin-$time-discount-time-$side";
+
+    $field = [
+        'id' => $id,
+        'label' => esc_html__(ucfirst($side), 'woocommerce'),
+        'type' => 'time',
+        'wrapper_class' => 'form-row form-row-first',
+        'custom_attributes' => [
+            'step' => 3600000,
+        ],
+    ];
+    return $field;
+}
+
+/**
+ * Template of morning/evening discount info input in booking
+ * @param string $time - 'morning' | 'evening'
+ * @return array
+ */
+function sz_create_admin_time_discount_price_input_field($time)
+{
+    if ($time !== 'morning' && $time !== 'evening') {
+        return;
+    }
+
+    $id = "admin-$time-discount-time-price";
+
+    $field = [
+        'id' => $id,
+        'label' => esc_html__(ucfirst($time) . ' Discount Price', 'woocommerce'),
+        'type' => 'number',
+        'data_type' => 'price',
+        'class' => '',
+        'wrapper_class' => 'form-row form-row-first',
+        'value' => '',
+        'custom_attributes' => [
+            'step' => 0.01,
+            'min' => 0,
+        ],
+    ];
+
+    return $field;
+}
+
+/**
+ * Template of byoe enabling checkboxes
+ * @param int $resource
+ * @return array
+ */
+function sz_create_admin_byoe_checkbox_field($resource)
+{
+    $type = sz_get_resource_short_slug($resource);
     $id = 'admin-byoe-enable-' . $type;
 
     $field = [
@@ -68,22 +177,11 @@ function create_admin_byoe_enabling_checkbox($resource)
 /**
  * Template of byoe text fields
  * @param int $resource
- * @param string $product
  * @return array
  */
-function create_admin_byoe_input_field($resource)
+function sz_create_admin_byoe_input_field($resource)
 {
-    switch ($resource) {
-        case ARCHERY_ID:
-            $type = 'archery';
-            break;
-        case AIRSOFT_ID:
-            $type = 'airsoft';
-            break;
-        case COMBO_ID:
-            $type = 'combo';
-            break;
-    }
+    $type = sz_get_resource_short_slug($resource);
     $id = "admin-byoe-price-$type";
     $value = get_byoe_price($resource);
     $value = is_null($value) ? '' : $value;
@@ -92,8 +190,8 @@ function create_admin_byoe_input_field($resource)
         'id' => $id,
         'label' => esc_html__('Bring Your Own Equipment Price', 'woocommerce'),
         'type' => 'number',
-        'class' => 'sz-admin-byoe-input',
         'data_type' => 'price',
+        'class' => '',
         'wrapper_class' => is_null(get_byoe_price($resource)) ? 'form-row form-row-first d-none' : 'form-row form-row-first',
         'value' => $value,
         'custom_attributes' => [
@@ -109,7 +207,7 @@ function create_admin_byoe_input_field($resource)
  * @param string $type
  * @return array
  */
-function create_admin_booking_discount_checkbox_field($type)
+function sz_create_admin_booking_discount_checkbox_field($type)
 {
     $id = str_replace(' ', '-', $type);
     $id = preg_replace('/\(|\)/m', '', $id);
@@ -119,9 +217,6 @@ function create_admin_booking_discount_checkbox_field($type)
         'id' => $id,
         'label' => esc_html__($type, 'woocommerce'),
         'class' => 'sz-admin-checkbox-enable',
-        'style' => '',
-        'wrapper_class' => '',
-        'value' => '',
         'custom_attributes' => [
             'checked' => true,
             'onclick' => 'return false;',
@@ -135,7 +230,7 @@ function create_admin_booking_discount_checkbox_field($type)
  * @param int $qty
  * @return array
  */
-function create_admin_booking_discount_input_field($qty)
+function sz_create_admin_booking_discount_input_field($qty)
 {
     $qty = +$qty;
 
@@ -143,8 +238,6 @@ function create_admin_booking_discount_input_field($qty)
         'id' => 'discount-qty',
         'label' => esc_html__('Quantity', 'woocommerce'),
         'type' => 'number',
-        'class' => '',
-        'wrapper_class' => '',
         'value' => $qty,
         'custom_attributes' => [
             'readonly' => true,

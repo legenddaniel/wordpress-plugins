@@ -30,29 +30,29 @@ add_action('admin_enqueue_scripts', 'admin_init_assets');
 /**
  * Add BYOE price setting field
  * @param int $resource (person)
- * @param int $product
  * @return null
  */
-function admin_byoe_field($resource)
+function sz_admin_byoe_field($resource)
 {
-    if (!in_array($resource, [ARCHERY_ID, AIRSOFT_ID, COMBO_ID])) {
-        return;
+    if (in_array($resource, [ARCHERY_ID, AIRSOFT_ID, COMBO_ID])) {
+        $checkbox_field = sz_create_admin_byoe_checkbox_field($resource);
+        $text_field = sz_create_admin_byoe_input_field($resource);
+
+        woocommerce_wp_checkbox($checkbox_field);
+        sz_wrap_admin_custom_field(function () use ($text_field) {
+            woocommerce_wp_text_input($text_field);
+        });
+
     }
-
-    $checkbox_field = create_admin_byoe_enabling_checkbox($resource);
-    $text_field = create_admin_byoe_input_field($resource);
-
-    woocommerce_wp_checkbox($checkbox_field);
-    woocommerce_wp_text_input($text_field);
 }
-add_action('woocommerce_bookings_after_person_block_cost', 'admin_byoe_field', 10, 2);
+add_action('woocommerce_bookings_after_person_block_cost', 'sz_admin_byoe_field');
 
 /**
  * Save BYOE info in the database
  * @param int $post_id
  * @return null
  */
-function admin_save_byoe_field($post_id)
+function sz_admin_save_byoe_field($post_id)
 {
     if ($post_id !== SINGULAR_ID) {
         return;
@@ -83,14 +83,39 @@ function admin_save_byoe_field($post_id)
         update_post_meta($id, 'byoe_price', $byoe_price);
     }
 }
-add_action('woocommerce_process_product_meta', 'admin_save_byoe_field');
+add_action('woocommerce_process_product_meta', 'sz_admin_save_byoe_field');
+
+/**
+ * Add morning/evening discount setting field
+ * @param int $product
+ * @return null
+ */
+function sz_admin_time_discount_field($product)
+{
+    if ($product == SINGULAR_ID) {
+        foreach (['morning', 'evening'] as $time) {
+            $checkbox_field = sz_create_admin_time_discount_checkbox_field($time);
+            $text_field_from = sz_create_admin_time_discount_time_input_field($time, 'from');
+            $text_field_to = sz_create_admin_time_discount_time_input_field($time, 'to');
+            $text_field_price = sz_create_admin_time_discount_price_input_field($time);
+
+            woocommerce_wp_checkbox($checkbox_field);
+            sz_wrap_admin_custom_field(function () use ($text_field_from, $text_field_to, $text_field_price) {
+                woocommerce_wp_text_input($text_field_from);
+                woocommerce_wp_text_input($text_field_to);
+                woocommerce_wp_text_input($text_field_price);
+            });
+        }
+    }
+}
+add_action('woocommerce_bookings_after_bookings_pricing', 'sz_admin_time_discount_field');
 
 /**
  * Display booking discount info in booking page in admin
  * @param int $booking_id
  * @return null
  */
-function admin_add_booking_details($booking_id)
+function sz_admin_add_booking_details($booking_id)
 {
     $booking = new WC_Booking($booking_id);
     $id = $booking->get_order_item_id();
@@ -102,22 +127,24 @@ function admin_add_booking_details($booking_id)
     }
 
     foreach ($discounts as $discount) {
-        $checkbox_field = create_admin_booking_discount_checkbox_field($discount['type']);
-        $text_field = create_admin_booking_discount_input_field($discount['qty']);
+        $checkbox_field = sz_create_admin_booking_discount_checkbox_field($discount['type']);
+        $text_field = sz_create_admin_booking_discount_input_field($discount['qty']);
 
         woocommerce_wp_checkbox($checkbox_field);
-        woocommerce_wp_text_input($text_field);
+        sz_wrap_admin_custom_field(function () use ($text_field) {
+            woocommerce_wp_text_input($text_field);
+        });
     }
 
 }
-add_action('woocommerce_admin_booking_data_after_booking_details', 'admin_add_booking_details');
+add_action('woocommerce_admin_booking_data_after_booking_details', 'sz_admin_add_booking_details');
 
 /**
  * Display Pass and VIP info in the admin->user->edit profile
  * @param WP_User
  * @return null
  */
-function admin_add_user_passes_field($user)
+function sz_admin_add_user_passes_field($user)
 {
     ?>
 
@@ -172,15 +199,15 @@ $user_id = $user->ID;
 
     <?php
 }
-add_action('show_user_profile', 'admin_add_user_passes_field');
-add_action('edit_user_profile', 'admin_add_user_passes_field');
+add_action('show_user_profile', 'sz_admin_add_user_passes_field');
+add_action('edit_user_profile', 'sz_admin_add_user_passes_field');
 
 /**
  * Save Pass and VIP info in the admin->user->edit profile to the db
  * @param int $user_id
  * @return null
  */
-function admin_save_user_passes_field($user_id)
+function sz_admin_save_user_passes_field($user_id)
 {
     if (!current_user_can('edit_user', $user_id)) {
         return false;
@@ -209,5 +236,5 @@ function admin_save_user_passes_field($user_id)
 
     }
 }
-add_action('personal_options_update', 'admin_save_user_passes_field');
-add_action('edit_user_profile_update', 'admin_save_user_passes_field');
+add_action('personal_options_update', 'sz_admin_save_user_passes_field');
+add_action('edit_user_profile_update', 'sz_admin_save_user_passes_field');

@@ -224,12 +224,13 @@ add_action('woocommerce_single_product_summary', 'render_summary');
 function sz_set_booking_availability($availability_rules, $resource_id, $product)
 {
     /**
-     * 
+     *
      * Temporarily fixed date and time for existing 3 memberships.
-     * 
-     * 
+     *
+     *
      */
 
+    // Allow certain members to book for evening time 
     if ($product->get_id() == SINGULAR_ID) {
         $memberships = [VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID];
         $user = get_current_user_id();
@@ -246,6 +247,44 @@ function sz_set_booking_availability($availability_rules, $resource_id, $product
     return $availability_rules;
 }
 add_filter('woocommerce_booking_get_availability_rules', 'sz_set_booking_availability', 10, 3);
+
+/**
+ * Set timeslot area html based on users
+ * @param string $block_html
+ * @param array $available_blocks - index+associative array
+ * @param array $blocks index array
+ * @return string
+ */
+function sz_set_timeslot_field($block_html, $available_blocks, $blocks)
+{
+    $memberships = [VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID];
+    $user = get_current_user_id();
+    if (is_vip($user, ...$memberships)) {
+        return $block_html;
+    }
+
+    // Do not provide evening timeslots to those unqualified visitors
+    $new_block_html = '';
+
+    $new_available_blocks = array_filter($available_blocks, function ($block) use ($blocks) {
+        return in_array($block, $blocks);
+    }, ARRAY_FILTER_USE_KEY);
+
+    // new WC_Booking_Form->get_time_slots_html
+    foreach ($new_available_blocks as $block => $quantity) {
+        if ($quantity['available'] > 0) {
+            if ($quantity['booked']) {
+                /* translators: 1: quantity available */
+                $new_block_html .= '<li class="block" data-block="' . esc_attr(date('Hi', $block)) . '" data-remaining="' . esc_attr($quantity['available']) . '" ><a href="#" data-value="' . get_time_as_iso8601($block) . '">' . date_i18n(wc_bookings_time_format(), $block) . ' <small class="booking-spaces-left">(' . sprintf(_n('%d left', '%d left', $quantity['available'], 'woocommerce-bookings'), absint($quantity['available'])) . ')</small></a></li>';
+            } else {
+                $new_block_html .= '<li class="block" data-block="' . esc_attr(date('Hi', $block)) . '"><a href="#" data-value="' . get_time_as_iso8601($block) . '">' . date_i18n(wc_bookings_time_format(), $block) . '</a></li>';
+            }
+        }
+    }
+
+    return $new_block_html;
+}
+add_filter('wc_bookings_get_time_slots_html', 'sz_set_timeslot_field', 10, 3);
 
 /**
  * Add discount field in 'Singular Passes'
