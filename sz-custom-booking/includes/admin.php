@@ -38,8 +38,9 @@ function sz_admin_byoe_field($resource)
         $checkbox_field = sz_create_admin_byoe_checkbox_field($resource);
         $text_field = sz_create_admin_byoe_input_field($resource);
 
+        $display = !is_null(get_byoe_price($resource));
         woocommerce_wp_checkbox($checkbox_field);
-        sz_wrap_admin_custom_field(function () use ($text_field) {
+        sz_wrap_admin_custom_field($display, function () use ($text_field) {
             woocommerce_wp_text_input($text_field);
         });
 
@@ -64,8 +65,6 @@ function sz_admin_save_byoe_field($post_id)
         'combo' => COMBO_ID,
     ];
 
-    global $wpdb;
-
     foreach ($resources as $type => $id) {
         $byoe_enable = sanitize_text_field($_POST["admin-byoe-enable-$type"]);
         $byoe_price = sanitize_text_field($_POST["admin-byoe-price-$type"]);
@@ -86,6 +85,45 @@ function sz_admin_save_byoe_field($post_id)
 add_action('woocommerce_process_product_meta', 'sz_admin_save_byoe_field');
 
 /**
+ * Save morning/evening discount info in the database
+ * @param int $post_id
+ * @return null
+ */
+function sz_admin_save_time_discount_field($post_id)
+{
+    if ($post_id !== SINGULAR_ID) {
+        return;
+    }
+
+    foreach (['morning', 'evening'] as $time) {
+        $time_discount_enable = sanitize_text_field($_POST["admin-$time-discount-enable"]);
+        $time_discount_from = sanitize_text_field($_POST["admin-$time-discount-time-from"]);
+        $time_discount_to = sanitize_text_field($_POST["admin-$time-discount-time-to"]);
+        $time_discount_price = sanitize_text_field($_POST["admin-$time-discount-price"]);
+
+        $time_discount = [
+            'enable' => !!$time_discount_enable,
+            'from' => $time_discount_from,
+            'to' => $time_discount_to,
+            'price' => $time_discount_price,
+        ];
+
+        $update = true;
+        foreach ($time_discount as $key => $value) {
+            if ($key !== 'enable' && $value === '') {
+                $update = false;
+                break;
+            }
+        }
+        if ($update) {
+            // update_post_meta($post_id, $time . '_discount, $time_discount);
+        }
+
+    }
+}
+// add_action('woocommerce_process_product_meta', 'sz_admin_save_time_discount_field');
+
+/**
  * Add morning/evening discount setting field
  * @param int $product
  * @return null
@@ -100,7 +138,7 @@ function sz_admin_time_discount_field($product)
             $text_field_price = sz_create_admin_time_discount_price_input_field($time);
 
             woocommerce_wp_checkbox($checkbox_field);
-            sz_wrap_admin_custom_field(function () use ($text_field_from, $text_field_to, $text_field_price) {
+            sz_wrap_admin_custom_field(true, function () use ($text_field_from, $text_field_to, $text_field_price) {
                 woocommerce_wp_text_input($text_field_from);
                 woocommerce_wp_text_input($text_field_to);
                 woocommerce_wp_text_input($text_field_price);
@@ -131,9 +169,7 @@ function sz_admin_add_booking_details($booking_id)
         $text_field = sz_create_admin_booking_discount_input_field($discount['qty']);
 
         woocommerce_wp_checkbox($checkbox_field);
-        sz_wrap_admin_custom_field(function () use ($text_field) {
-            woocommerce_wp_text_input($text_field);
-        });
+        woocommerce_wp_text_input($text_field);
     }
 
 }

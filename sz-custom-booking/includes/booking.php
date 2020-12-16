@@ -230,7 +230,7 @@ function sz_set_booking_availability($availability_rules, $resource_id, $product
      *
      */
 
-    // Allow certain members to book for evening time 
+    // Allow certain members to book for evening time
     if ($product->get_id() == SINGULAR_ID) {
         $memberships = [VIP_888_ANNUAL_ID, VIP_ANNUAL_ID, VIP_SEMIANNUAL_ID];
         $user = get_current_user_id();
@@ -238,7 +238,32 @@ function sz_set_booking_availability($availability_rules, $resource_id, $product
             return $availability_rules;
         }
 
+        // Clear cache to enforce customize rules in any cases
+        WC_Bookings_Cache::delete_booking_slots_transient($product);
+
         $l = count($availability_rules);
+        // foreach (['morning', 'evening'] as $time) {
+        //     $time_discount = get_post_meta(SINGULAR_ID, $time . '_discount', true);
+        //     if (!$time_discount['enable']) {
+        //         continue;
+        //     }
+
+        //     if ($time === 'morning') {
+        //         for ($i = 0; $i < $l; $i++) {
+        //             if ($time_discount['from'] < $availability_rules[$i]['range']['from']) {
+        //                 $availability_rules[$i]['range']['from'] = $time_discount['from'];
+        //             }
+        //         }
+        //     }
+        //     if ($time === 'evening') {
+        //         for ($i = 0; $i < $l; $i++) {
+        //             if ($time_discount['to'] > $availability_rules[$i]['range']['to']) {
+        //                 $availability_rules[$i]['range']['to'] = $time_discount['to'];
+        //             }
+        //         }
+        //     }
+        // }
+
         for ($i = 0; $i < $l; $i++) {
             $availability_rules[$i]['range']['to'] = '21:00';
         }

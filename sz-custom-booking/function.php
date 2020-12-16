@@ -55,12 +55,14 @@ function sz_get_cart()
 
 /**
  * Wrap a div around the output for styling
+ * @param bool $display
  * @param function $callback - function to execute
  * @return null
  */
-function sz_wrap_admin_custom_field($callback)
+function sz_wrap_admin_custom_field($display, $callback)
 {
-    echo '<div class="admin-discount-field">';
+    $display = $display ? '' : ' d-none';
+    echo '<div class="admin-discount-field' . $display . '">';
     $callback();
     echo '</div>';
 }
@@ -132,7 +134,7 @@ function sz_create_admin_time_discount_price_input_field($time)
         return;
     }
 
-    $id = "admin-$time-discount-time-price";
+    $id = "admin-$time-discount-price";
 
     $field = [
         'id' => $id,
@@ -192,7 +194,7 @@ function sz_create_admin_byoe_input_field($resource)
         'type' => 'number',
         'data_type' => 'price',
         'class' => '',
-        'wrapper_class' => is_null(get_byoe_price($resource)) ? 'form-row form-row-first d-none' : 'form-row form-row-first',
+        'wrapper_class' => 'form-row form-row-first',
         'value' => $value,
         'custom_attributes' => [
             'step' => 0.01,
