@@ -166,11 +166,11 @@ function render_summary()
 	    <div class="row">
 	        <div class="column">
                 <p class="p-question">
-                    <span class="sz-text-highlight-red">Did you know? </span>You can enjoy one FREE extra entry if you <?=$is_logged_in ? '' : 'become a member and ';?>buy the promo package!
+                    <span class="sz-text-highlight-green">Did you know? </span>You can enjoy one FREE extra entry if you <?=$is_logged_in ? '' : 'become a member and ';?>buy the promo package!
                 </p>
             </div>
             <div class="column">
-                <a class="a-question" href=<?=get_permalink($href);?>><button class="b-question"><?=$btn_text;?></button></a>
+                <a class="a-question" href=<?=get_permalink($href);?>><button><?=$btn_text;?></button></a>
             </div>
         </div>
     </div>
@@ -189,23 +189,21 @@ function render_summary()
         <div class="sz-sum-sub-desc">
             <div class="mlr-10">
                 <h4 class="sz-sum-title">Check-in</h4>
-                <p class="p-content">
+                <p class="p-question">
                     Check-in starts 10 minutes prior to your booked session time. If you book for 4:30, please arrive at
-                    4:20 for check-in. </p>
+                    4:20 for check-in. 
+                </p>
             </div>
             <div class="mlr-10">
                 <h4 class="sz-sum-title">Duration</h4>
-                <p class="p-content">
-
+                <p class="p-question">
                     The session is 60 minutes long and includes expert shooting instructions from your instructor.
                 </p>
             </div>
             <div class="mlr-10">
                 <h4 class="sz-sum-title">Age</h4>
-                <p class="p-content">
-
+                <p class="p-question">
                     There are no age restrictions but children under 16 years old must be accompanied by an adult.
-
                 </p>
             </div>
         </div>

@@ -7,10 +7,6 @@
 
 /* Custom styles starts */
 
-.sz-text-highlight-red {
-    color: red;
-}
-
 .sz-text-highlight-green {
     color: #5ab152;
 }
@@ -56,17 +52,13 @@
     text-align: center;
 }
 
-.p-content {
-    color: #1d1e23;
-}
-
 .p-question {
-    margin-top: 0.7em !important;
+    margin-top: 1em;
 }
 
 .column {
     float: left;
-    width: 50%;
+    margin-right: 1em;
 }
 
 /* Clear floats after the columns */
@@ -79,17 +71,6 @@
     .column {
         width: 100%;
     }
-}
-
-.b-question {
-    background-color: #f6f6f6 !important;
-    color: #1d1e23 !important;
-    border-color: #bdbdbd !important;
-}
-
-.b-question:hover {
-    background-color: #bdbdbd !important;
-    color: white !important;
 }
 
 /* Custom styles ends */
