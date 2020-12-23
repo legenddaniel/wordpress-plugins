@@ -177,38 +177,6 @@ function render_summary()
 
     <hr>
 
-    <div class="mtb-25">
-        <p class="sz-sum-head">
-            You are a few clicks away from booking your session at
-            <span class="sz-text-highlight-green">Solely Archery & Airsoft Club</span> located at
-            <span class="sz-text-highlight-green">101 - 8365 Woodbine Avenue, Markham ON</span>. <br>
-            We are open by reservation only. For same day booking, please call first to check availability: (905) 882-9629.
-            <br>
-            You may also book over the phone. See you soon!
-        </p>
-        <div class="sz-sum-sub-desc">
-            <div class="mlr-10">
-                <h4 class="sz-sum-title">Check-in</h4>
-                <p class="p-question">
-                    Check-in starts 10 minutes prior to your booked session time. If you book for 4:30, please arrive at
-                    4:20 for check-in. 
-                </p>
-            </div>
-            <div class="mlr-10">
-                <h4 class="sz-sum-title">Duration</h4>
-                <p class="p-question">
-                    The session is 60 minutes long and includes expert shooting instructions from your instructor.
-                </p>
-            </div>
-            <div class="mlr-10">
-                <h4 class="sz-sum-title">Age</h4>
-                <p class="p-question">
-                    There are no age restrictions but children under 16 years old must be accompanied by an adult.
-                </p>
-            </div>
-        </div>
-    </div>
-
 <?php
 }
 add_action('woocommerce_single_product_summary', 'render_summary');
@@ -269,7 +237,7 @@ function sz_set_booking_availability($availability_rules, $resource_id, $product
 
     return $availability_rules;
 }
-add_filter('woocommerce_booking_get_availability_rules', 'sz_set_booking_availability', 10, 3);
+// add_filter('woocommerce_booking_get_availability_rules', 'sz_set_booking_availability', 10, 3);
 
 /**
  * Set timeslot area html based on users
@@ -307,7 +275,7 @@ function sz_set_timeslot_field($block_html, $available_blocks, $blocks)
 
     return $new_block_html;
 }
-add_filter('wc_bookings_get_time_slots_html', 'sz_set_timeslot_field', 10, 3);
+// add_filter('wc_bookings_get_time_slots_html', 'sz_set_timeslot_field', 10, 3);
 
 /**
  * Add discount field in 'Singular Passes'

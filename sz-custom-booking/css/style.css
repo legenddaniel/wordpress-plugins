@@ -11,6 +11,10 @@
     color: #5ab152;
 }
 
+.sz-text-highlight-bold {
+    font-weight: 600;
+}
+
 .sz-size-checkbox {
     width: 1px;
     white-space: nowrap;
@@ -32,28 +36,17 @@
     margin: 25px 0;
 }
 
-.mlr-10 {
-    margin: 0 10px;
+.woocommerce-product-details__short-description .sc_title {
+    margin-bottom: 0.5em;
 }
 
-.sz-sum-head {
-    color: #1d1e23;
-}
-
-.sz-sum-sub-desc {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-}
-
-.sz-sum-title {
-    margin: initial;
-    color: #75b647 !important;
+.summary > .woocommerce-product-details__short-description p.sz-sum-head {
     text-align: center;
+    margin-bottom: 3em;
 }
 
-.p-question {
-    margin-top: 1em;
+.sz-sum-row > .wpb_column {
+    margin-bottom: 1em;
 }
 
 .column {
