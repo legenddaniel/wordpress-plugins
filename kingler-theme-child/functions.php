@@ -29,6 +29,13 @@ function init_styles()
     );
 
     wp_enqueue_script(
+        'accordion-js',
+        get_stylesheet_directory_uri() . '/accordion.js',
+        ['jquery'],
+        rand(111, 9999)
+    );
+
+    wp_enqueue_script(
         'screets-icon-style',
         get_stylesheet_directory_uri() . '/screets-icon-style.js',
         [],

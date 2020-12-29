@@ -54,6 +54,17 @@
     margin-right: 1em;
 }
 
+@media (min-width: 632px) {
+    .p-question {
+        padding: 0.6em 0.6em 0.6em 0;
+    }
+}
+@media (min-width: 960px) {
+    .p-question {
+        padding: 1em 1em 1em 0;
+    }
+}
+
 /* Clear floats after the columns */
 .row:after {
     content: "";
