@@ -1,25 +1,25 @@
 <?php
 /**
  * Plugin Name:       New_Points
- * Plugin URI:        http://
  * Description:       Customized WooCommerce Points & Rewards.
  * Version:           1.0.0
  * Author:            Neo, Daniel Siyuan Zuo
- * Author URI:        https://
+ * Text Domain: points-rewards-new-points
  */
  
 defined( 'WPINC' ) || die;
  
-include_once 'new-point.php';
+is_admin() and include_once 'class-new-point-admin.php';
+
+include_once 'class-new-point.php';
+include_once 'class-new-point-order.php';
+include_once 'class-new-point-shop.php';
 //include_once 'class-tutsplus-custom-woocommerce-display.php';
  
 add_action( 'plugins_loaded', 'new_points_init' );
-/**
- * Start the plugin.
- */
 function new_points_init() {
-
-	$admin = new New_Points();
-
+	is_admin() and new New_Point_Admin();
+	new New_Point_Order();
+	new New_Point_Shop();
 }
 
