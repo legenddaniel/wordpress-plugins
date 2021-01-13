@@ -22,7 +22,7 @@ class New_Point_Order extends New_Point
         add_action('woocommerce_order_partially_refunded', array($this, 'reset_total_when_partially_refunded'), 10, 2);
 
         // Change points decreased based on user total spend
-        add_filter('wc_points_rewards_decrease_points', array($this, 'set_points_when_partially_refunded'), 10, 5);
+        add_filter('wc_points_rewards_decrease_points', array($this, 'reset_points_when_cancel_refunded'), 10, 5);
     }
 
     /**
@@ -92,7 +92,7 @@ class New_Point_Order extends New_Point
                     "SELECT meta_value
                     FROM {$wpdb->prefix}postmeta
                     WHERE post_id = %d AND (meta_key = '_date_paid' OR meta_key = '_date_completed')"
-                , $order_id),
+                    , $order_id),
                 ARRAY_N
             );
             return $dates[0][0] != $dates[1][0];
@@ -108,6 +108,7 @@ class New_Point_Order extends New_Point
      */
     public function set_total_after_payment($order_id)
     {
+        // Prevent from a duplicate setting since this function is used for 2 hooks
         if ($this->has_set_total_or_points($order_id)) {
             return;
         }
@@ -127,6 +128,7 @@ class New_Point_Order extends New_Point
      */
     public function set_point_balance_after_point_order_payment($order_id)
     {
+        // Prevent from a duplicate setting since this function is used for 2 hooks
         if ($this->has_set_total_or_points($order_id)) {
             return;
         }
@@ -142,7 +144,7 @@ class New_Point_Order extends New_Point
     }
 
     /**
-     * Restore the total_amount after order cancelled/refunded/failed
+     * Restore the total_amount after order cancelled/(fully) refunded/failed. Beware that this status is different from event type for Points and Rewards Plugin.
      * @param int $order_id
      * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure or if the value passed to the function is the same as the one that is already in the database.
      */
@@ -152,21 +154,25 @@ class New_Point_Order extends New_Point
         $user = $order->get_user_id();
         $total = $order->get_subtotal();
 
-        // Should not minus the whole subtotal if refunded before when cancelled
-        if ($order->get_status() === 'cancelled') {
-            global $wpdb;
-            $refund = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT SUM(total_sales)
+        // Deduct the past refunds if applicable
+        // Beware that order/refund processing might take some time so would be better if a little gap between each cancel/refund
+        global $wpdb;
+        $refund = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(total_sales)
                     FROM {$wpdb->prefix}wc_order_stats
-                    WHERE parent_id = %d"
-                    , $order_id)
-            );
-            $total += $refund;
+                    WHERE parent_id = %d AND status = 'wc-completed'"
+                , $order_id
+            )
+        );
+        if ($total <= $refund) {
+            return;
         }
 
+        $total += $refund;
         $total_amount = $this->get_total_amount($user);
         $new_total = $total_amount >= $total ? $total_amount - $total : 0;
+
         return $this->set_total_amount_in_db($user, $new_total);
     }
 
@@ -188,7 +194,7 @@ class New_Point_Order extends New_Point
     }
 
     /**
-     * Set points based on user total spend at the time they ordered
+     * Set points based on user total spend at the time they ordered. Beware that this hook triggers when the points decrease. So a refund amount (event type) has to be verified.
      * @param int $points
      * @param int $user_id
      * @param string $event_type
@@ -196,17 +202,36 @@ class New_Point_Order extends New_Point
      * @param int $order_id
      * @return int
      */
-    public function set_points_when_partially_refunded($points, $user_id, $event_type, $data, $order_id)
+    public function reset_points_when_cancel_refunded($points, $user_id, $event_type, $data, $order_id)
     {
-        // Separate redeeming logic
-        if ($event_type === 'order-redeem') {
+        // Separate redeeming and cancelled/refund logic
+        // Beware that this event type is different from WooCommerce order status
+        if ($event_type !== 'order-refunded' && $event_type !== 'order-cancelled') {
             return $points;
         }
 
         $order = wc_get_order($order_id);
-        $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
+        
+        if ($event_type === 'order-refunded') {
+            $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
+            $points *= $ratio;
+        }
 
-        return $points * $ratio;
+        // Deduct the past refunds if applicable
+        if ($event_type === 'order-cancelled') {
+            global $wpdb;
+            $refund = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT SUM(points)
+                        FROM {$wpdb->prefix}wc_points_rewards_user_points_log
+                        WHERE order_id = %d AND type = 'order-refunded'"
+                    , $order_id
+                )
+            );
+            $points += $refund;
+        }
+
+        return $points;
     }
 
 }

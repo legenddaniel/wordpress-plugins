@@ -82,19 +82,6 @@ abstract class New_Point
     }
 
     /**
-     * Calculate points
-     * @param WC_Product $product
-     * @param array $cart_item
-     * @return int
-     */
-    protected function recalculate_points($product, $cart_item = null)
-    {
-        $price = $product->get_regular_price();
-        $qty = $cart_item['quantity'] ?: 1;
-        return round($price * $qty);
-    }
-
-    /**
      * Check if the product is a point product
      * @param int|string|WC_Product $product
      * @return bool

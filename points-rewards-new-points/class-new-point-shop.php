@@ -20,8 +20,8 @@ class New_Point_Shop extends New_Point
         });
 
         // Apply custom point:cost ratio
-        add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_ratio'));
-        add_filter('woocommerce_points_earned_for_order_item', array($this, 'recalculate_ratio'));
+        add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points'));
+        add_filter('woocommerce_points_earned_for_order_item', array($this, 'recalculate_points'));
 
         // Display points in cart/checkout total lines
         add_action('woocommerce_cart_totals_before_order_total', array($this, 'display_points_used_total'));
@@ -43,12 +43,25 @@ class New_Point_Shop extends New_Point
      * @param string|double $amount - The original points
      * @return int
      */
-    public function recalculate_ratio($amount)
+    public function recalculate_points($amount)
     {
         $total_amount = $this->total_amount;
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
 
-        return $amount * $ratio;
+        return round($amount * $ratio);
+    }
+
+    /**
+     * Calculate points of a WC_Product instance
+     * @param WC_Product $product
+     * @param array $cart_item
+     * @return int
+     */
+    private function recalculate_product_points($product, $cart_item = null)
+    {
+        $price = $product->get_regular_price();
+        $qty = $cart_item['quantity'] ?: 1;
+        return round($price * $qty);
     }
 
     /**
@@ -61,7 +74,7 @@ class New_Point_Shop extends New_Point
         foreach (WC()->cart->get_cart() as $cart_item) {
             $data = $cart_item['data'];
             if ($this->is_point_product($data)) {
-                $total_points += $this->recalculate_points($data, $cart_item);
+                $total_points += $this->recalculate_product_points($data, $cart_item);
             }
         }
         if ($total_points) {
@@ -118,7 +131,7 @@ class New_Point_Shop extends New_Point
             return $price_html;
         }
 
-        $new_html = $this->recalculate_points($product) . ' points';
+        $new_html = $this->recalculate_product_points($product) . ' points';
 
         return $new_html;
     }
@@ -137,7 +150,7 @@ class New_Point_Shop extends New_Point
             return $price_html;
         }
 
-        $new_html = $this->recalculate_points($product, $cart_item) . ' points';
+        $new_html = $this->recalculate_product_points($product, $cart_item) . ' points';
 
         return $new_html;
     }

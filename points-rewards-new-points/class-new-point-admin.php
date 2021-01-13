@@ -20,7 +20,7 @@ class New_Point_Admin
      */
     public function admin_init_assets()
     {
-        $plugin_url = plugin_dir_url(__DIR__);
+        $plugin_url = plugin_dir_url(__FILE__);
 
         wp_enqueue_script(
             'admin',
