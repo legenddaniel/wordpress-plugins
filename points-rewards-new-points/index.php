@@ -4,7 +4,7 @@
  * Description:       Customized WooCommerce Points & Rewards.
  * Version:           1.0.0
  * Author:            Neo, Daniel Siyuan Zuo
- * Text Domain: points-rewards-new-points
+ * Text Domain: 	  points-rewards-new-points
  */
  
 defined( 'WPINC' ) || die;

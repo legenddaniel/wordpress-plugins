@@ -1,0 +1,58 @@
+{
+    "enable": "1",
+    "price_switcher": "0",
+    "currency_default": "USD",
+    "currency_hidden": [
+        "0",
+        "0"
+    ],
+    "currency": [
+        "USD",
+        "CAD"
+    ],
+    "currency_pos": [
+        "left",
+        "left"
+    ],
+    "currency_rate": [
+        "1",
+        "2"
+    ],
+    "currency_rate_fee": [
+        "0",
+        "0"
+    ],
+    "currency_decimals": [
+        "2",
+        "2"
+    ],
+    "currency_custom": [
+        "USD$",
+        "CAD$"
+    ],
+    "auto_detect": "1",
+    "geo_api": "0",
+    "enable_currency_by_country": "1",
+    "USD_by_country": [
+        "US"
+    ],
+    "CAD_by_country": [
+        "CA"
+    ],
+    "enable_design": "1",
+    "design_title": "Select your currency",
+    "design_position": "1",
+    "text_color": "#ffffff",
+    "sidebar_style": "0",
+    "main_color": "#f78080",
+    "background_color": "#212121",
+    "is_checkout": "1",
+    "conditional_tags": "",
+    "flag_custom": "",
+    "shortcode_color": "#212121",
+    "shortcode_bg_color": "#ffffff",
+    "shortcode_active_color": "#212121",
+    "shortcode_active_bg_color": "#ffffff",
+    "custom_css": "",
+    "enable_multi_payment": "1"
+}

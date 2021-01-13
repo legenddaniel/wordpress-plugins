@@ -59,12 +59,11 @@ class New_Point_Order extends New_Point
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
             if ($this->is_point_product($product_id)) {
-                $product = wc_get_product($product_id);
-                $points_used += $product->get_regular_price();
+                $points_used += $this->get_product_price($product_id);
             }
         }
 
-        return $points_used ? update_post_meta($order_id, 'points_used', $points_used) : false;
+        return $points_used ? update_post_meta($order_id, 'points_used', round($points_used)) : false;
     }
 
     /**
@@ -211,7 +210,7 @@ class New_Point_Order extends New_Point
         }
 
         $order = wc_get_order($order_id);
-        
+
         if ($event_type === 'order-refunded') {
             $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
             $points *= $ratio;

@@ -13,6 +13,24 @@ abstract class New_Point
     }
 
     /**
+     * Filter-less version of WC_Product:get_regular_product
+     * @param WC_Product|int $product
+     * @return int|double
+     */
+    protected function get_product_price($product)
+    {
+        $type = gettype($product);
+        if ($type === 'integer' || $type === 'string') {
+            $product_id = $product;
+        } else {
+            $product_id = $product->get_id();
+        }
+
+        $price = get_post_meta($product_id, '_regular_price', true);
+        return +$price;
+    }
+
+    /**
      * Fetch total amount from usermeta
      * @param int $user_id
      * @return int|double

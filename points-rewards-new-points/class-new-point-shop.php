@@ -20,8 +20,8 @@ class New_Point_Shop extends New_Point
         });
 
         // Apply custom point:cost ratio
-        add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points'));
-        add_filter('woocommerce_points_earned_for_order_item', array($this, 'recalculate_points'));
+        add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points_cart'), 10, 3);
+        add_filter('woocommerce_points_earned_for_order_item', array($this, 'recalculate_points_order'), 10, 5);
 
         // Display points in cart/checkout total lines
         add_action('woocommerce_cart_totals_before_order_total', array($this, 'display_points_used_total'));
@@ -39,16 +39,50 @@ class New_Point_Shop extends New_Point
     }
 
     /**
-     * Recalculate points earned on a single product basis with various ratio in cart
-     * @param string|double $amount - The original points
+     * Recalculate points earned on a non-point product basis with various ratio
+     * @param array|WC_Order_Item_Product $item
+     * @param int $amount - The default points
      * @return int
      */
-    public function recalculate_points($amount)
+    private function recalculate_points($item, $amount)
     {
+        // Return default points for point product (i.e. 0)
+        $product_id = $item['product_id'] ?: $item->data['product_id'];
+        if ($this->is_point_product($product_id)) {
+            return $amount;
+        }
+
+        $price = $this->get_product_price($product_id);
         $total_amount = $this->total_amount;
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
 
-        return round($amount * $ratio);
+        return round($price * $ratio);
+    }
+
+    /**
+     * Recalculate points earned on a single product basis with various ratio in cart
+     * @param string|double $amount - The original points
+     * @param string $item_key
+     * @param array $item - Cart item
+     * @return int
+     */
+    public function recalculate_points_cart($amount, $item_key, $item)
+    {
+        return $this->recalculate_points($item, $amount);
+    }
+
+    /**
+     * Recalculate points earned on a single product basis with various ratio in order
+     * @param string|double $amount - The original points
+     * @param WC_Product $product
+     * @param string $item_key
+     * @param WC_Order_Item_Product $item - Order item
+     * @param WC_Order $order
+     * @return int
+     */
+    public function recalculate_points_order($amount, $product, $item_key, $item, $order)
+    {
+        return $this->recalculate_points($item, $amount);
     }
 
     /**
@@ -59,7 +93,8 @@ class New_Point_Shop extends New_Point
      */
     private function recalculate_product_points($product, $cart_item = null)
     {
-        $price = $product->get_regular_price();
+        // Cannot use $product->get_regular_price with multi-currency plugin
+        $price = $this->get_product_price($product);
         $qty = $cart_item['quantity'] ?: 1;
         return round($price * $qty);
     }
