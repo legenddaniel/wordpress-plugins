@@ -1,0 +1,17 @@
+{
+    "USD": {
+        "rate": "1",
+        "pos": "left",
+        "decimals": "2",
+        "custom": "USD$",
+        "hide": "0",
+        "is_main": 1
+    },
+    "CAD": {
+        "rate": "2",
+        "pos": "left",
+        "decimals": "2",
+        "custom": "CAD$",
+        "hide": "0"
+    }
+}

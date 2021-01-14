@@ -101,7 +101,23 @@ class New_Point_Order extends New_Point
     }
 
     /**
-     * Set the total_amount after payment completed
+     * Exchange total to USD for CAD orders
+     * @param int $order_id
+     * @param int|double $total - Original total spend
+     * @return int|double New total
+     */
+    private function set_usd_based_total($order_id, $total)
+    {
+        $currency = get_post_meta($order_id, '_order_currency', true);
+        if ($currency && $currency === 'CAD') {
+            $rate = get_post_meta($order_id, 'wmc_order_info', true);
+            $total = number_format($total * $rate['USD']['rate'] / $rate['CAD']['rate'], 2);
+        }
+        return $total;
+    }
+
+    /**
+     * Set the total_amount after payment completed, based on USD amount
      * @param int $order_id
      * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure or if the value passed to the function is the same as the one that is already in the database.
      */
@@ -115,6 +131,9 @@ class New_Point_Order extends New_Point
         $order = wc_get_order($order_id);
         $user = $order->get_user_id();
         $total = $order->get_subtotal();
+
+        // Set the amount to USD based if applicable
+        $total = $this->set_usd_based_total($order_id, $total);
 
         $total_amount = $this->get_total_amount($user);
         return $this->set_total_amount_in_db($user, $total_amount + $total);
@@ -169,6 +188,10 @@ class New_Point_Order extends New_Point
         }
 
         $total += $refund;
+
+        // Set the amount to USD based if applicable
+        $total = $this->set_usd_based_total($order_id, $total);
+
         $total_amount = $this->get_total_amount($user);
         $new_total = $total_amount >= $total ? $total_amount - $total : 0;
 
@@ -186,6 +209,9 @@ class New_Point_Order extends New_Point
         $order = wc_get_order($order_id);
         $user = $order->get_user_id();
         $total = (new WC_Order_Refund($refund_id))->get_amount();
+
+        // Set the amount to USD based if applicable
+        $total = $this->set_usd_based_total($order_id, $total);
 
         $total_amount = $this->get_total_amount($user);
         $new_total = $total_amount >= $total ? $total_amount - $total : 0;
@@ -213,7 +239,7 @@ class New_Point_Order extends New_Point
 
         if ($event_type === 'order-refunded') {
             $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
-            $points *= $ratio;
+            $points = $this->set_usd_based_total($order_id, $points) * $ratio;
         }
 
         // Deduct the past refunds if applicable
