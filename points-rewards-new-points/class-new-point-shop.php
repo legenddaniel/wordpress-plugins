@@ -13,9 +13,11 @@ class New_Point_Shop extends New_Point
         add_action('woocommerce_after_cart_table', function () {
             //     echo apply_filters( 'the_content',"[wcps id='90']");
             // echo apply_filters( 'the_content',"[TABS_R id=91]");
-            echo apply_filters('the_content', "[WPSM_AC id=105]");
+            // echo apply_filters('the_content', "[WPSM_AC id=105]");
             // echo apply_filters( 'the_content',"[carousel_slide id='102']");
-            // echo apply_filters( 'the_content','[sp_wpcarousel id="94"]');
+            echo apply_filters( 'the_content','[products_slider cats="17" autoplay="false"]');
+            echo apply_filters( 'the_content','[products_slider cats="18" autoplay="false"]');
+            echo apply_filters( 'the_content','[products_slider cats="19" autoplay="false"]');
 
         });
 
