@@ -1,0 +1,84 @@
+.cr-wrapper {
+    margin: 64px auto;
+    text-align: center;
+}
+
+.cr-wrapper li {
+    list-style: none;
+}
+.cr-wrapper p {
+    padding: 8px 0;
+    margin: auto;
+}
+/* .woocommerce .woocommerce-cart-form > .cr-wrapper a {
+    text-decoration: none;
+}
+.woocommerce .woocommerce-cart-form > .cr-wrapper a:hover {
+    text-decoration: underline;
+} */
+
+.cr-border {
+    border: 2px solid #000;
+}
+
+.cr-padding {
+    padding: 20px;
+}
+
+#cr-head.cr-remove-border {
+    border-bottom: none;
+}
+#cr-main.cr-remove-border {
+    border-top: none;
+}
+
+.cr-link {
+    cursor: pointer;
+}
+.cr-link:not(.cr-no-underline):hover {
+    text-decoration: underline;
+}
+
+.cr-switch {
+    display: inline-block;
+}
+.cr-switch-off {
+    transform: rotate(90deg);
+}
+.cr-switch-on {
+    transform: rotate(-90deg);
+}
+
+.cr-main-wrapper {
+    padding: 20px;
+}
+
+.cr-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin: auto;
+    width: 50%;
+}
+
+#cr-main:not(.cr-active) {
+    display: none;
+}
+.cr-tabs > .cr-link.cr-active {
+    cursor: default;
+    font-weight: bold;
+    text-decoration: underline;
+}
+#cr-sliders > div:not(.cr-active), 
+#cr-sliders > div:not(.cr-active) * {
+    position: absolute;
+    left: -99999px;
+    /* visibility: hidden;
+
+    height: 0; */
+}
+#cr-sliders > div:not(.cr-active) .slick-track {
+    width: 100% !important;
+}
+#cr-sliders > div:not(.cr-active) .slick-track > li {
+    width: 250px !important;
+}

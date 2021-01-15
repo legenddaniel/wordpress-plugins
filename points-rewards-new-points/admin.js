@@ -3,4 +3,4 @@ jQuery(document).ready(function ($) {
 
     // Hide the points removed in admin single order page
     $p.parents('.note.system-note').toggle(false);
-})
+});

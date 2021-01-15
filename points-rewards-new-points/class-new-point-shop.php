@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class New_Point_Shop extends New_Point
 {
     private $total_amount = 0;
@@ -10,16 +14,14 @@ class New_Point_Shop extends New_Point
         $this->total_amount = $this->get_total_amount(get_current_user_id());
         $this->ratio_type = $this->get_ratio_type($this->total_amount);
 
-        add_action('woocommerce_after_cart_table', function () {
-            //     echo apply_filters( 'the_content',"[wcps id='90']");
-            // echo apply_filters( 'the_content',"[TABS_R id=91]");
-            // echo apply_filters('the_content', "[WPSM_AC id=105]");
-            // echo apply_filters( 'the_content',"[carousel_slide id='102']");
-            echo apply_filters( 'the_content','[products_slider cats="17" autoplay="false"]');
-            echo apply_filters( 'the_content','[products_slider cats="18" autoplay="false"]');
-            echo apply_filters( 'the_content','[products_slider cats="19" autoplay="false"]');
+        add_action('wp_enqueue_scripts', array($this, 'init_assets'));
 
-        });
+        // Render rewards html in cart page
+        add_action('woocommerce_after_cart_table', array($this, 'apply_template'));
+
+        // Validate point product purchase
+        add_filter('woocommerce_add_to_cart_validation', array($this, 'validate_point_product_purchase_add'), 10, 3);
+        add_filter('woocommerce_update_cart_validation', array($this, 'validate_point_product_purchase_update'), 10, 4);
 
         // Apply custom point:cost ratio
         add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points_cart'), 10, 3);
@@ -38,6 +40,115 @@ class New_Point_Shop extends New_Point
 
         // Change the price of point product
         add_action('woocommerce_before_calculate_totals', array($this, 'change_gift_price'));
+    }
+
+    /**
+     * Load CSS and JavaScript
+     * @return void
+     */
+    public function init_assets()
+    {
+        $plugin_url = plugin_dir_url(__FILE__);
+
+        wp_enqueue_style(
+            'cr-css',
+            $plugin_url . 'template-cart-rewards.css',
+            [],
+            rand(111, 9999)
+        );
+
+        wp_enqueue_script(
+            'cr-js',
+            $plugin_url . 'template-cart-rewards.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
+    }
+
+    /**
+     * Apply rewards area html template in cart page
+     * @return void
+     */
+    public function apply_template()
+    {
+        wc_get_template(
+            '/template-cart-rewards.php',
+            [
+                'points' => WC_Points_Rewards_Manager::get_users_points(get_current_user_id()),
+                // 'sliders' => [
+                //     $this->render_slider(95), $this->render_slider(95), $this->render_slider(95)
+                // ]
+                'sliders' => [
+                    $this->render_slider(17), $this->render_slider(18), $this->render_slider(19),
+                ],
+            ],
+            '',
+            dirname(__FILE__)
+        );
+    }
+
+    /**
+     * Render the slider from formatted shortcodes
+     * @param int $cat_id
+     * @return mixed
+     */
+    private function render_slider($cat_id)
+    {
+        // $slider_shortcode = '[slide-anything id="%d"]';
+        // $slider_shortcode = '[wpb-product-slider product_type="category" category="%d"]';
+        $slider_shortcode = '[products_slider cats="%d" autoplay="false" dots="false"]';
+        return apply_filters('the_content', sprintf(__($slider_shortcode, 'woocommerce'), $cat_id));
+    }
+
+    /**
+     * Check if have enough points for redeeming when add to cart
+     * @param bool $passed
+     * @param int $product_id
+     * @param int $quantity
+     * @return bool
+     */
+    public function validate_point_product_purchase_add($passed, $product_id, $quantity)
+    {
+        if ($this->is_point_product($product_id)) {
+            $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
+            $points_used = 0;
+            foreach (WC()->cart->get_cart() as $item) {
+                $product = $item['data'];
+                if ($this->is_point_product($product)) {
+                    $points_used += $this->get_product_price($product) * $item['quantity'];
+                }
+            }
+            if ($points_used + $this->get_product_price($product_id) * $quantity > $total_points) {
+                wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
+                return false;
+            }
+        }
+        return $passed;
+    }
+
+    /**
+     * Check if have enough points for redeeming when update cart
+     * @param bool $passed
+     * @param string $cart_item_key
+     * @param array $values - Cart item
+     * @param int $quantity
+     * @return bool
+     */
+    public function validate_point_product_purchase_update($passed, $cart_item_key, $values, $quantity)
+    {
+        $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
+        $points_used = 0;
+        foreach (WC()->cart->get_cart() as $item) {
+            $product = $item['data'];
+            if ($this->is_point_product($product)) {
+                $points_used += $this->get_product_price($product) * $item['quantity'];
+            }
+        }
+        if ($points_used > $total_points) {
+            wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
+            return false;
+        }
+        return $passed;
     }
 
     /**
