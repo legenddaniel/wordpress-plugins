@@ -31,5 +31,13 @@ jQuery(document).ready(function ($) {
         // Enforce a resize for slider bug fix
         $(window).trigger('resize');
 
+    });
+
+    // Refresh the page after cart update for bug fix
+    $('body').on('updated_cart_totals', function() {
+        location.reload();
+    });
+    $('#cr-sliders .add_to_cart_button').on('click', function() {
+        location.href = '/winery/cart'; // Will remove winery in production
     })
 });
