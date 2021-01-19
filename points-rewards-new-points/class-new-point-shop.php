@@ -8,7 +8,6 @@ class New_Point_Shop extends New_Point
 {
     private $total_amount = 0;
     private $ratio_type = '';
-    // private $cart_total_points = 0;
 
     public function __construct()
     {
@@ -22,7 +21,7 @@ class New_Point_Shop extends New_Point
 
         // Validate point product purchase
         add_filter('woocommerce_add_to_cart_validation', array($this, 'validate_point_product_purchase_add'), 10, 3);
-        // add_filter('woocommerce_update_cart_validation', array($this, 'validate_point_product_purchase_update'), 10, 4);
+        add_filter('woocommerce_update_cart_validation', array($this, 'validate_point_product_purchase_update'), 10, 4);
 
         // Apply custom point:cost ratio
         add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points_cart'), 10, 3);
@@ -31,6 +30,7 @@ class New_Point_Shop extends New_Point
         // Display points in cart/checkout total lines
         add_action('woocommerce_cart_totals_before_order_total', array($this, 'display_points_used_total'));
         add_action('woocommerce_review_order_before_order_total', array($this, 'display_points_used_total'));
+        add_action('woocommerce_widget_shopping_cart_before_buttons', array($this, 'display_minicart_points_used'));
 
         // Add cart item data for points earned
         // add_filter('woocommerce_add_cart_item_data', array($this, 'add_item_point_earned_data'), 10, 3);
@@ -80,11 +80,8 @@ class New_Point_Shop extends New_Point
             '/template-cart-rewards.php',
             [
                 'points' => WC_Points_Rewards_Manager::get_users_points(get_current_user_id()),
-                // 'sliders' => [
-                //     $this->render_slider(95), $this->render_slider(95), $this->render_slider(95)
-                // ]
                 'sliders' => [
-                    $this->render_slider(17), $this->render_slider(18), $this->render_slider(19)
+                    $this->render_slider(17), $this->render_slider(18), $this->render_slider(19),
                 ],
             ],
             '',
@@ -99,10 +96,40 @@ class New_Point_Shop extends New_Point
      */
     private function render_slider($cat_id)
     {
-        // $slider_shortcode = '[slide-anything id="%d"]';
-        // $slider_shortcode = '[wpb-product-slider product_type="category" category="%d"]';
         $slider_shortcode = '[products_slider cats="%d" autoplay="false" dots="false" order="ASC" orderby="meta_value_num" meta_key="_regular_price"]';
+
         return apply_filters('the_content', sprintf(__($slider_shortcode, 'woocommerce'), $cat_id));
+    }
+
+    /**
+     * Update cart model with latest quantity
+     * @param array $items
+     * @param int $product_id
+     * @param int $qty
+     * @return array
+     */
+    private function add_qty_to_cart_model(&$items, $product_id, $qty)
+    {
+        if ($this->is_point_product($product_id)) {
+            $items[$product_id] = $qty;
+        }
+        return $items;
+    }
+
+    /**
+     * Create/update a cart model with array[prdt_id => qty]
+     * @param array $items
+     * @return array
+     */
+    private function set_cart_model($items = null)
+    {
+        $items = $items ?? [];
+        foreach (WC()->cart->get_cart() as $item) {
+            $product_id = $item['product_id'];
+            $qty = $item['quantity'];
+            $items = $this->add_qty_to_cart_model($items, $product_id, $qty);
+        }
+        return $items;
     }
 
     /**
@@ -114,14 +141,8 @@ class New_Point_Shop extends New_Point
      */
     public function validate_point_product_purchase_add($passed, $product_id, $quantity)
     {
+        $points_used = $this->get_points_used() + $this->recalculate_product_points($product_id, $quantity);
         $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-        $points_used = 0;
-        foreach (WC()->cart->get_cart() as $item) {
-            $product = $item['data'];
-            if ($this->is_point_product($product)) {
-                $points_used += $this->get_product_price($product) * $item['quantity'];
-            }
-        }
         if ($points_used > $total_points) {
             wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
             return false;
@@ -135,40 +156,25 @@ class New_Point_Shop extends New_Point
      * @param bool $passed
      * @param string $cart_item_key
      * @param array $values - Cart item
-     * @param int $quantity - Whole cart item qty
+     * @param int $quantity - Item new quantity
      * @return bool
      */
     public function validate_point_product_purchase_update($passed, $cart_item_key, $values, $quantity)
     {
-        // if (did_action('validate_point_product_purchase_update') > 1) {
-        //     return;
-        // }
+        $items = $this->set_cart_model(); // Init cart model
+        $items = $this->add_qty_to_cart_model($items, $values['product_id'], $quantity); // Add current to cart model
 
-        // $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-        // $points_used = 0;
-        // foreach (WC()->cart->get_cart() as $item) {
-        //     $product = $item['data'];
-        //     if ($this->is_point_product($product)) {
-        //         $points_used += $this->get_product_price($product) * $_POST["cart[$cart_item_key][qty]"];
-        //     }
-        // }
-        // if ($points_used > $total_points) {
-        //     wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
-        //     return false;
-        // }
-        // return $passed;
+        // Sum up the total points used
+        $points_used = 0;
+        foreach ($items as $product_id => $qty) {
+            $points_used += $this->recalculate_product_points($product_id, $qty);
+        }
 
-        // Issue: cannot get $_POST["cart[$cart_item_key][qty]"]
-
-        // $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-        // $product = $values['data'];
-        // if ($this->is_point_product($product)) {
-        //     $this->cart_total_points += $this->get_product_price($product) * $_POST["cart[$cart_item_key][qty]"];
-        // }
-        // if ($_REQUEST["cart[16a5cdae362b8d27a1d8f8c7b78b4330][qty]"] === null) {
-        //     wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
-        //     return false;
-        // }
+        $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
+        if ($total_points < $points_used) {
+            wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
+            return false;
+        }
         return $passed;
     }
 
@@ -221,39 +227,76 @@ class New_Point_Shop extends New_Point
     }
 
     /**
-     * Calculate points subtotal of a point product
+     * Calculate points subtotal of a POINT product (ratio-less)
      * @param WC_Product $product
-     * @param array $cart_item
+     * @param array|int $cart_item_or_qty
      * @return int
      */
-    private function recalculate_product_points($product, $cart_item = null)
+    private function recalculate_product_points($product, $cart_item_or_qty = null)
     {
         // Cannot use $product->get_regular_price with multi-currency plugin
         $price = $this->get_product_price($product);
-        $qty = $cart_item['quantity'] ?: 1;
+        switch (gettype($cart_item_or_qty)) {
+            case 'integer':
+                $qty = $cart_item_or_qty;
+                break;
+            case 'NULL':
+                $qty = 1;
+                break;
+            default:
+                $qty = $cart_item_or_qty['quantity'];
+                break;
+        }
+        // $qty = $cart_item['quantity'] ?: 1;
         return round($price * $qty);
     }
 
     /**
-     * Display points in cart/checkout total lines
+     * Get points used in cart
+     * @return int
+     */
+    private function get_points_used()
+    {
+        $points_used = 0;
+        foreach (WC()->cart->get_cart() as $item) {
+            $product = $item['data'];
+            if ($this->is_point_product($product)) {
+                $points_used += $this->recalculate_product_points($product, $item['quantity']);
+            }
+        }
+        return $points_used;
+    }
+
+    /**
+     * Display points used in cart/checkout
      * @return void
      */
     public function display_points_used_total()
     {
-        $total_points = 0;
-        foreach (WC()->cart->get_cart() as $cart_item) {
-            $data = $cart_item['data'];
-            if ($this->is_point_product($data)) {
-                $total_points += $this->recalculate_product_points($data, $cart_item);
-            }
+        $total_points = $this->get_points_used();
+        if (!$total_points) {
+            return;
         }
-        if ($total_points) {
-            echo
-            '<tr>
-                <th>' . __("Points Used", "woocommerce") . '</th>
-                <td data-title="total-volume">' . $total_points . ' points</td>
-            </tr>';
+
+        echo
+        '<tr class="cart-subtotal">
+            <th>' . __("Points Used", "woocommerce") . '</th>
+            <td data-title="Points Used"><span class="woocommerce-Price-amount amount">' . $total_points . ' points</span></td>
+        </tr>';
+    }
+
+    /**
+     * Display points used in minicart
+     * @return void
+     */
+    public function display_minicart_points_used()
+    {
+        $total_points = $this->get_points_used();
+        if (!$total_points) {
+            return;
         }
+
+        echo '<p class="woocommerce-mini-cart__total total"><strong>' . __("Points Used", "woocommerce") . ':</strong><span class="woocommerce-Price-amount amount">' . $total_points . ' points</span></p>';
     }
 
     /**
@@ -305,7 +348,7 @@ class New_Point_Shop extends New_Point
         // Multiple by quantity for subtotal
         $points = is_null($cart_item) ? $this->get_product_price($product) : $this->recalculate_product_points($product, $cart_item);
 
-        $new_html = $points . ' points';
+        $new_html = '<span class="woocommerce-Price-amount amount">' . $points . ' points</span>';
         return $new_html;
     }
 
@@ -361,5 +404,4 @@ class New_Point_Shop extends New_Point
         $points = $this->recalculate_points($product, null);
         return preg_replace('/\d+/', $points, $msg);
     }
-
 }

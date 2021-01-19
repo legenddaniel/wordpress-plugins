@@ -15,7 +15,7 @@ class New_Point_Admin
         add_filter('woocommerce_admin_settings_sanitize_option_wc_points_rewards_earn_points_ratio_500', 'WC_Points_Rewards_Admin::save_conversion_ratio_field', 10, 3);
         add_filter('woocommerce_admin_settings_sanitize_option_wc_points_rewards_earn_points_ratio_1000', 'WC_Points_Rewards_Admin::save_conversion_ratio_field', 10, 3);
         add_filter('woocommerce_admin_settings_sanitize_option_wc_points_rewards_earn_points_ratio_up1000', 'WC_Points_Rewards_Admin::save_conversion_ratio_field', 10, 3);
-        add_filter('wc_points_rewards_settings', array($this, 'new_points_rewards_settings'));
+        add_filter('wc_points_rewards_settings', array($this, 'change_plugin_settings'));
     }
 
     /**
@@ -38,7 +38,7 @@ class New_Point_Admin
      * Custom template for the setting page. Partially copied from WC_Points_Rewards_Admin::save_conversion_ratio_field
      * @return array The filtered setting page template
      */
-    public function new_points_rewards_settings()
+    public function change_plugin_settings()
     {
         $settings = array(
 
