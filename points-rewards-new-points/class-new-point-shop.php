@@ -43,6 +43,17 @@ class New_Point_Shop extends New_Point
         // Change the message display in single product page
         add_filter('wc_points_rewards_single_product_message', array($this, 'change_product_point_msg'));
 
+        // Replace the default display for variable products (non-point)
+        // First remove the current one from WC_Points_Rewards_Product
+        // add_action('init', function () {
+        //     $this->remove_filters_with_method_name('woocommerce_before_add_to_cart_button', 'add_variation_message_to_product_summary', 25);
+        //     remove_action('woocommerce_before_add_to_cart_button', 'add_variation_message_to_product_summary', 25);
+        // }, 20);
+        add_action('woocommerce_before_add_to_cart_button', array($this, 'replace_variable_product_points_html'));
+        // add_filter('woocommerce_variation_price_html', array($this, 'replace_variable_reg_product_html'), 20, 2);
+        // add_filter( 'woocommerce_variation_sale_price_html', array( $this, 'replace_variable_reg_product_html' ), 20, 2 );
+        add_filter('woocommerce_available_variation', array($this, 'replace_available_variable_reg_product_html'), 20, 3);
+
         // Change the price of point product
         add_action('woocommerce_before_calculate_totals', array($this, 'change_gift_price'));
     }
@@ -65,6 +76,12 @@ class New_Point_Shop extends New_Point
         wp_enqueue_script(
             'cr-js',
             $plugin_url . 'template-cart-rewards.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
+        wp_enqueue_script(
+            'variable-js',
+            $plugin_url . 'variable.js',
             ['jquery'],
             rand(111, 9999)
         );
@@ -141,11 +158,17 @@ class New_Point_Shop extends New_Point
      */
     public function validate_point_product_purchase_add($passed, $product_id, $quantity)
     {
-        $points_used = $this->get_points_used() + $this->recalculate_product_points($product_id, $quantity);
-        $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-        if ($points_used > $total_points) {
-            wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
-            return false;
+        if ($this->is_point_product($product_id)) {
+            $variation_id = $_POST['variation_id'];
+
+            $points = $variation_id ? $this->recalculate_product_points($variation_id, $quantity) : $this->recalculate_product_points($product_id, $quantity);
+            $points_used = $this->get_points_used() + $points;
+
+            $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
+            if ($points_used > $total_points) {
+                wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
+                return false;
+            }
         }
 
         return $passed;
@@ -161,20 +184,24 @@ class New_Point_Shop extends New_Point
      */
     public function validate_point_product_purchase_update($passed, $cart_item_key, $values, $quantity)
     {
-        $items = $this->set_cart_model(); // Init cart model
-        $items = $this->add_qty_to_cart_model($items, $values['product_id'], $quantity); // Add current to cart model
+        $product_id = $values['product_id'];
+        if ($this->is_point_product($product_id)) {
+            $items = $this->set_cart_model(); // Init cart model
+            $items = $this->add_qty_to_cart_model($items, $product_id, $quantity); // Add current to cart model
 
-        // Sum up the total points used
-        $points_used = 0;
-        foreach ($items as $product_id => $qty) {
-            $points_used += $this->recalculate_product_points($product_id, $qty);
+            // Sum up the total points used
+            $points_used = 0;
+            foreach ($items as $product_id => $qty) {
+                $points_used += $this->recalculate_product_points($product_id, $qty);
+            }
+
+            $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
+            if ($total_points < $points_used) {
+                wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
+                return false;
+            }
         }
 
-        $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-        if ($total_points < $points_used) {
-            wc_add_notice(__('You don\'t have enough points!', 'woocommerce'), 'error');
-            return false;
-        }
         return $passed;
     }
 
@@ -182,16 +209,18 @@ class New_Point_Shop extends New_Point
      * Recalculate points earned on a non-point product basis with various ratio
      * @param int|WC_Product $product
      * @param int $amount - The default points
+     * @param int $variation_id
      * @return int
      */
-    private function recalculate_points($product, $amount)
+    private function recalculate_points($product, $amount = null, $variation_id = null)
     {
         // Return default points for point product (i.e. 0)
         if ($this->is_point_product($product)) {
             return $amount;
         }
 
-        $price = $this->get_product_price($product);
+        // $price = $this->get_product_price($product);
+        $price = $variation_id ? $this->get_product_price($variation_id) : $this->get_product_price($product);
         $total_amount = $this->total_amount;
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
 
@@ -208,7 +237,9 @@ class New_Point_Shop extends New_Point
     public function recalculate_points_cart($amount, $item_key, $item)
     {
         $product = $item['data'];
-        return $this->recalculate_points($product, $amount);
+        $variation = $item['variation_id'];
+        return $this->recalculate_points($product, $amount, $variation);
+        // return $this->recalculate_points($product, $amount);
     }
 
     /**
@@ -223,7 +254,8 @@ class New_Point_Shop extends New_Point
     public function recalculate_points_order($amount, $product, $item_key, $item, $order)
     {
         $product_id = $item->get_product_id();
-        return $this->recalculate_points($product_id, $amount);
+        $variation_id = $item->get_variation_id();
+        return $this->recalculate_points($product_id, $amount, $variation_id);
     }
 
     /**
@@ -281,7 +313,7 @@ class New_Point_Shop extends New_Point
         echo
         '<tr class="cart-subtotal">
             <th>' . __("Points Used", "woocommerce") . '</th>
-            <td data-title="Points Used"><span class="woocommerce-Price-amount amount">' . $total_points . ' points</span></td>
+            <td data-title="Points Used"><span class="woocommerce-Price-amount amount">' . $total_points . ' Points</span></td>
         </tr>';
     }
 
@@ -296,7 +328,7 @@ class New_Point_Shop extends New_Point
             return;
         }
 
-        echo '<p class="woocommerce-mini-cart__total total"><strong>' . __("Points Used", "woocommerce") . ':</strong><span class="woocommerce-Price-amount amount">' . $total_points . ' points</span></p>';
+        echo '<p class="woocommerce-mini-cart__total total"><strong>' . __("Points Used", "woocommerce") . ':</strong><span class="woocommerce-Price-amount amount">' . $total_points . ' Points</span></p>';
     }
 
     /**
@@ -335,20 +367,21 @@ class New_Point_Shop extends New_Point
     /**
      * Change price to points for gifts
      * @param string $price_html - Price html
-     * @param WC_Product $product
+     * @param WC_Product $product - Variation_id in cart
      * @param array $cart_item
      * @return string
      */
     private function change_gift_price_html($price_html, $product, $cart_item = null)
     {
-        if (!$this->is_point_product($product)) {
+        // Skip for variable products (not the variations)
+        if (!$this->is_point_product($product) || $product->is_type('variable')) {
             return $price_html;
         }
 
         // Multiple by quantity for subtotal
         $points = is_null($cart_item) ? $this->get_product_price($product) : $this->recalculate_product_points($product, $cart_item);
 
-        $new_html = '<span class="woocommerce-Price-amount amount">' . $points . ' points</span>';
+        $new_html = '<span class="woocommerce-Price-amount amount">' . $points . ' Points</span>';
         return $new_html;
     }
 
@@ -390,18 +423,75 @@ class New_Point_Shop extends New_Point
     }
 
     /**
-     * Change points earned message in single prduct page. Remove message for point products.
+     * Change points earned message in single product page. Remove message for point products. P.S. Seems only work for simple products.
      * @param string $msg
      * @return string
      */
     public function change_product_point_msg($msg)
     {
+        // Hide redundant msg for variable products (not the variations)
         global $product;
-        if ($this->is_point_product($product)) {
+        if ($this->is_point_product($product) || $product->is_type('variable')) {
             return null;
         }
 
-        $points = $this->recalculate_points($product, null);
+        $points = $this->recalculate_points($product);
         return preg_replace('/\d+/', $points, $msg);
+    }
+
+    /**
+     * Replace the default point html for available variable products for non-point prducts.
+     * @param array $data
+     * @param WC_Product $product
+     * @param WC_Product $variation
+     * @return array
+     */
+    public function replace_available_variable_reg_product_html($data, $product, $variation)
+    {
+        if (!$this->is_point_product($product) || $product->is_type('variable')) {
+            $points = $this->recalculate_points($variation);
+            $data['price_html'] = preg_replace('/\d+/', $points, $data['price_html'], 1);
+            return $data;
+        }
+    }
+
+    /**
+     * Replace/hide the default html for variable products. Partially copy from WC_Points_Rewards_Product::add_variation_message_to_product_summary
+     * @return void
+     */
+    public function replace_variable_product_points_html()
+    {
+        global $product;
+
+        // make sure the product has variations (otherwise it's probably a simple product)
+        if ($product && method_exists($product, 'get_available_variations')) {
+            
+            // Create context for the following methods and remove the embedded action
+            $that = new WC_Points_Rewards_Product();
+            $this->remove_filters_with_method_name('woocommerce_before_add_to_cart_button', 'add_variation_message_to_product_summary', 25);
+
+            // Hide the html after removing default
+            if ($this->is_point_product($product)) {
+                return;
+            }
+            
+            // get variations
+            $variations = $product->get_available_variations();
+
+            // find the variation with the most points
+            $points = $that->get_highest_points_variation($variations, $product->get_id());
+
+            $total_amount = $this->total_amount;
+            $ratio = $this->process_ratio($this->get_ratio($total_amount));
+            $points = round($points * $ratio);
+
+            $message = '';
+            // if we have a points value let's create a message; other wise don't print anything
+            if ($points) {
+                $message = $that->create_variation_message_to_product_summary($points);
+            }
+
+            echo $message;
+        }
     }
 }

@@ -1,0 +1,122 @@
+[
+    {
+        "attributes": {
+            "attribute_color": "Black"
+        },
+        "availability_html": "",
+        "backorders_allowed": false,
+        "dimensions": {
+            "length": "",
+            "width": "",
+            "height": ""
+        },
+        "dimensions_html": "N\/A",
+        "display_price": 70,
+        "display_regular_price": 70,
+        "image": {
+            "title": "",
+            "caption": "",
+            "url": "",
+            "alt": "",
+            "src": "",
+            "srcset": false,
+            "sizes": false
+        },
+        "image_id": 0,
+        "is_downloadable": false,
+        "is_in_stock": true,
+        "is_purchasable": true,
+        "is_sold_individually": "no",
+        "is_virtual": false,
+        "max_qty": "",
+        "min_qty": 1,
+        "price_html": "<span class=\"wc-points-rewards-product-message\">Purchase this product now and earn <strong>53<\/strong> Points!<\/span><br \/> <span class=\"price\"><span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">CAD$<\/span>70.00<\/span><\/span>",
+        "sku": "",
+        "variation_description": "",
+        "variation_id": 6310,
+        "variation_is_active": true,
+        "variation_is_visible": true,
+        "weight": "",
+        "weight_html": "N\/A"
+    },
+    {
+        "attributes": {
+            "attribute_color": "White"
+        },
+        "availability_html": "",
+        "backorders_allowed": false,
+        "dimensions": {
+            "length": "",
+            "width": "",
+            "height": ""
+        },
+        "dimensions_html": "N\/A",
+        "display_price": 90,
+        "display_regular_price": 90,
+        "image": {
+            "title": "",
+            "caption": "",
+            "url": "",
+            "alt": "",
+            "src": "",
+            "srcset": false,
+            "sizes": false
+        },
+        "image_id": 0,
+        "is_downloadable": false,
+        "is_in_stock": true,
+        "is_purchasable": true,
+        "is_sold_individually": "no",
+        "is_virtual": false,
+        "max_qty": "",
+        "min_qty": 1,
+        "price_html": "<span class=\"wc-points-rewards-product-message\">Purchase this product now and earn <strong>68<\/strong> Points!<\/span><br \/> <span class=\"price\"><span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">CAD$<\/span>90.00<\/span><\/span>",
+        "sku": "",
+        "variation_description": "",
+        "variation_id": 6311,
+        "variation_is_active": true,
+        "variation_is_visible": true,
+        "weight": "",
+        "weight_html": "N\/A"
+    },
+    {
+        "attributes": {
+            "attribute_color": "Red"
+        },
+        "availability_html": "",
+        "backorders_allowed": false,
+        "dimensions": {
+            "length": "",
+            "width": "",
+            "height": ""
+        },
+        "dimensions_html": "N\/A",
+        "display_price": 140,
+        "display_regular_price": 140,
+        "image": {
+            "title": "",
+            "caption": "",
+            "url": "",
+            "alt": "",
+            "src": "",
+            "srcset": false,
+            "sizes": false
+        },
+        "image_id": 0,
+        "is_downloadable": false,
+        "is_in_stock": true,
+        "is_purchasable": true,
+        "is_sold_individually": "no",
+        "is_virtual": false,
+        "max_qty": "",
+        "min_qty": 1,
+        "price_html": "<span class=\"wc-points-rewards-product-message\">Purchase this product now and earn <strong>105<\/strong> Points!<\/span><br \/> <span class=\"price\"><span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">CAD$<\/span>140.00<\/span><\/span>",
+        "sku": "",
+        "variation_description": "",
+        "variation_id": 6312,
+        "variation_is_active": true,
+        "variation_is_visible": true,
+        "weight": "",
+        "weight_html": "N\/A"
+    }
+]

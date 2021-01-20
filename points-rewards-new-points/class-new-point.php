@@ -1,7 +1,7 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
 abstract class New_Point
@@ -17,8 +17,8 @@ abstract class New_Point
     }
 
     /**
-     * Filter-less version of WC_Product:get_regular_product
-     * @param WC_Product|int $product
+     * Filter-less version of WC_Product:get_regular_product. Product may be single product id or variation id.
+     * @param WC_Product|int $product - Product_id or Variation id
      * @return int|double
      */
     protected function get_product_price($product)
@@ -31,6 +31,7 @@ abstract class New_Point
         }
 
         $price = get_post_meta($product_id, '_regular_price', true);
+        // return $price === '' ? $price : +$price;
         return +$price;
     }
 
@@ -119,9 +120,37 @@ abstract class New_Point
         }
 
         $terms = get_the_terms($product_id, 'product_cat');
-        foreach ($terms as $term) {
-            if ($term->name === 'points') {
-                return true;
+        if (is_array($terms)) {
+            foreach ($terms as $term) {
+                if ($term->name === 'points') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected function remove_filters_with_method_name($hook_name = '', $method_name = '', $priority = 0)
+    {
+        global $wp_filter;
+        // Take only filters on right hook name and priority
+        if (!isset($wp_filter[$hook_name][$priority]) || !is_array($wp_filter[$hook_name][$priority])) {
+            return false;
+        }
+        // Loop on filters registered
+        foreach ((array) $wp_filter[$hook_name][$priority] as $unique_id => $filter_array) {
+            // Test if filter is an array ! (always for class/method)
+            if (isset($filter_array['function']) && is_array($filter_array['function'])) {
+                // Test if object is a class and method is equal to param !
+                if (is_object($filter_array['function'][0]) && get_class($filter_array['function'][0]) && $filter_array['function'][1] == $method_name) {
+                    // Test for WordPress >= 4.7 WP_Hook class (https://make.wordpress.org/core/2016/09/08/wp_hook-next-generation-actions-and-filters/)
+                    if (is_a($wp_filter[$hook_name], 'WP_Hook')) {
+                        unset($wp_filter[$hook_name]->callbacks[$priority][$unique_id]);
+                    } else {
+                        unset($wp_filter[$hook_name][$priority][$unique_id]);
+                    }
+                }
             }
         }
         return false;

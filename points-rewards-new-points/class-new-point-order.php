@@ -1,7 +1,7 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
 class New_Point_Order extends New_Point
@@ -61,9 +61,15 @@ class New_Point_Order extends New_Point
         $points_used = 0;
         $order = wc_get_order($order_id);
         foreach ($order->get_items() as $item) {
+            // $product_id = $item->get_product_id();
+            // if ($this->is_point_product($product_id)) {
+            //     $points_used += $this->get_product_price($product_id);
+            // }
             $product_id = $item->get_product_id();
+            $variation_id = $item->get_variation_id();
             if ($this->is_point_product($product_id)) {
-                $points_used += $this->get_product_price($product_id);
+                $price = $this->get_product_price($product_id) ?: $this->get_product_price($variation_id);
+                $points_used += $price;
             }
         }
 

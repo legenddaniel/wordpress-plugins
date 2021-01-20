@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
 ?>
     <section class="cr-wrapper">
         <div id="cr-head" class="cr-border">
-            <p>You now have <b><?=$points;?></b> Beauty Insider points</p>
+            <p>You now have <b><?=$points;?></b> Beauty Insider Points</p>
             <p id="cr-clp-switch"><b class="cr-link">Redeem your rewards</b><span class="cr-link cr-no-underline">&nbsp;</span><span class="cr-link cr-no-underline cr-switch cr-switch-off">></span></p>
         </div>
         <div id="cr-main" class="cr-padding cr-border">
