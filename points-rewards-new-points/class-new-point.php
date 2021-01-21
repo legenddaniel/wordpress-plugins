@@ -105,7 +105,7 @@ abstract class New_Point
     }
 
     /**
-     * Check if the product is a point product
+     * Check if the product is a point product. Must be a simple product or the parent product of variations.
      * @param int|string|WC_Product $product
      * @return bool
      */
@@ -131,6 +131,39 @@ abstract class New_Point
         return false;
     }
 
+    /**
+     * Calculate points subtotal of a POINT product (ratio-less)
+     * @param WC_Product|int $product
+     * @param int|null $variation - 0 or null if not a variation
+     * @param array|int $cart_item_or_qty
+     * @return int
+     */
+    protected function recalculate_point_product_points($product, $variation, $cart_item_or_qty = null)
+    {
+        // Cannot use $product->get_regular_price with multi-currency plugin
+        $price = $variation ? $this->get_product_price($variation) : $this->get_product_price($product);
+        switch (gettype($cart_item_or_qty)) {
+            case 'integer':
+                $qty = $cart_item_or_qty;
+                break;
+            case 'NULL':
+                $qty = 1;
+                break;
+            default:
+                $qty = $cart_item_or_qty['quantity'];
+                break;
+        }
+        // $qty = $cart_item['quantity'] ?: 1;
+        return round($price * $qty);
+    }
+
+    /**
+     * Remove default action/filter
+     * @param string $hook_name
+     * @param string $method_name
+     * @param int $priority
+     * @return bool
+     */
     protected function remove_filters_with_method_name($hook_name = '', $method_name = '', $priority = 0)
     {
         global $wp_filter;
