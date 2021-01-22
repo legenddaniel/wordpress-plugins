@@ -6,7 +6,20 @@ if (!defined('ABSPATH')) {
 
 abstract class New_Point
 {
-    // HTML template config
+    // Point product category id
+    // local
+    // protected $point_cat = 16;
+    // protected $point_500_cat = 17;
+    // protected $point_1000_cat = 18;
+    // protected $point_up1000_cat = 19;
+
+    // moditech.site
+    protected $point_cat = 182;
+    protected $point_500_cat = 183;
+    protected $point_1000_cat = 184;
+    protected $point_up1000_cat = 185;
+
+    // HTML template
     protected $text_no_point = 'You don\'t have enough points!';
     protected $text_points_used = 'Points Used';
     protected $html_cart_subtotal = '<tr class="cart-subtotal"><th>%s</th><td data-title="%s"><span class="woocommerce-Price-amount amount">%d Points</span></td></tr>';
@@ -137,7 +150,7 @@ abstract class New_Point
         $terms = get_the_terms($product_id, 'product_cat');
         if (is_array($terms)) {
             foreach ($terms as $term) {
-                if ($term->name === 'points') {
+                if ($term->term_id === $this->point_cat) {
                     return true;
                 }
             }

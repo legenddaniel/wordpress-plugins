@@ -62,7 +62,7 @@
 }
 
 #cr-main.cr-active {
-    height: 32rem !important;
+    height: 40rem !important;
     /* min-height: 28rem; */
 }
 #cr-main:not(.cr-active) {

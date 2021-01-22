@@ -37,7 +37,7 @@ jQuery(document).ready(function ($) {
     $('body').on('updated_cart_totals', function() {
         location.reload();
     });
-    // $('#cr-sliders .add_to_cart_button').on('click', function() {
-    //     location.href = '/winery/cart'; // Will remove winery in production
-    // })
+    $('#cr-sliders .add_to_cart_button').on('click', function() {
+        location.href = '/cart'; // Will remove winery in production
+    })
 });

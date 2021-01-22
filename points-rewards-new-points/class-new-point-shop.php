@@ -41,8 +41,8 @@ class New_Point_Shop extends New_Point
         add_filter('wc_points_rewards_single_product_message', array($this, 'change_product_point_msg'));
 
         // // Replace the default display for variable products (non-point)
-        add_action('woocommerce_before_add_to_cart_button', array($this, 'replace_variable_product_points_html'));
         add_filter('woocommerce_available_variation', array($this, 'replace_available_variable_product_html'), 20, 3);
+        add_action('woocommerce_before_add_to_cart_button', array($this, 'replace_variable_product_points_html'));
 
         // // Change the price of point product
         add_action('woocommerce_before_calculate_totals', array($this, 'change_gift_price'));
@@ -80,7 +80,7 @@ class New_Point_Shop extends New_Point
         $args = [
             'points' => WC_Points_Rewards_Manager::get_users_points(get_current_user_id()),
             'sliders' => [
-                $this->render_slider(17), $this->render_slider(18), $this->render_slider(19),
+                $this->render_slider($this->point_500_cat), $this->render_slider($this->point_1000_cat), $this->render_slider($this->point_up1000_cat),
             ],
         ];
         new_point_template_cart_rewards($args);
@@ -93,7 +93,7 @@ class New_Point_Shop extends New_Point
      */
     private function render_slider($cat_id)
     {
-        $slider_shortcode = '[products_slider cats="%d" autoplay="false" dots="false" order="ASC" orderby="meta_value_num" meta_key="_regular_price"]';
+        $slider_shortcode = '[products_slider cats="%d" autoplay="false" dots="false" order="ASC" orderby="meta_value_num" meta_key="_price"]';
 
         return apply_filters('the_content', sprintf(__($slider_shortcode, 'woocommerce'), $cat_id));
     }
@@ -353,7 +353,7 @@ class New_Point_Shop extends New_Point
         $points = $this->recalculate_point_product_points($product, $variation, $qty);
 
         // Should not apply in cart/checkout page
-        if ((is_single() || is_shop()) && $product->is_on_sale()) {
+        if (!is_cart() && !is_checkout() && method_exists($product, 'is_on_sale') && $product->is_on_sale()) {
             $reg_points = $this->recalculate_point_product_points($product, $variation, $qty, 'regular');
 
             return sprintf($this->html_onsale_variable_point_product_price, $reg_points, $points);
@@ -429,10 +429,12 @@ class New_Point_Shop extends New_Point
      */
     public function replace_available_variable_product_html($data, $product, $variation)
     {
-        // Points earned for regular products (Purchase this product now and earn XX Points!)
+        // Points earned for regular products (Purchase this product now and earn XX Points!). Apply to single product page rather than the preview since (Purchase this product now and earn XX Points!) is not in the preview.
         if (!$this->is_point_product($product)) {
-            $points = $this->recalculate_points($variation);
-            $data['price_html'] = preg_replace('/\d+/', $points, $data['price_html'], 1);
+            if (is_product()) {
+                $points = $this->recalculate_points($variation);
+                $data['price_html'] = preg_replace('/\d+/', $points, $data['price_html'], 1);
+            }
             return $data;
         }
 
@@ -443,7 +445,7 @@ class New_Point_Shop extends New_Point
                 $reg_points = $this->recalculate_point_product_points($product, $variation, 1, 'regular');
                 $price_html = '<span class="price">' . sprintf($this->html_onsale_variable_point_product_price, $reg_points, $points) . '</span>';
             } else {
-                $price_html = '<span class="price">' . sprinft($this->html_onsale_single_point_product_price, $points) . '</span>';
+                $price_html = '<span class="price">' . sprintf($this->html_onsale_single_point_product_price, $points) . '</span>';
             }
 
             $data['price_html'] = $price_html;
