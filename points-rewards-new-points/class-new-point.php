@@ -6,6 +6,14 @@ if (!defined('ABSPATH')) {
 
 abstract class New_Point
 {
+    // HTML template config
+    protected $text_no_point = 'You don\'t have enough points!';
+    protected $text_points_used = 'Points Used';
+    protected $html_cart_subtotal = '<tr class="cart-subtotal"><th>%s</th><td data-title="%s"><span class="woocommerce-Price-amount amount">%d Points</span></td></tr>';
+    protected $html_minicart_subtotal = '<p class="woocommerce-mini-cart__total total"><strong>%s:</strong><span class="woocommerce-Price-amount amount">%d Points</span></p>';
+    protected $html_variable_point_product_price = '<span class="woocommerce-Price-amount amount">%dPoints</span> – <span class="woocommerce-Price-amount amount">%dPoints</span>';
+    protected $html_onsale_variable_point_product_price = '<del><span class="woocommerce-Price-amount amount">%d Points</span></del> <ins><span class="woocommerce-Price-amount amount">%d Points</span></ins>';
+    protected $html_onsale_single_point_product_price = '<span class="woocommerce-Price-amount amount">%d Points</span>';
 
     public function __construct()
     {
@@ -17,11 +25,12 @@ abstract class New_Point
     }
 
     /**
-     * Filter-less version of WC_Product:get_regular_product. Product may be single product id or variation id.
+     * Filter-less version of WC_Product:get_regular_price/get_sale_price. Product may be single product id or variation id.
      * @param WC_Product|int $product - Product_id or Variation id
+     * @param string $price_type - 'regular' or 'sale'
      * @return int|double
      */
-    protected function get_product_price($product)
+    protected function get_product_price($product, $price_type = null)
     {
         $type = gettype($product);
         if ($type === 'integer' || $type === 'string') {
@@ -30,9 +39,14 @@ abstract class New_Point
             $product_id = $product->get_id();
         }
 
-        $price = get_post_meta($product_id, '_regular_price', true);
-        // return $price === '' ? $price : +$price;
-        return +$price;
+        // Try to get sale price first if not specified.
+        if ($price_type) {
+            $price = get_post_meta($product_id, "_{$price_type}_price", true);
+        } else {
+            $price = get_post_meta($product_id, '_sale_price', true) ?: get_post_meta($product_id, '_regular_price', true);
+        }
+
+        return +$price ? +$price : 0;
     }
 
     /**
@@ -42,7 +56,8 @@ abstract class New_Point
      */
     protected function get_total_amount($user_id)
     {
-        return +get_user_meta($user_id, 'total_amount', true) ?: 0;
+        $total_amount = get_user_meta($user_id, 'total_amount', true);
+        return $total_amount ? +$total_amount: 0;
     }
 
     /**
@@ -136,24 +151,21 @@ abstract class New_Point
      * @param WC_Product|int $product
      * @param int|null $variation - 0 or null if not a variation
      * @param array|int $cart_item_or_qty
+     * @param string $price_type - 'regular' or 'sale'
      * @return int
      */
-    protected function recalculate_point_product_points($product, $variation, $cart_item_or_qty = null)
+    protected function recalculate_point_product_points($product, $variation, $cart_item_or_qty = 1, $price_type = null)
     {
         // Cannot use $product->get_regular_price with multi-currency plugin
-        $price = $variation ? $this->get_product_price($variation) : $this->get_product_price($product);
+        $price = $variation ? $this->get_product_price($variation, $price_type) : $this->get_product_price($product, $price_type);
         switch (gettype($cart_item_or_qty)) {
             case 'integer':
                 $qty = $cart_item_or_qty;
-                break;
-            case 'NULL':
-                $qty = 1;
                 break;
             default:
                 $qty = $cart_item_or_qty['quantity'];
                 break;
         }
-        // $qty = $cart_item['quantity'] ?: 1;
         return round($price * $qty);
     }
 

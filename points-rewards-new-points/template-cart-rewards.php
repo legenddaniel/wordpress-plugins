@@ -4,9 +4,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Render pre-formatted point product slider since wc_get_template() not working properly.
+ * @param array $args - Must be [points => '', sliders => [slider1, slider2, slider3]]
+ * @return void
+ */
+function new_point_template_cart_rewards($args)
+{
+    extract($args);
+    ?>
 
-
-?>
     <section class="cr-wrapper">
         <div id="cr-head" class="cr-border">
             <p>You now have <b><?=$points;?></b> Beauty Insider Points</p>
@@ -28,4 +35,5 @@ if (!defined('ABSPATH')) {
         </div>
     </section>
 
-<?php
+    <?php
+}

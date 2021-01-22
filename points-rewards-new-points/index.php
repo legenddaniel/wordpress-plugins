@@ -11,6 +11,7 @@ defined( 'WPINC' ) || die;
  
 is_admin() and include_once 'class-new-point-admin.php';
 
+include_once 'template-cart-rewards.php';
 include_once 'class-new-point.php';
 include_once 'class-new-point-order.php';
 include_once 'class-new-point-shop.php';
