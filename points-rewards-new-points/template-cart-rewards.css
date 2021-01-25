@@ -1,6 +1,7 @@
 .cr-wrapper {
-    margin: 64px auto;
+    margin-bottom: 32px;
     text-align: center;
+    color: #000;
 }
 
 .cr-wrapper li {
@@ -45,7 +46,7 @@
     height: 21px;
     vertical-align: middle;
     text-align: center;
-    line-height: 100%;
+    font-weight: bold;
 }
 .cr-switch-off {
     transform: rotate(90deg);

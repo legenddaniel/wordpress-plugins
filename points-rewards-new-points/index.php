@@ -3,7 +3,7 @@
  * Plugin Name:       New_Points
  * Description:       Customized WooCommerce Points & Rewards.
  * Version:           1.0.0
- * Author:            Neo, Daniel Siyuan Zuo
+ * Author:            Daniel Siyuan Zuo. Neo
  * Text Domain: 	  points-rewards-new-points
  */
  

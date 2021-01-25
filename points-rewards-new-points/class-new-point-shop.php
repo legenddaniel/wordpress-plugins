@@ -17,7 +17,7 @@ class New_Point_Shop extends New_Point
         add_action('wp_enqueue_scripts', array($this, 'init_assets'));
 
         // // Render rewards html in cart page
-        add_action('woocommerce_after_cart_table', array($this, 'apply_template'));
+        add_action('woocommerce_before_cart_table', array($this, 'apply_template'));
 
         // // Validate point product purchase
         add_filter('woocommerce_add_to_cart_validation', array($this, 'validate_point_product_purchase_add'), 10, 3);

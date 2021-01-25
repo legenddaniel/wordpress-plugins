@@ -22,9 +22,9 @@ function new_point_template_cart_rewards($args)
         <div id="cr-main" class="cr-padding cr-border">
             <div>
                 <ul class="cr-tabs">
-                    <li class="cr-link cr-active">0 - 500</li>
-                    <li class="cr-link">500 - 1000</li>
-                    <li class="cr-link">1000+</li>
+                    <li class="cr-link cr-active">0 - 500 Points</li>
+                    <li class="cr-link">500 - 1000 Points</li>
+                    <li class="cr-link">1000+ Points</li>
                 </ul>
             </div>
             <div id="cr-sliders">

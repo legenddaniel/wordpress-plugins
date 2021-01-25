@@ -1,0 +1,72 @@
+/**
+* Theme Name: Woncep Child
+* Description: This is a child theme of Woncep.
+* Author: Daniel Siyuan Zuo
+* Template: woncep
+* Version: 1.0.0
+*/
+
+body {
+    font-family: var(--e-global-typography-text-font-family), hops and barley;
+}
+
+.header-group-action {
+    align-items: baseline;
+}
+.site-header-wishlist .header-wishlist .count {
+    top: -3px;
+}
+
+#page .site-content {
+    margin-top: 0;
+}
+
+.product-style-1 ul.products .product-bottom > .price,
+.product-style-1 ul.products .product-bottom > .list-button-action {
+    display: block;
+    text-align: left;
+}
+ul.products li.product a[class*="product_type_"] {
+    line-height: unset;
+}
+
+a.xoo-qv-button:hover {
+    background-color: var(--primary_hover);
+    color: #fff;
+}
+
+.elementor-menu-cart__product-price.product-price {
+    color: #000;
+}
+
+div.coupon:not(.under-proceed) {
+    display: none;
+}
+.sz-coupon-form {
+    margin-top: 2rem;
+}
+.sz-coupon-form > .coupon > input {
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    border: 1px solid var(--border);
+}
+
+.sz-cart-ad {
+    margin-top: 2rem;
+    padding: 15px 35px 30px;
+    border: 6px solid;
+    border-color: var(--border);
+}
+
+.sz-cart-ad img {
+    margin: auto;
+}
+
+.sz-cart-ad-txt-wrapper {
+    margin-top: 2rem;
+    color: #000;
+}
+
+.sz-cart-ad-txt-contact-wrapper > span {
+    display: block;
+}
