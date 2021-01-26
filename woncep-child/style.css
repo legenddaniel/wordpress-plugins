@@ -17,8 +17,18 @@ body {
     top: -3px;
 }
 
+body.post-type-archive-product .elementor-section.woncep-breadcrumb-build,
+body.term-sale .elementor-section.woncep-breadcrumb-build,
+body.term-pre-order .elementor-section.woncep-breadcrumb-build {
+    display: none;
+}
+
 #page .site-content {
     margin-top: 0;
+}
+
+.woocommerce-info {
+    background-color: #000 !important;
 }
 
 .product-style-1 ul.products .product-bottom > .price,
@@ -30,6 +40,15 @@ ul.products li.product a[class*="product_type_"] {
     line-height: unset;
 }
 
+.stock-label {
+    top: 0;
+    left: 0;
+    padding: 6.5px;
+    background-color: #000;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 a.xoo-qv-button:hover {
     background-color: var(--primary_hover);
     color: #fff;
@@ -37,6 +56,66 @@ a.xoo-qv-button:hover {
 
 .elementor-menu-cart__product-price.product-price {
     color: #000;
+}
+
+body.single-product > #page > .site-content {
+    margin: 2rem auto;
+}
+
+.single-product div.product .single_variation_wrap {
+    margin-top: 1rem;
+}
+
+.woocommerce-variation-add-to-cart {
+    position: relative;
+}
+.woocommerce-variation-add-to-cart > .points {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.elementor-column-gap-default > .elementor-row > .elementor-column > .elementor-element-populated {
+    padding: 0;
+}
+
+tr.woocommerce-shipping-totals.shipping > td > * {
+    padding: 0.5rem 0;
+}
+table.shop_table_responsive tr.woocommerce-shipping-totals td {
+    width: 100%;
+}
+.sz-free-shipping-msg {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 3rem;
+    background-color: #000;
+}
+.sz-free-shipping-msg::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: -10px;
+    right: 8px;
+    width: 0;
+    height: 0;
+    border-width: 0px 0px 10px 10px;
+    border-style: solid;
+    border-color: #000 transparent;
+}
+.sz-free-shipping-msg,
+#order_review .sz-free-shipping-msg .woocommerce-Price-amount {
+    color: #fff;
+}
+
+.single-product .button,
+.woocommerce-cart .button {
+    text-transform: uppercase;
+}
+.elementor-text-editor a.checkout-button:hover {
+    color: #fff;
 }
 
 div.coupon:not(.under-proceed) {
@@ -69,4 +148,8 @@ div.coupon:not(.under-proceed) {
 
 .sz-cart-ad-txt-contact-wrapper > span {
     display: block;
+}
+
+body.woocommerce-checkout > #page > .site-content {
+    margin: 2rem 1rem;
 }

@@ -16,8 +16,8 @@ abstract class New_Point
     // moditec.site
     protected $point_cat = 182;
     protected $point_500_cat = 174; // 183
-    protected $point_1000_cat = 174; // 184
-    protected $point_up1000_cat = 174; // 185
+    protected $point_1000_cat = 169; // 184
+    protected $point_up1000_cat = 124; // 185
 
     // HTML template
     protected $text_no_point = 'You don\'t have enough points!';

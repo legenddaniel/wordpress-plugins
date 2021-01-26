@@ -62,12 +62,6 @@ class New_Point_Shop extends New_Point
             [],
             rand(111, 9999)
         );
-        wp_enqueue_style(
-            'style-css',
-            $plugin_url . 'style.css',
-            [],
-            rand(111, 9999)
-        );
 
         wp_enqueue_script(
             'cr-js',

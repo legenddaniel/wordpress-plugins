@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-add_action('wp_enqueue_scripts', 'sz_init_assets_new_points');
+// add_action('wp_enqueue_scripts', 'sz_init_assets_new_points');
 function sz_init_assets_new_points()
 {
     if (is_shop()) {
@@ -86,4 +86,30 @@ function sz_admin_display_ad_settings($settings)
         ],
     ];
     return array_merge($settings, $new_settings);
+}
+
+add_action('woocommerce_after_shipping_rate', 'sz_free_shipping_notice');
+function sz_free_shipping_notice()
+{
+    $cart = WC()->cart;
+
+    $packages = $cart->get_shipping_packages();
+    $package = reset($packages);
+    $zone = wc_get_shipping_zone($package);
+
+    $cart_total = $cart->get_displayed_subtotal();
+    if ($cart->display_prices_including_tax()) {
+        $cart_total = round($cart_total - ($cart->get_discount_total() + $cart->get_discount_tax()), wc_get_price_decimals());
+    } else {
+        $cart_total = round($cart_total - $cart->get_discount_total(), wc_get_price_decimals());
+    }
+    foreach ($zone->get_shipping_methods(true) as $k => $method) {
+        $min_amount = $method->get_option('min_amount');
+
+        if ($method->id == 'free_shipping' && !empty($min_amount) && $cart_total < $min_amount) {
+            $remaining = $min_amount - $cart_total;
+            printf(__('<div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div>', 'woocommerce'), wc_price($remaining));
+        }
+    }
+
 }
