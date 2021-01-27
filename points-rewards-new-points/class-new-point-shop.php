@@ -16,18 +16,18 @@ class New_Point_Shop extends New_Point
 
         add_action('wp_enqueue_scripts', array($this, 'init_assets'));
 
-        // // Render rewards html in cart page
+        // Render rewards html in cart page
         add_action('woocommerce_before_cart_table', array($this, 'apply_template'));
 
-        // // Validate point product purchase
+        // Validate point product purchase
         add_filter('woocommerce_add_to_cart_validation', array($this, 'validate_point_product_purchase_add'), 10, 3);
         add_filter('woocommerce_update_cart_validation', array($this, 'validate_point_product_purchase_update'), 10, 4);
 
-        // // Apply custom point:cost ratio
+        // Apply custom point:cost ratio
         add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points_cart'), 10, 3);
         add_filter('woocommerce_points_earned_for_order_item', array($this, 'recalculate_points_order'), 10, 5);
 
-        // // Display points in cart/checkout total lines
+        // Display points in cart/checkout total lines
         add_action('woocommerce_cart_totals_before_order_total', array($this, 'display_points_used_total'));
         add_action('woocommerce_review_order_before_order_total', array($this, 'display_points_used_total'));
         add_action('woocommerce_widget_shopping_cart_before_buttons', array($this, 'display_minicart_points_used'));
@@ -37,14 +37,14 @@ class New_Point_Shop extends New_Point
         add_filter('woocommerce_cart_item_price', array($this, 'change_gift_price_html_cart'), 10, 3);
         add_filter('woocommerce_cart_item_subtotal', array($this, 'change_gift_subtotal_html'), 10, 3);
 
-        // // Change the message display in single product page
+        // Change the message display in single product page
         add_filter('wc_points_rewards_single_product_message', array($this, 'change_product_point_msg'));
 
-        // // Replace the default display for variable products (non-point)
+        // Replace the default display for variable products (non-point)
         add_filter('woocommerce_available_variation', array($this, 'replace_available_variable_product_html'), 20, 3);
         add_action('woocommerce_before_add_to_cart_button', array($this, 'replace_variable_product_points_html'));
 
-        // // Change the price of point product
+        // Change the price of point product
         add_action('woocommerce_before_calculate_totals', array($this, 'change_gift_price'));
     }
 
@@ -96,6 +96,29 @@ class New_Point_Shop extends New_Point
         $slider_shortcode = '[products_slider cats="%d" autoplay="false" dots="false" order="ASC" orderby="meta_value_num" meta_key="_price"]';
 
         return apply_filters('the_content', sprintf(__($slider_shortcode, 'woocommerce'), $cat_id));
+    }
+
+    /**
+     * Check if current product (including its sibling variations) has been in the cart
+     * @param int|WC_Product $product - Not variation
+     * @return bool
+     */
+    private function is_in_cart($product)
+    {
+        if (gettype($product) === 'integer' || gettype($product) === 'string') {
+            $product_id = $product;
+        } else if ($product instanceof WC_Product) {
+            $product_id = $product->get_id();
+        } else {
+            die('Not a product!');
+        }
+
+        foreach (WC()->cart->get_cart() as $item) {
+            if ($item['product_id'] === $product_id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -429,6 +452,12 @@ class New_Point_Shop extends New_Point
      */
     public function replace_available_variable_product_html($data, $product, $variation)
     {
+        // Hide the msg if item already in the cart
+        if ($this->is_in_cart($product)) {
+            $data['price_html'] = '';
+            return $data;
+        }
+
         // Points earned for regular products (Purchase this product now and earn XX Points!). Apply to single product page rather than the preview since (Purchase this product now and earn XX Points!) is not in the preview.
         if (!$this->is_point_product($product)) {
             if (is_product()) {
@@ -468,20 +497,23 @@ class New_Point_Shop extends New_Point
             $that = new WC_Points_Rewards_Product();
             $this->remove_filters_with_method_name('woocommerce_before_add_to_cart_button', 'add_variation_message_to_product_summary', 25);
 
-            // Hide the html after removing default
-            if ($this->is_point_product($product)) {
+            // Hide the html after removing default, or item already in the cart
+            if ($this->is_point_product($product) || $this->is_in_cart($product)) {
                 return;
             }
 
-            // get variations
+            // get variation with the highest price. $that->get_highest_points_variation() not working properly
             $variations = $product->get_available_variations();
+            $variation_ids = wp_list_pluck( $variations, 'variation_id' );
 
-            // find the variation with the most points
-            $points = $that->get_highest_points_variation($variations, $product->get_id());
-
+            $prices = array_map(function($id) {
+                return $this->get_product_price($id);
+            }, $variation_ids);
+            $price = max($prices);
+            
             $total_amount = $this->total_amount;
             $ratio = $this->process_ratio($this->get_ratio($total_amount));
-            $points = round($points * $ratio);
+            $points = round($price * $ratio);
 
             $message = '';
             // if we have a points value let's create a message; other wise don't print anything

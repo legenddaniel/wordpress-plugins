@@ -22,6 +22,9 @@ body.term-sale .elementor-section.woncep-breadcrumb-build,
 body.term-pre-order .elementor-section.woncep-breadcrumb-build {
     display: none;
 }
+.elementor-section.woncep-breadcrumb-build {
+    margin-bottom: 2rem;
+}
 
 #page .site-content {
     margin-top: 0;
@@ -29,6 +32,14 @@ body.term-pre-order .elementor-section.woncep-breadcrumb-build {
 
 .woocommerce-info {
     background-color: #000 !important;
+}
+
+#sz-home-slider-button {
+    background-color: #000;
+    color: #fff;
+}
+#sz-home-slider-button:hover {
+    background-color: var(--primary_hover);
 }
 
 .product-style-1 ul.products .product-bottom > .price,
@@ -62,6 +73,18 @@ body.single-product > #page > .site-content {
     margin: 2rem auto;
 }
 
+.woncep-product-pagination .woncep-product-pagination-content > .price {
+    display: flex;
+    flex-direction: column;
+}
+.woncep-product-pagination-content > .price > ins {
+    margin-left: 0;
+}
+
+.variable-item.button-variable-item:not([class*="color-variable-item"]) {
+    border-radius: 0 !important;
+}
+
 .single-product div.product .single_variation_wrap {
     margin-top: 1rem;
 }
@@ -75,6 +98,15 @@ body.single-product > #page > .site-content {
     left: 0;
 }
 
+.sz-desc-wrapper {
+    border: 2px solid var(--border);
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+.sz-desc-wrapper > p {
+    margin: 0;
+}
+
 .elementor-column-gap-default > .elementor-row > .elementor-column > .elementor-element-populated {
     padding: 0;
 }
@@ -85,13 +117,21 @@ tr.woocommerce-shipping-totals.shipping > td > * {
 table.shop_table_responsive tr.woocommerce-shipping-totals td {
     width: 100%;
 }
-.sz-free-shipping-msg {
+.sz-free-shipping-msg-wrapper {
     position: relative;
+    min-height: 3rem;
+}
+.sz-free-shipping-msg {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: absolute;
+    top: 0;
+    right: 0;
     min-height: 3rem;
+    padding: 0 1rem;
     background-color: #000;
+    white-space: nowrap;
 }
 .sz-free-shipping-msg::before {
     content: "";
@@ -152,4 +192,15 @@ div.coupon:not(.under-proceed) {
 
 body.woocommerce-checkout > #page > .site-content {
     margin: 2rem 1rem;
+}
+
+@media (max-width: 420px), (min-width: 768px) and (max-width: 980px) {
+    .checkout-review-order-table-wrapper {
+        padding: 0;
+    }
+}
+@media (max-width: 360px) {
+    #order_review {
+        padding: 20px 16px 40px;
+    }
 }

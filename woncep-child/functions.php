@@ -4,6 +4,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+
+remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
+add_action('woocommerce_product_meta_start', 'sz_custom_desc');
+function sz_custom_desc()
+{
+    $content = the_content();
+    if (!$content) {
+        return;
+    }
+    ?>
+        <div class="sz-desc-wrapper">
+            <?php $content; ?>
+        </div>
+    <?php
+}
+
 // add_action('wp_enqueue_scripts', 'sz_init_assets_new_points');
 function sz_init_assets_new_points()
 {
@@ -15,6 +31,12 @@ function sz_init_assets_new_points()
             rand(111, 9999)
         );
     }
+}
+
+add_filter('woocommerce_currency_symbol', 'sz_hide_currency_html', 20, 2);
+function sz_hide_currency_html($currency_symbol, $currency)
+{
+    return '$';
 }
 
 add_action('woocommerce_after_cart_totals', 'sz_relocate_coupon_field');
@@ -108,7 +130,7 @@ function sz_free_shipping_notice()
 
         if ($method->id == 'free_shipping' && !empty($min_amount) && $cart_total < $min_amount) {
             $remaining = $min_amount - $cart_total;
-            printf(__('<div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div>', 'woocommerce'), wc_price($remaining));
+            printf(__('<div class="sz-free-shipping-msg-wrapper"><div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div></div>', 'woocommerce'), wc_price($remaining));
         }
     }
 
