@@ -9,9 +9,13 @@ class New_Point_Order extends New_Point
 
     public function __construct()
     {
+
         // Add order meta of point ratio for partial refund
         add_action('woocommerce_checkout_update_order_meta', array($this, 'add_ratio_into_order_meta'), 10, 2);
         add_action('woocommerce_checkout_update_order_meta', array($this, 'add_points_used_into_order_meta'), 10, 2);
+
+        // Display points used in order details
+        add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_points_used_in_order_details'));
 
         // Set the total amount and point balance after payment completed
         add_action('woocommerce_payment_complete', array($this, 'set_total_after_payment'));
@@ -70,6 +74,11 @@ class New_Point_Order extends New_Point
         }
 
         return $points_used ? update_post_meta($order_id, 'points_used', round($points_used)) : false;
+    }
+
+    public function display_points_used_in_order_details($order)
+    {
+        var_dump($order);
     }
 
     /**

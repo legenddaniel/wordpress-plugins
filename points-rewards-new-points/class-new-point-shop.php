@@ -16,6 +16,9 @@ class New_Point_Shop extends New_Point
 
         add_action('wp_enqueue_scripts', array($this, 'init_assets'));
 
+        // Hide point products (not categories)
+        // add_action('woocommerce_product_query', array($this, 'hide_products'));
+
         // Render rewards html in cart page
         add_action('woocommerce_before_cart_table', array($this, 'apply_template'));
 
@@ -96,6 +99,27 @@ class New_Point_Shop extends New_Point
         $slider_shortcode = '[products_slider cats="%d" autoplay="false" dots="false" order="ASC" orderby="meta_value_num" meta_key="_price"]';
 
         return apply_filters('the_content', sprintf(__($slider_shortcode, 'woocommerce'), $cat_id));
+    }
+
+    /**
+     * Do not query products of certain categories
+     * @param WP_Query
+     * @return void
+     */
+    public function hide_products($query)
+    {
+        if (is_cart()) {
+            return;
+        }
+        
+        $tax_query = $query->get('tax_query');
+        $tax_query[] = array(
+            'taxonomy' => 'product_cat',
+            'field' => 'slug',
+            'terms' => array('points'),
+            'operator' => 'NOT IN',
+        );
+        $query->set('tax_query', $tax_query);
     }
 
     /**
@@ -504,13 +528,13 @@ class New_Point_Shop extends New_Point
 
             // get variation with the highest price. $that->get_highest_points_variation() not working properly
             $variations = $product->get_available_variations();
-            $variation_ids = wp_list_pluck( $variations, 'variation_id' );
+            $variation_ids = wp_list_pluck($variations, 'variation_id');
 
-            $prices = array_map(function($id) {
+            $prices = array_map(function ($id) {
                 return $this->get_product_price($id);
             }, $variation_ids);
             $price = max($prices);
-            
+
             $total_amount = $this->total_amount;
             $ratio = $this->process_ratio($this->get_ratio($total_amount));
             $points = round($price * $ratio);

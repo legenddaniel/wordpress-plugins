@@ -15,13 +15,17 @@ abstract class New_Point
 
     // moditec.site
     protected $point_cat = 182;
-    protected $point_500_cat = 174; // 183
-    protected $point_1000_cat = 169; // 184
-    protected $point_up1000_cat = 124; // 185
+    // protected $point_500_cat = 174; // 183, 174
+    protected $point_1000_cat = 169; // 184, 169
+    protected $point_up1000_cat = 124; // 185, 124
+    protected $point_500_cat = 183; // 183, 174
+    // protected $point_1000_cat = 184; // 184, 169
+    // protected $point_up1000_cat = 185; // 185, 124
 
     // HTML template
     protected $text_no_point = 'You don\'t have enough points!';
     protected $text_points_used = 'Points Used';
+    protected $html_point_product_edit = '<div style="%s">↑↑↑↑↑↑↑↑↑↑↑Notice: <br>This is a gift product redeemed by Points. Here the prices are the Points to redeem them. <br>You can set the "Point Price" as if you are setting prices of a regular product, but the unit or say currency of this price is in Point instead of Dollar.<br>In this case, you don\'t need to set taxes, either.</div>';
     protected $html_cart_subtotal = '<tr class="cart-subtotal"><th>%s</th><td data-title="%s"><span class="woocommerce-Price-amount amount">%d Points</span></td></tr>';
     protected $html_minicart_subtotal = '<p class="woocommerce-mini-cart__total total"><strong>%s:</strong><span class="woocommerce-Price-amount amount">%d Points</span></p>';
     protected $html_variable_point_product_price = '<span class="woocommerce-Price-amount amount">%dPoints</span> – <span class="woocommerce-Price-amount amount">%dPoints</span>';

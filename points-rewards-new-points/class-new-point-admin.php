@@ -1,15 +1,22 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
-class New_Point_Admin
+class New_Point_Admin extends New_Point
 {
 
     public function __construct()
     {
         add_action('admin_enqueue_scripts', array($this, 'admin_init_assets'));
+
+        // Remove some default woocommerce-points-and-rewards plugin settings in Admin
+        add_action('init', array($this, 'remove_points_plugin_product_edit_display'));
+
+        // Display notice to admin that this is a point product and display is different from normal products
+        add_action('woocommerce_product_options_pricing', array($this, 'display_notice_for_point_products'));
+        add_action('woocommerce_variation_options_pricing', array($this, 'display_notice_for_point_products'));
 
         // Add custom field identification
         add_filter('woocommerce_admin_settings_sanitize_option_wc_points_rewards_earn_points_ratio_500', 'WC_Points_Rewards_Admin::save_conversion_ratio_field', 10, 3);
@@ -32,6 +39,40 @@ class New_Point_Admin
             ['jquery'],
             rand(111, 9999)
         );
+    }
+
+    /**
+     * Hide default points settings in product edit page
+     * @return void
+     */
+    public function remove_points_plugin_product_edit_display()
+    {
+        $this->remove_filters_with_method_name('woocommerce_product_options_general_product_data', 'render_simple_product_fields', 10);
+
+        $this->remove_filters_with_method_name('woocommerce_product_after_variable_attributes', 'render_variable_product_fields', 15);
+    }
+
+    /**
+     * Tell the admin for point products this is point price
+     * @return void
+     */
+    public function display_notice_for_point_products()
+    {
+        global $post;
+
+        $product_id = $post->ID;
+        if (!$this->is_point_product($product_id)) {
+            return;
+        }
+
+        if (current_action() === 'woocommerce_product_options_pricing') {
+            $styles = 'font-weight: bold; padding: 1rem;';
+        }
+        if (current_action() === 'woocommerce_variation_options_pricing') {
+            $styles = 'float: left; font-weight: bold;';
+        }
+
+        printf(__($this->html_point_product_edit, 'woocommerce'), $styles);
     }
 
     /**
