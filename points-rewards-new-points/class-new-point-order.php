@@ -10,12 +10,21 @@ class New_Point_Order extends New_Point
     public function __construct()
     {
 
-        // Add order meta of point ratio for partial refund
+        // Add order meta and order item meta of point products for future use
         add_action('woocommerce_checkout_update_order_meta', array($this, 'add_ratio_into_order_meta'), 10, 2);
         add_action('woocommerce_checkout_update_order_meta', array($this, 'add_points_used_into_order_meta'), 10, 2);
+        add_action('woocommerce_checkout_create_order_line_item', array($this, 'add_points_order_item_meta'), 10, 4);
 
         // Display points used in order details
-        add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_points_used_in_order_details'));
+        add_filter('woocommerce_get_order_item_totals', array($this, 'display_points_used_in_order_details'), 10, 3);
+
+        // Change point product subtotal html in order details (thankyou, email, my account)
+        add_filter('woocommerce_order_formatted_line_subtotal', array($this, 'change_gift_subtotal_html_frontend'), 10, 3);
+        add_filter('woocommerce_display_item_meta', array($this, 'hide_point_product_meta'), 10, 3);
+
+        // Change point product subtotal html in order details (admin)
+        // add_filter('woocommerce_order_amount_item_subtotal', array($this, 'change_gift_subtotal_html_admin'), 10, 5);
+        add_filter('woocommerce_hidden_order_itemmeta', array($this, 'hide_point_product_meta_admin'));
 
         // Set the total amount and point balance after payment completed
         add_action('woocommerce_payment_complete', array($this, 'set_total_after_payment'));
@@ -76,9 +85,115 @@ class New_Point_Order extends New_Point
         return $points_used ? update_post_meta($order_id, 'points_used', round($points_used)) : false;
     }
 
-    public function display_points_used_in_order_details($order)
+    /**
+     * Add point price in the order meta data (point products).
+     * @param WC_Order_Item_Product $item
+     * @param string $cart_item_key
+     * @param array $values
+     * @param WC_Order $order
+     * @return null
+     */
+    public function add_points_order_item_meta($item, $cart_item_key, $values, $order)
     {
-        var_dump($order);
+        $product_id = $item->get_product_id();
+        if (!$this->is_point_product($product_id)) {
+            return;
+        }
+
+        $variation_id = $item->get_variation_id();
+        $qty = $item->get_quantity();
+
+        $points = $this->recalculate_point_product_points($product_id, $variation_id, $qty);
+
+        $item->update_meta_data('points_subtotal', $points);
+    }
+
+    /**
+     * Display points used in order details if applicable
+     * @param array $total_rows - Original data
+     * @param WC_Order $order
+     * @param string $tax_display
+     * @return array
+     */
+    public function display_points_used_in_order_details($total_rows, $order, $tax_display)
+    {
+        $order_id = $order->get_id();
+        $points_used = get_post_meta($order_id, 'points_used', true);
+
+        if (!$points_used) {
+            return $total_rows;
+        }
+
+        // Display this row at 2nd last line
+        $new_rows = $this->array_insert(
+            $total_rows,
+            ['points_used' => [
+                'label' => __($this->text_points_used . ':', 'woocommerce'),
+                'value' => sprintf($this->html_single_point_product_price, $points_used),
+            ]],
+            count($total_rows) - 1
+        );
+
+        return $new_rows;
+    }
+
+    /**
+     * Change subtotal to points for point products in order details
+     * @param string $subtotal_html - Subtotal html
+     * @param WC_Order_Item_Product $item
+     * @param WC_Order $order
+     * @return string
+     */
+    public function change_gift_subtotal_html_frontend($subtotal_html, $item, $order)
+    {
+        $points = $item->get_meta('points_subtotal');
+        if (!$points) {
+            return $subtotal_html;
+        }
+
+        return sprintf($this->html_single_point_product_price, $points);
+    }
+
+    /**
+     * Change subtotal to points for point products in admin order page
+     * @param float $subtotal
+     * @param WC_Order $order
+     * @param WC_Order_Item_Product $item
+     * @param bool $inc_tax
+     * @param bool $round
+     * @return float
+     */
+    public function change_gift_subtotal_html_admin($subtotal, $order, $item, $inc_tax, $round)
+    {
+        // return $this->change_gift_subtotal_html($subtotal, $item);
+    }
+
+    /**
+     * Hide ALL item meta data of point products. Change this code if there's some data to be shown.
+     * @param string $html
+     * @param WC_Order_Item_Product $item
+     * @param array $args
+     * @return string|null
+     */
+    public function hide_point_product_meta($html, $item, $args)
+    {
+        // So far hide ALL meta data
+        $product_id = $item->get_product_id();
+        if ($this->is_point_product($product_id)) {
+            return;
+        }
+        return $html;
+    }
+
+    /**
+     * Add points_subtotal meta data to hidden options
+     * @param array $meta
+     * @return array
+     */
+    public function hide_point_product_meta_admin(&$meta)
+    {
+        $meta[] = 'points_subtotal';
+        return $meta;
     }
 
     /**
@@ -192,7 +307,7 @@ class New_Point_Order extends New_Point
         global $wpdb;
         $refund = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT SUM(total_sales)
+                "SELECT SUM(net_total)
                     FROM {$wpdb->prefix}wc_order_stats
                     WHERE parent_id = %d AND status = 'wc-completed'"
                 , $order_id
@@ -214,6 +329,30 @@ class New_Point_Order extends New_Point
     }
 
     /**
+     * Get refund subtotal without any fees from $_POST['line_item_totals']. WC_Order_Refund::get_amount not working properly.
+     * @return int|float
+     */
+    private function get_refund_subtotal()
+    {
+        $refunds = $_POST['line_item_totals'];
+        if (!$refunds) {
+            return 0;
+        }
+
+        $total = 0;
+        $totals = json_decode(stripslashes($refunds), true);
+        if (is_array($totals)) {
+            foreach ($totals as $line_total) {
+                if ($line_total) {
+                    $total += $line_total;
+                }
+            }
+        }
+
+        return $total;
+    }
+
+    /**
      * Restore the total_amount after order partially refunded.
      * @param int $order_id
      * @param int $refund_id
@@ -223,7 +362,8 @@ class New_Point_Order extends New_Point
     {
         $order = wc_get_order($order_id);
         $user = $order->get_user_id();
-        $total = (new WC_Order_Refund($refund_id))->get_amount();
+
+        $total = $this->get_refund_subtotal();
 
         // Set the amount to USD based if applicable
         $total = $this->set_usd_based_total($order_id, $total);
@@ -253,8 +393,9 @@ class New_Point_Order extends New_Point
         $order = wc_get_order($order_id);
 
         if ($event_type === 'order-refunded') {
+            $total = $this->get_refund_subtotal();
             $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
-            $points = $this->set_usd_based_total($order_id, $points) * $ratio;
+            $points = $this->set_usd_based_total($order_id, $total) * $ratio;
         }
 
         // Deduct the past refunds if applicable

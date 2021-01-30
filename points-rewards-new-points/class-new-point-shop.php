@@ -399,14 +399,14 @@ class New_Point_Shop extends New_Point
         // For simple/variation point products. Most probably ids as the param.
         $points = $this->recalculate_point_product_points($product, $variation, $qty);
 
-        // Should not apply in cart/checkout page
-        if (!is_cart() && !is_checkout() && method_exists($product, 'is_on_sale') && $product->is_on_sale()) {
+        // Should not apply in checkout page. Apply in cart page due to the point product slider
+        if (!is_checkout() && method_exists($product, 'is_on_sale') && $product->is_on_sale()) {
             $reg_points = $this->recalculate_point_product_points($product, $variation, $qty, 'regular');
 
             return sprintf($this->html_onsale_variable_point_product_price, $reg_points, $points);
         }
 
-        return sprintf($this->html_onsale_single_point_product_price, $points);
+        return sprintf($this->html_single_point_product_price, $points);
     }
 
     /**
@@ -498,7 +498,7 @@ class New_Point_Shop extends New_Point
                 $reg_points = $this->recalculate_point_product_points($product, $variation, 1, 'regular');
                 $price_html = '<span class="price">' . sprintf($this->html_onsale_variable_point_product_price, $reg_points, $points) . '</span>';
             } else {
-                $price_html = '<span class="price">' . sprintf($this->html_onsale_single_point_product_price, $points) . '</span>';
+                $price_html = '<span class="price">' . sprintf($this->html_single_point_product_price, $points) . '</span>';
             }
 
             $data['price_html'] = $price_html;

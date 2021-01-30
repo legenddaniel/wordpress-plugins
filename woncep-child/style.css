@@ -6,8 +6,13 @@
 * Version: 1.0.0
 */
 
-body {
+body,
+.main-navigation .sub-menu li.menu-item > a {
     font-family: var(--e-global-typography-text-font-family), hops and barley;
+}
+
+table td, table th {
+    vertical-align: middle;
 }
 
 .header-group-action {
@@ -16,8 +21,14 @@ body {
 .site-header-wishlist .header-wishlist .count {
     top: -3px;
 }
+.site-header-account .account-dropdown {
+    margin-top: 0;
+    z-index: 600;
+}
 
 body.post-type-archive-product .elementor-section.woncep-breadcrumb-build,
+body.single-product .elementor-section.woncep-breadcrumb-build,
+body.tax-product_cat .elementor-section.woncep-breadcrumb-build,
 body.term-sale .elementor-section.woncep-breadcrumb-build,
 body.term-pre-order .elementor-section.woncep-breadcrumb-build {
     display: none;
@@ -42,6 +53,11 @@ body.term-pre-order .elementor-section.woncep-breadcrumb-build {
     background-color: var(--primary_hover);
 }
 
+ul.products li.product {
+    margin-left: 0;
+    margin-right: 0;
+}
+
 .product-style-1 ul.products .product-bottom > .price,
 .product-style-1 ul.products .product-bottom > .list-button-action {
     display: block;
@@ -63,6 +79,12 @@ ul.products li.product a[class*="product_type_"] {
 a.xoo-qv-button:hover {
     background-color: var(--primary_hover);
     color: #fff;
+}
+.xoo-qv-container {
+    padding-bottom: 2rem;
+}
+.xoo-qv-main {
+    padding: 2rem;
 }
 
 .elementor-menu-cart__product-price.product-price {
@@ -218,6 +240,14 @@ body.woocommerce-checkout > #page > .site-content {
     }
 }
 
-.woocommerce-order-overview__order {
+.woocommerce-MyAccount-content .order_details tfoot > tr:last-child .amount {
+    color: var(--primary);
+}
+
+.woocommerce-order-overview > .woocommerce-order-overview__order.order {
     padding-top: 16px;
+}
+
+.woocommerce-orders-table__header {
+    text-align: end;
 }

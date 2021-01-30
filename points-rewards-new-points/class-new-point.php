@@ -30,7 +30,7 @@ abstract class New_Point
     protected $html_minicart_subtotal = '<p class="woocommerce-mini-cart__total total"><strong>%s:</strong><span class="woocommerce-Price-amount amount">%d Points</span></p>';
     protected $html_variable_point_product_price = '<span class="woocommerce-Price-amount amount">%dPoints</span> – <span class="woocommerce-Price-amount amount">%dPoints</span>';
     protected $html_onsale_variable_point_product_price = '<del><span class="woocommerce-Price-amount amount">%d Points</span></del> <ins><span class="woocommerce-Price-amount amount">%d Points</span></ins>';
-    protected $html_onsale_single_point_product_price = '<span class="woocommerce-Price-amount amount">%d Points</span>';
+    protected $html_single_point_product_price = '<span class="woocommerce-Price-amount amount">%d Points</span>';
 
     public function __construct()
     {
@@ -74,7 +74,7 @@ abstract class New_Point
     protected function get_total_amount($user_id)
     {
         $total_amount = get_user_meta($user_id, 'total_amount', true);
-        return $total_amount ? +$total_amount: 0;
+        return $total_amount ? +$total_amount : 0;
     }
 
     /**
@@ -216,5 +216,17 @@ abstract class New_Point
             }
         }
         return false;
+    }
+
+    /**
+     * array_splice for all types of array
+     * @param array $array
+     * @param mixed $values
+     * @param int $offset
+     * @return array
+     */
+    protected function array_insert($array, $values, $offset)
+    {
+        return array_slice($array, 0, $offset, true) + $values + array_slice($array, $offset, null, true);
     }
 }

@@ -56,12 +56,38 @@ class New_Point_Account extends New_Point
         $user = get_current_user_id();
         $total_amount = $this->get_total_amount($user);
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
+
         ?>
             <h2>Total Expense & Point Earned Ratio</h2>
-            <p style="font-size: 2rem">You have spent <strong>USD$<?=esc_html__($total_amount);?></strong> on Moditec</p>
+        <?php
+
+        if (!$ratio) {
+            ?>
+                <p style="font-size: 2rem; margin-bottom: 0;">You are one step to our rewards!</p>
+                <p>Purchase anything and start earning points!</p>
+                <p>Some introduction here or another page to introduce</p>
+            <?php
+            return;
+        }
+
+        $member = '';
+        switch (+$ratio) {
+            case 2:
+                $member = 'Platinum';
+                break;
+            case 1.5:
+                $member = 'Gold';
+                break;
+            default:
+                $member = 'Silver';
+                break;
+        }
+
+        ?>
+            <p style="font-size: 2rem">As a <strong><?=esc_html__($member);?></strong> member, you have spent <strong>USD$<?=esc_html__($total_amount);?></strong> on Moditec</p>
             <p style="font-size: 2rem"><strong><?=esc_html__($ratio);?></strong> <?= $ratio == 1 ? 'Point is' : 'Points are';?> earned for every USD$1 you spend</p>
             <p>Some introduction here or another page to introduce</p>
-        <?
+        <?php
     }
 
 }
