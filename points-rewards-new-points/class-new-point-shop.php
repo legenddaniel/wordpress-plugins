@@ -521,7 +521,12 @@ class New_Point_Shop extends New_Point
             $that = new WC_Points_Rewards_Product();
             $this->remove_filters_with_method_name('woocommerce_before_add_to_cart_button', 'add_variation_message_to_product_summary', 25);
 
-            // Hide the html after removing default, or item already in the cart
+            // Our client doesn't need anything below for now.
+            return;
+
+            /*
+
+            // Hide the html for point products after removing default, or item already in the cart
             if ($this->is_point_product($product) || $this->is_in_cart($product)) {
                 return;
             }
@@ -546,6 +551,7 @@ class New_Point_Shop extends New_Point
             }
 
             echo $message;
+            */
         }
     }
 }

@@ -10,15 +10,27 @@ class WC_Moditec
 
     public function __construct()
     {
+        add_action('wp_enqueue_scripts', array($this, 'init_assets'));
+
+        // Change 'Read More' button text to 'Out Of Stock'
+        add_filter('gettext', [$this, 'change_read_more_text'], 10, 3);
+
         // Relocate the description box
-        remove_action('woocommerce_after_single_product_summary', [$this, 'woocommerce_output_product_data_tabs'], 10);
+        remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
         add_action('woocommerce_product_meta_start', [$this, 'custom_desc']);
+
+        // Hide decimals
+        add_filter('woocommerce_price_trim_zeros', [$this, 'hide_decimals']);
+
+        // Hide stock
+        add_filter('woocommerce_get_stock_html', [$this, 'hide_stock_html'], 10, 2);
 
         // Hide CAD/USD
         add_filter('woocommerce_currency_symbol', [$this, 'hide_currency_html'], 20, 2);
 
-        // Display recommended products slider
+        // Display recommended products slider. Display 1st on large and 2nd on small screen
         add_action('woocommerce_after_cart_table', [$this, 'display_recommended_products']);
+        add_action('woocommerce_cart_collaterals', [$this, 'display_recommended_products']);
 
         // Relocate coupon field
         add_action('woocommerce_after_cart_totals', [$this, 'relocate_coupon_field']);
@@ -31,6 +43,24 @@ class WC_Moditec
 
         // Display gap to free shipping label in cart/checkout
         add_action('woocommerce_after_shipping_rate', [$this, 'free_shipping_notice']);
+    }
+
+    public function init_assets()
+    {
+        wp_enqueue_script(
+            'register-link',
+            get_stylesheet_directory_uri() . '/register-link.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
+    }
+
+    public function change_read_more_text($translated_text, $text, $domain)
+    {
+        if (!is_admin() && $domain === 'woocommerce' && $translated_text === 'Read more') {
+            $translated_text = 'Out Of Stock';
+        }
+        return $translated_text;
     }
 
     public function custom_desc()
@@ -46,9 +76,19 @@ class WC_Moditec
     <?php
 }
 
+    public function hide_stock_html($html, $product)
+    {
+        return '';
+    }
+
     public function hide_currency_html($currency_symbol, $currency)
     {
         return '$';
+    }
+
+    public function hide_decimals($display)
+    {
+        return true;
     }
 
     private function render_slider($cat_id)
@@ -61,7 +101,7 @@ class WC_Moditec
     public function display_recommended_products()
     {
         ?>
-            <div>
+            <div class="sz-recommend">
                 <h2>Recommended For You</h2>
                 <?=$this->render_slider(124);?>
             </div>
