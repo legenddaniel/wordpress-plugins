@@ -149,6 +149,10 @@ class WC_Moditec
     public function display_label()
     {
         global $product;
+        if (!$product->is_in_stock()) {
+            return;
+        }
+
         $product_id = $product->get_id();
 
         // Priority: 1. new arrival 2. top seller 3. sale
@@ -162,6 +166,7 @@ class WC_Moditec
         if (in_array($product_id, $this->new_arrivals)) {
             $label = 'New Arrival';
         }
+
         if (!$label) {
             return;
         }
