@@ -14,7 +14,7 @@ abstract class New_Point
     // protected $point_up1000_cat = 19;
 
     // moditec.site
-    protected $point_cat = 182;
+    protected $point_cat = 182; // When you change this, change also $point_cat in child theme functions
     // protected $point_500_cat = 174; // 183, 174
     protected $point_1000_cat = 169; // 184, 169
     protected $point_up1000_cat = 124; // 185, 124

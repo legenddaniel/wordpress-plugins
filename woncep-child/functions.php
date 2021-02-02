@@ -7,13 +7,29 @@ if (!defined('ABSPATH')) {
 class WC_Moditec
 {
     private $cart_ad = 9116;
+    private $point_cat = 182; // When you change this, change also $point_cat in New_Point
+    private $new_arrival_limit = 12;
+    private $top_seller_limit = 12;
+
+    private $new_arrivals = [];
+    private $top_sellers = [];
 
     public function __construct()
     {
-        add_action('wp_enqueue_scripts', array($this, 'init_assets'));
+        add_action('wp_enqueue_scripts', [$this, 'init_assets']);
+
+        // Query product info during certain pages pre-load
+        add_action('template_redirect', [$this, 'init_special_products']);
+
+        // Display 'New Arrival' label
+        add_action('woocommerce_before_shop_loop_item_title', [$this, 'display_label']);
+        add_action('woocommerce_product_thumbnails', [$this, 'display_label']);
 
         // Change 'Read More' button text to 'Out Of Stock'
         add_filter('gettext', [$this, 'change_read_more_text'], 10, 3);
+
+        // Hide default sale label
+        add_filter('woocommerce_sale_flash', [$this, 'hide_sale_label']);
 
         // Relocate the description box
         remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
@@ -55,12 +71,102 @@ class WC_Moditec
         );
     }
 
+    public function init_special_products()
+    {
+        if (is_shop() || is_product() || strpos(get_page_link(), 'index') !== false) {
+            global $wpdb;
+
+            // New arrivals
+            $new_arrivals = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT DISTINCT post.ID
+                    FROM {$wpdb->prefix}posts AS post
+                    JOIN {$wpdb->prefix}term_relationships AS term
+                    ON post.ID = term.object_id
+                    WHERE
+                        post.post_status = 'publish' AND
+                        post.post_type = 'product' AND
+                        post.ID NOT IN (
+                            SELECT DISTINCT term.object_id
+                            FROM {$wpdb->prefix}term_relationships AS term
+                            WHERE term.term_taxonomy_id = %d
+                        )
+                    ORDER BY post.post_date DESC, post.ID DESC
+                    LIMIT %d",
+                    [$this->point_cat, $this->new_arrival_limit]
+                ),
+            );
+            if ($new_arrivals) {
+                foreach ($new_arrivals as $new_arrival) {
+                    $this->new_arrivals[] = $new_arrival->ID;
+                }
+            }
+
+            // Top seller products
+            $top_sellers = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT DISTINCT meta.post_id
+                    FROM {$wpdb->prefix}postmeta AS meta
+                    JOIN {$wpdb->prefix}posts AS post
+                    ON meta.post_id = post.ID
+                    JOIN {$wpdb->prefix}term_relationships AS term
+                    ON meta.post_id = term.object_id
+                    WHERE
+                        meta.meta_key = 'total_sales' AND
+                        post.post_status = 'publish' AND
+                        post.post_type = 'product' AND
+                        post.ID NOT IN (
+                            SELECT DISTINCT term.object_id
+                            FROM {$wpdb->prefix}term_relationships AS term
+                            WHERE term.term_taxonomy_id = %d
+                        )
+                    ORDER BY meta.meta_value * 1 DESC, meta.post_id DESC
+                    LIMIT %d",
+                    [$this->point_cat, $this->top_seller_limit]
+                ),
+            );
+            if ($top_sellers) {
+                foreach ($top_sellers as $top_seller) {
+                    $this->top_sellers[] = $top_seller->post_id;
+                }
+            }
+        }
+    }
+
     public function change_read_more_text($translated_text, $text, $domain)
     {
         if (!is_admin() && $domain === 'woocommerce' && $translated_text === 'Read more') {
             $translated_text = 'Out Of Stock';
         }
         return $translated_text;
+    }
+
+    public function hide_sale_label()
+    {
+        return false;
+    }
+
+    public function display_label()
+    {
+        global $product;
+        $product_id = $product->get_id();
+
+        // Priority: 1. new arrival 2. top seller 3. sale
+        $label = '';
+        if ($product->is_on_sale()) {
+            $label = 'Sale';
+        }
+        if (in_array($product_id, $this->top_sellers)) {
+            $label = 'Top Seller';
+        }
+        if (in_array($product_id, $this->new_arrivals)) {
+            $label = 'New Arrival';
+        }
+        if (!$label) {
+            return;
+        }
+
+        echo '<span class="sz-label">' . $label . '</span>';
     }
 
     public function custom_desc()
