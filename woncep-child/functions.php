@@ -71,63 +71,99 @@ class WC_Moditec
         );
     }
 
+    private function get_top_sellers()
+    {
+        // Partially copied from WC_Admin_Dashboard::get_top_seller
+        global $wpdb;
+
+        // $query = array();
+        // $query['fields'] = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
+		// 	FROM {$wpdb->posts} as posts";
+        // $query['join'] = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
+        // $query['join'] .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
+        // $query['join'] .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
+        // $query['where'] = "WHERE posts.post_type IN ( '" . implode("','", wc_get_order_types('order-count')) . "' ) ";
+        // $query['where'] .= "AND posts.post_status IN ('wc-processing','wc-completed') ";
+        // $query['where'] .= "AND order_item_meta.meta_key = '_qty' ";
+        // $query['where'] .= "AND order_item_meta_2.meta_key = '_product_id' ";
+        // $query['groupby'] = 'GROUP BY product_id';
+        // $query['orderby'] = 'ORDER BY qty DESC';
+        // $query['limits'] = 'LIMIT ' . $this->top_seller_limit;
+
+        // return $wpdb->get_results(implode(' ',  $query));
+
+        $top_sellers = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT p.ID
+                FROM {$wpdb->prefix}posts p
+                INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim
+                    ON p.ID = oim.meta_value
+                INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim2
+                    ON oim.order_item_id = oim2.order_item_id
+                INNER JOIN {$wpdb->prefix}woocommerce_order_items oi
+                    ON oim.order_item_id = oi.order_item_id
+                INNER JOIN {$wpdb->prefix}posts as o
+                    ON o.ID = oi.order_id
+                WHERE p.post_type = 'product'
+                AND p.post_status = 'publish'
+                AND o.post_status IN ('wc-processing','wc-completed')
+                AND oim.meta_key = '_product_id'
+                AND oim2.meta_key = '_qty'
+                AND p.ID NOT IN (
+                        SELECT DISTINCT object_id
+                        FROM {$wpdb->prefix}term_relationships
+                        WHERE term_taxonomy_id = %d
+                    )
+                GROUP BY p.ID
+                ORDER BY COUNT(oim2.meta_value) * 1 DESC
+                LIMIT %d",
+                [$this->point_cat, $this->top_seller_limit]
+            )
+        );
+        return $top_sellers;
+    }
+
+    private function get_new_arrivals()
+    {
+        global $wpdb;
+        
+        $new_arrivals = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT DISTINCT post.ID
+                FROM {$wpdb->prefix}posts AS post
+                JOIN {$wpdb->prefix}term_relationships AS term
+                ON post.ID = term.object_id
+                WHERE
+                    post.post_status = 'publish' AND
+                    post.post_type = 'product' AND
+                    post.ID NOT IN (
+                        SELECT DISTINCT term.object_id
+                        FROM {$wpdb->prefix}term_relationships AS term
+                        WHERE term.term_taxonomy_id = %d
+                    )
+                ORDER BY post.post_date DESC, post.ID DESC
+                LIMIT %d",
+                [$this->point_cat, $this->new_arrival_limit]
+            ),
+        );
+        return $new_arrivals;
+    }
+
     public function init_special_products()
     {
         if (is_shop() || is_product() || strpos(get_page_link(), 'index') !== false) {
-            global $wpdb;
-
-            // New arrivals
-            $new_arrivals = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT DISTINCT post.ID
-                    FROM {$wpdb->prefix}posts AS post
-                    JOIN {$wpdb->prefix}term_relationships AS term
-                    ON post.ID = term.object_id
-                    WHERE
-                        post.post_status = 'publish' AND
-                        post.post_type = 'product' AND
-                        post.ID NOT IN (
-                            SELECT DISTINCT term.object_id
-                            FROM {$wpdb->prefix}term_relationships AS term
-                            WHERE term.term_taxonomy_id = %d
-                        )
-                    ORDER BY post.post_date DESC, post.ID DESC
-                    LIMIT %d",
-                    [$this->point_cat, $this->new_arrival_limit]
-                ),
-            );
+            
+            $new_arrivals = $this->get_new_arrivals();
             if ($new_arrivals) {
                 foreach ($new_arrivals as $new_arrival) {
                     $this->new_arrivals[] = $new_arrival->ID;
                 }
             }
 
-            // Top seller products
-            $top_sellers = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT DISTINCT meta.post_id
-                    FROM {$wpdb->prefix}postmeta AS meta
-                    JOIN {$wpdb->prefix}posts AS post
-                    ON meta.post_id = post.ID
-                    JOIN {$wpdb->prefix}term_relationships AS term
-                    ON meta.post_id = term.object_id
-                    WHERE
-                        meta.meta_key = 'total_sales' AND
-                        post.post_status = 'publish' AND
-                        post.post_type = 'product' AND
-                        post.ID NOT IN (
-                            SELECT DISTINCT term.object_id
-                            FROM {$wpdb->prefix}term_relationships AS term
-                            WHERE term.term_taxonomy_id = %d
-                        )
-                    ORDER BY meta.meta_value * 1 DESC, meta.post_id DESC
-                    LIMIT %d",
-                    [$this->point_cat, $this->top_seller_limit]
-                ),
-            );
+            $top_sellers = $this->get_top_sellers();
             if ($top_sellers) {
                 foreach ($top_sellers as $top_seller) {
-                    $this->top_sellers[] = $top_seller->post_id;
+                    $this->top_sellers[] = $top_seller->ID;
                 }
             }
         }
