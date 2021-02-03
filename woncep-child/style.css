@@ -169,6 +169,9 @@ a.xoo-qv-button:hover {
 .elementor-menu-cart__product-price.product-price {
     color: #000;
 }
+.site-header-cart-side.active {
+    z-index: 9999999999;
+}
 
 body.single-product > #page > .site-content {
     margin: 2rem auto;
@@ -381,6 +384,9 @@ body.woocommerce-checkout > #page > .site-content {
     color: var(--primary);
 }
 
+.woocommerce-order .woocommerce-thankyou-order-received {
+    color: #000;
+}
 .woocommerce-order-overview > .woocommerce-order-overview__order.order {
     padding-top: 16px;
 }

@@ -255,7 +255,7 @@ class New_Point_Shop extends New_Point
         $total_amount = $this->total_amount;
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
 
-        return round($price * $ratio);
+        return $price * $ratio;
     }
 
     /**
@@ -542,7 +542,7 @@ class New_Point_Shop extends New_Point
 
             $total_amount = $this->total_amount;
             $ratio = $this->process_ratio($this->get_ratio($total_amount));
-            $points = round($price * $ratio);
+            $points = round($price * $ratio); // maybe not rounding
 
             $message = '';
             // if we have a points value let's create a message; other wise don't print anything

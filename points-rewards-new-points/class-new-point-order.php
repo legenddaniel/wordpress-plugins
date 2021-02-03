@@ -25,6 +25,7 @@ class New_Point_Order extends New_Point
         // Change point product subtotal html in order details (admin)
         // add_filter('woocommerce_order_amount_item_subtotal', array($this, 'change_gift_subtotal_html_admin'), 10, 5);
         add_filter('woocommerce_hidden_order_itemmeta', array($this, 'hide_point_product_meta_admin'));
+        add_action('woocommerce_before_order_itemmeta', array($this, 'display_point_product_notice'), 10, 3);
 
         // Set the total amount and point balance after payment completed
         add_action('woocommerce_payment_complete', array($this, 'set_total_after_payment'));
@@ -82,7 +83,7 @@ class New_Point_Order extends New_Point
             }
         }
 
-        return $points_used ? update_post_meta($order_id, 'points_used', round($points_used)) : false;
+        return $points_used ? update_post_meta($order_id, 'points_used', $points_used) : false;
     }
 
     /**
@@ -168,6 +169,16 @@ class New_Point_Order extends New_Point
         // return $this->change_gift_subtotal_html($subtotal, $item);
     }
 
+    public function display_point_product_notice($item_id, $item, $product)
+    {
+        if (!$this->is_point_product($product)) {
+            return;
+        }
+
+        echo 'This is a POINT Product.';
+
+    }
+
     /**
      * Hide ALL item meta data of point products. Change this code if there's some data to be shown.
      * @param string $html
@@ -234,14 +245,18 @@ class New_Point_Order extends New_Point
      * Exchange total to USD for CAD orders
      * @param int $order_id
      * @param int|double $total - Original total spend
+     * @param bool $round - Round or not
      * @return int|double New total
      */
-    private function set_usd_based_total($order_id, $total)
+    private function set_usd_based_total($order_id, $total, $round = true)
     {
         $currency = get_post_meta($order_id, '_order_currency', true);
         if ($currency && $currency === 'CAD') {
             $rate = get_post_meta($order_id, 'wmc_order_info', true);
-            $total = number_format($total * $rate['USD']['rate'] / $rate['CAD']['rate'], 2);
+            $total = $total * $rate['USD']['rate'] / $rate['CAD']['rate'];
+            if ($round) {
+                $total = number_format($total, 2);                
+            }
         }
         return $total;
     }
@@ -304,7 +319,7 @@ class New_Point_Order extends New_Point
 
         // Deduct the past refunds if applicable
         // Beware that order/refund processing might take some time so would be better if a little gap between each cancel/refund
-        global $wpdb;
+        global $wpdb; // Wait for 1 min!!!
         $refund = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT SUM(net_total)
@@ -312,12 +327,12 @@ class New_Point_Order extends New_Point
                     WHERE parent_id = %d AND status = 'wc-completed'"
                 , $order_id
             )
-        );
-        if ($total <= $refund) {
+        ); // Wait for 1 min!!!
+        if ($total + $refund <= 0) {
             return;
         }
 
-        $total += $refund;
+        $total += $refund; // Wait for 1 min!!!
 
         // Set the amount to USD based if applicable
         $total = $this->set_usd_based_total($order_id, $total);
@@ -392,23 +407,34 @@ class New_Point_Order extends New_Point
 
         $order = wc_get_order($order_id);
 
+        // Points that have been refunded (negative integer)
+        global $wpdb;
+        $refund = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(points)
+                    FROM {$wpdb->prefix}wc_points_rewards_user_points_log
+                    WHERE order_id = %d AND type = 'order-refunded'"
+                , $order_id
+            )
+        );
+
+        // order-refunded means partially refunding
         if ($event_type === 'order-refunded') {
+            $points_earned = get_post_meta($order_id, '_wc_points_earned', true);
+
             $total = $this->get_refund_subtotal();
             $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
-            $points = $this->set_usd_based_total($order_id, $total) * $ratio;
+
+            // Sometimes the event type will still be 'order-refunded' even though this is the last item in the orde to refund/cancel since there's still other fees like shipping fee. In this case we need to use the min value between the current point value and the currently remaining point value.
+            $points = round($this->set_usd_based_total($order_id, $total, false) * $ratio);
+            $points = min($points, $points_earned + $refund);
         }
 
+        // order-cancelled means all items will be refunded/cancelled after current action including non-product items e.g. shipping fees.
         // Deduct the past refunds if applicable
         if ($event_type === 'order-cancelled') {
-            global $wpdb;
-            $refund = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT SUM(points)
-                        FROM {$wpdb->prefix}wc_points_rewards_user_points_log
-                        WHERE order_id = %d AND type = 'order-refunded'"
-                    , $order_id
-                )
-            );
+
+            // In case 'order-cancelled' $points is total points earned.
             $points += $refund;
         }
 
