@@ -25,7 +25,7 @@ class New_Point_Order extends New_Point
         // Change point product subtotal html in order details (admin)
         // add_filter('woocommerce_order_amount_item_subtotal', array($this, 'change_gift_subtotal_html_admin'), 10, 5);
         add_filter('woocommerce_hidden_order_itemmeta', array($this, 'hide_point_product_meta_admin'));
-        add_action('woocommerce_before_order_itemmeta', array($this, 'display_point_product_notice'), 10, 3);
+        // add_action('woocommerce_admin_order_item_values', array($this, 'display_point_product_notice'), 10, 3);
 
         // Set the total amount and point balance after payment completed
         add_action('woocommerce_payment_complete', array($this, 'set_total_after_payment'));
@@ -169,14 +169,12 @@ class New_Point_Order extends New_Point
         // return $this->change_gift_subtotal_html($subtotal, $item);
     }
 
-    public function display_point_product_notice($item_id, $item, $product)
+    public function display_point_product_notice($product, $item, $item_id)
     {
-        if (!$this->is_point_product($product)) {
-            return;
+        $product_id = $item->get_product_id();
+        if ($this->is_point_product($product_id)) {
+            echo 'This is a POINT Product.';
         }
-
-        echo 'This is a POINT Product.';
-
     }
 
     /**
@@ -255,7 +253,7 @@ class New_Point_Order extends New_Point
             $rate = get_post_meta($order_id, 'wmc_order_info', true);
             $total = $total * $rate['USD']['rate'] / $rate['CAD']['rate'];
             if ($round) {
-                $total = number_format($total, 2);                
+                $total = number_format($total, 2);
             }
         }
         return $total;
@@ -426,7 +424,9 @@ class New_Point_Order extends New_Point
             $ratio = $this->process_ratio($order->get_meta('point_ratio', true));
 
             // Sometimes the event type will still be 'order-refunded' even though this is the last item in the orde to refund/cancel since there's still other fees like shipping fee. In this case we need to use the min value between the current point value and the currently remaining point value.
-            $points = round($this->set_usd_based_total($order_id, $total, false) * $ratio);
+            $rounding_option = $this->rounding_option;
+            $points = $rounding_option($this->set_usd_based_total($order_id, $total, false) * $ratio);
+
             $points = min($points, $points_earned + $refund);
         }
 

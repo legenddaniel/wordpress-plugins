@@ -6,6 +6,9 @@ if (!defined('ABSPATH')) {
 
 abstract class New_Point
 {
+    // Default 'ceil' if no plugin data
+    protected $rounding_option = 'ceil';
+
     // Point product category id
     // local
     // protected $point_cat = 16;
@@ -16,8 +19,8 @@ abstract class New_Point
     // moditec.site
     protected $point_cat = 182; // When you change this, change also $point_cat in child theme functions
     // protected $point_500_cat = 174; // 183, 174
-    protected $point_1000_cat = 169; // 184, 169
-    protected $point_up1000_cat = 124; // 185, 124
+    protected $point_1000_cat = 183; // 184, 169
+    protected $point_up1000_cat = 183; // 185, 124
     protected $point_500_cat = 183; // 183, 174
     // protected $point_1000_cat = 184; // 184, 169
     // protected $point_up1000_cat = 185; // 185, 124
@@ -34,6 +37,8 @@ abstract class New_Point
 
     public function __construct()
     {
+        // Use plugin option first
+        $this->rounding_option = get_option('wc_points_rewards_earn_points_rounding');
 
         // remove_action('woocommerce_order_status_cancelled', 'WC_Points_Rewards_Order::handle_cancelled_refunded_order');
         // remove_action('woocommerce_order_status_refunded', 'WC_Points_Rewards_Order::handle_cancelled_refunded_order');

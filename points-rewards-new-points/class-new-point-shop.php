@@ -25,6 +25,9 @@ class New_Point_Shop extends New_Point
         // Validate point product purchase
         add_filter('woocommerce_add_to_cart_validation', array($this, 'validate_point_product_purchase_add'), 10, 3);
         add_filter('woocommerce_update_cart_validation', array($this, 'validate_point_product_purchase_update'), 10, 4);
+        add_action('woocommerce_check_cart_items', array($this, 'validate_point_product_purchase_order'));
+        add_action('woocommerce_before_checkout_process', array($this, 'validate_point_product_purchase_order'));
+        add_action('woocommerce_cart_has_errors', array($this, 'display_additional_cart_error_info_for_point_product'));
 
         // Apply custom point:cost ratio
         add_filter('woocommerce_points_earned_for_cart_item', array($this, 'recalculate_points_cart'), 10, 3);
@@ -111,7 +114,7 @@ class New_Point_Shop extends New_Point
         if (is_cart()) {
             return;
         }
-        
+
         $tax_query = $query->get('tax_query');
         $tax_query[] = array(
             'taxonomy' => 'product_cat',
@@ -180,6 +183,18 @@ class New_Point_Shop extends New_Point
     }
 
     /**
+     * Check if user has enough points for redeeming
+     * @param int $user
+     * @param int $points
+     * @return bool
+     */
+    private function has_enough_points($user, $points)
+    {
+        $total_points = WC_Points_Rewards_Manager::get_users_points($user);
+        return $total_points >= $points;
+    }
+
+    /**
      * Check if have enough points for redeeming when add to cart
      * @param bool $passed
      * @param int $product_id
@@ -194,8 +209,7 @@ class New_Point_Shop extends New_Point
             $points = $this->recalculate_point_product_points($product_id, $variation_id, $quantity);
             $points_used = $this->get_points_used() + $points;
 
-            $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-            if ($points_used > $total_points) {
+            if (!$this->has_enough_points(get_current_user_id(), $points_used)) {
                 wc_add_notice(__($this->text_no_point, 'woocommerce'), 'error');
                 return false;
             }
@@ -226,14 +240,47 @@ class New_Point_Shop extends New_Point
                 $points_used += $this->recalculate_point_product_points($id, null, $qty);
             }
 
-            $total_points = WC_Points_Rewards_Manager::get_users_points(get_current_user_id());
-            if ($total_points < $points_used) {
+            if (!$this->has_enough_points(get_current_user_id(), $points_used)) {
                 wc_add_notice(__($this->text_no_point, 'woocommerce'), 'error');
                 return false;
             }
         }
 
         return $passed;
+    }
+
+    /**
+     * Check if have enough points for redeeming before processing order
+     * @return void
+     */
+    public function validate_point_product_purchase_order()
+    {
+        $points_used = $this->get_points_used();
+        if (!$this->has_enough_points(get_current_user_id(), $points_used)) {
+            $error = $this->text_no_point . ' The vendor may just changed the point to redeem an item.';
+
+            if (current_action() === 'woocommerce_check_cart_items') {
+                wc_add_notice(__($error, 'woocommerce'), 'error');
+                return false;
+            }
+            if (current_action() === 'woocommerce_before_checkout_process') {
+                throw new Exception(sprintf(__($error . ' <a href="%s" class="wc-backward">Return to cart</a>', 'woocommerce'), esc_url(wc_get_page_permalink('cart'))));
+            }
+
+        }
+    }
+
+    /**
+     * Display additional error message if this error is related to point product.
+     * @return void
+     */
+    public function display_additional_cart_error_info_for_point_product()
+    {
+        $points_used = $this->get_points_used();
+        if (!$this->has_enough_points(get_current_user_id(), $points_used)) {
+            echo '<p>' . esc_html__('If you are redeeming point product(s), this might be due to the price change of the selected item(s).', 'woocommerce') . '</p>';
+        }
+
     }
 
     /**
@@ -255,7 +302,9 @@ class New_Point_Shop extends New_Point
         $total_amount = $this->total_amount;
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
 
-        return $price * $ratio;
+        $rounding_option = $this->rounding_option;
+
+        return $rounding_option($price * $ratio);
     }
 
     /**
@@ -526,32 +575,32 @@ class New_Point_Shop extends New_Point
 
             /*
 
-            // Hide the html for point products after removing default, or item already in the cart
-            if ($this->is_point_product($product) || $this->is_in_cart($product)) {
-                return;
-            }
+        // Hide the html for point products after removing default, or item already in the cart
+        if ($this->is_point_product($product) || $this->is_in_cart($product)) {
+        return;
+        }
 
-            // get variation with the highest price. $that->get_highest_points_variation() not working properly
-            $variations = $product->get_available_variations();
-            $variation_ids = wp_list_pluck($variations, 'variation_id');
+        // get variation with the highest price. $that->get_highest_points_variation() not working properly
+        $variations = $product->get_available_variations();
+        $variation_ids = wp_list_pluck($variations, 'variation_id');
 
-            $prices = array_map(function ($id) {
-                return $this->get_product_price($id);
-            }, $variation_ids);
-            $price = max($prices);
+        $prices = array_map(function ($id) {
+        return $this->get_product_price($id);
+        }, $variation_ids);
+        $price = max($prices);
 
-            $total_amount = $this->total_amount;
-            $ratio = $this->process_ratio($this->get_ratio($total_amount));
-            $points = round($price * $ratio); // maybe not rounding
+        $total_amount = $this->total_amount;
+        $ratio = $this->process_ratio($this->get_ratio($total_amount));
+        $points = round($price * $ratio); // maybe not rounding
 
-            $message = '';
-            // if we have a points value let's create a message; other wise don't print anything
-            if ($points) {
-                $message = $that->create_variation_message_to_product_summary($points);
-            }
+        $message = '';
+        // if we have a points value let's create a message; other wise don't print anything
+        if ($points) {
+        $message = $that->create_variation_message_to_product_summary($points);
+        }
 
-            echo $message;
-            */
+        echo $message;
+         */
         }
     }
 }

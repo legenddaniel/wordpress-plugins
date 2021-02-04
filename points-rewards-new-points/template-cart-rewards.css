@@ -14,12 +14,6 @@
 #cr-sliders > .cr-padding > p {
     margin: auto;
 }
-/* .woocommerce .woocommerce-cart-form > .cr-wrapper a {
-    text-decoration: none;
-}
-.woocommerce .woocommerce-cart-form > .cr-wrapper a:hover {
-    text-decoration: underline;
-} */
 
 .cr-border {
     border: 2px solid #eee;
@@ -96,11 +90,7 @@
 }
 
 #cr-main.cr-active {
-    /* height: 40rem !important; */
-    /* min-height: 28rem; */
-    /* 1334+: */
     max-height: 591.484px;
-    /* max-height: 38rem; */
 }
 @media (max-width: 766px) {
     #cr-main.cr-active {
@@ -108,7 +98,6 @@
     }
 }
 #cr-main:not(.cr-active) {
-    /* display: none; */
     height: 1px;
     overflow: hidden;
     padding: 0 20px;
@@ -119,31 +108,15 @@
     font-weight: bold;
     text-decoration: underline;
 }
-/* #cr-sliders > div:not(.cr-active) *,  */
+
 #cr-sliders > div:not(.cr-active) {
-    /* position: absolute;
-    left: -99999px; */
-    /* width: 500px !important; */
     padding: 0 20px;
     overflow: hidden;
     height: 1px;
     visibility: hidden;
 }
-/* #cr-sliders > div:not(.cr-active),
-#cr-sliders > div:not(.cr-active) * {
-    height: 1px;
-    visibility: hidden;
-} */
-/* #cr-sliders > div:not(.cr-active) .slick-track, 
-#cr-sliders > div:not(.cr-active) .slick-track > li {
-    width: 500px !important;
-} */
-/* #cr-sliders > div:not(.cr-active),
-#cr-sliders > div:not(.cr-active) ul > button,
-#cr-sliders > div:not(.cr-active) ul li,
-#cr-sliders > div:not(.cr-active) ul li .product-image > img,
-#cr-sliders > div:not(.cr-active) ul li .product-caption > *,
-#cr-sliders > div:not(.cr-active) ul li .product-bottom {
-    height: 1px;
-    visibility: hidden;
-} */
+@media (max-width: 576px) {
+    #cr-sliders > div:not(.cr-active) {
+        padding: 0 10px;
+    }
+}
