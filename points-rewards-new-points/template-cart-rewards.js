@@ -28,6 +28,9 @@ jQuery(document).ready(function ($) {
         $('#cr-sliders > div').not(':eq(' + index + ')').removeClass(className);
         $('#cr-sliders > div').eq(index).addClass(className);
 
+        // Enforce a resize for slider bug fix
+        $(window).trigger('resize');
+
     });
 
     // Refresh the page after cart update for bug fix
