@@ -52,6 +52,10 @@ class New_Point_Order extends New_Point
     public function add_ratio_into_order_meta($order_id, $data)
     {
         $order = wc_get_order($order_id);
+        if (!$order->get_user_id()) {
+            return;
+        }
+
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
             if (!($this->is_point_product($product_id))) {
@@ -72,8 +76,12 @@ class New_Point_Order extends New_Point
      */
     public function add_points_used_into_order_meta($order_id, $data)
     {
-        $points_used = 0;
         $order = wc_get_order($order_id);
+        if (!$order->get_user_id()) {
+            return;
+        }
+
+        $points_used = 0;
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
             if ($this->is_point_product($product_id)) {
@@ -100,6 +108,9 @@ class New_Point_Order extends New_Point
         if (!$this->is_point_product($product_id)) {
             return;
         }
+        if (!$order->get_user_id()) {
+            return;
+        }
 
         $variation_id = $item->get_variation_id();
         $qty = $item->get_quantity();
@@ -118,6 +129,10 @@ class New_Point_Order extends New_Point
      */
     public function display_points_used_in_order_details($total_rows, $order, $tax_display)
     {
+        if (!$order->get_user_id()) {
+            return;
+        }
+
         $order_id = $order->get_id();
         $points_used = get_post_meta($order_id, 'points_used', true);
 
@@ -147,6 +162,10 @@ class New_Point_Order extends New_Point
      */
     public function change_gift_subtotal_html_frontend($subtotal_html, $item, $order)
     {
+        if (!$order->get_user_id()) {
+            return;
+        }
+
         $points = $item->get_meta('points_subtotal');
         if (!$points) {
             return $subtotal_html;
@@ -166,6 +185,10 @@ class New_Point_Order extends New_Point
      */
     public function change_gift_subtotal_html_admin($subtotal, $order, $item, $inc_tax, $round)
     {
+        // if (!$order->get_user_id()) {
+        //     return;
+        // }
+
         // return $this->change_gift_subtotal_html($subtotal, $item);
     }
 
@@ -272,6 +295,10 @@ class New_Point_Order extends New_Point
         }
 
         $order = wc_get_order($order_id);
+        if (!$order->get_user_id()) {
+            return;
+        }
+
         $user = $order->get_user_id();
         $total = $order->get_subtotal();
 
@@ -294,6 +321,11 @@ class New_Point_Order extends New_Point
             return;
         }
 
+        $order = wc_get_order($order_id);
+        if (!$order->get_user_id()) {
+            return;
+        }
+
         // Redeeming logic
         $points_used = get_post_meta($order_id, 'points_used', true);
         if (!$points_used) {
@@ -313,6 +345,10 @@ class New_Point_Order extends New_Point
     {
         $order = wc_get_order($order_id);
         $user = $order->get_user_id();
+        if (!$user) {
+            return;
+        }
+
         $total = $order->get_subtotal();
 
         // Deduct the past refunds if applicable
@@ -375,6 +411,9 @@ class New_Point_Order extends New_Point
     {
         $order = wc_get_order($order_id);
         $user = $order->get_user_id();
+        if (!$user) {
+            return;
+        }
 
         $total = $this->get_refund_subtotal();
 
@@ -397,6 +436,10 @@ class New_Point_Order extends New_Point
      */
     public function reset_points_when_cancel_refunded($points, $user_id, $event_type, $data, $order_id)
     {
+        if (!$user_id) {
+            return $points;
+        }
+
         // Separate redeeming and cancelled/refund logic
         // Beware that this event type is different from WooCommerce order status
         if ($event_type !== 'order-refunded' && $event_type !== 'order-cancelled') {

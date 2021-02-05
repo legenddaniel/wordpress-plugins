@@ -7,6 +7,8 @@ if (!defined('ABSPATH')) {
 class WC_Moditec
 {
     private $cart_ad = 9116;
+    private $size_chart = 9466;
+
     private $point_cat = 182; // When you change this, change also $point_cat in New_Point
     private $new_arrival_limit = 12;
     private $top_seller_limit = 12;
@@ -31,9 +33,15 @@ class WC_Moditec
         // Hide default sale label
         add_filter('woocommerce_sale_flash', [$this, 'hide_sale_label']);
 
+        // Display size chart
+        remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
+        add_action('woocommerce_product_meta_start', 'woocommerce_template_single_excerpt');
+        // add_action('woocommerce_product_meta_start', [$this, 'display_size_chart']);
+
         // Relocate the description box
         remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
-        add_action('woocommerce_product_meta_start', [$this, 'custom_desc']);
+        // add_action('woocommerce_after_single_product_summary', 'woocommerce_product_description_tab');
+        add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc']);
 
         // Hide decimals
         add_filter('woocommerce_price_trim_zeros', [$this, 'hide_decimals']);
@@ -78,7 +86,7 @@ class WC_Moditec
 
         // $query = array();
         // $query['fields'] = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
-		// 	FROM {$wpdb->posts} as posts";
+        //     FROM {$wpdb->posts} as posts";
         // $query['join'] = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
         // $query['join'] .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
         // $query['join'] .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
@@ -126,7 +134,7 @@ class WC_Moditec
     private function get_new_arrivals()
     {
         global $wpdb;
-        
+
         $new_arrivals = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT DISTINCT post.ID
@@ -151,8 +159,8 @@ class WC_Moditec
 
     public function init_special_products()
     {
-        if (is_shop() || is_product() || strpos(get_page_link(), 'index') !== false) {
-            
+        if (is_shop() || is_product_category() || is_product() || strpos(get_page_link(), 'index') !== false) {
+
             $new_arrivals = $this->get_new_arrivals();
             if ($new_arrivals) {
                 foreach ($new_arrivals as $new_arrival) {
@@ -212,15 +220,15 @@ class WC_Moditec
 
     public function custom_desc()
     {
-        $content = the_content();
+        $content = get_the_content();
         if (!$content) {
             return;
         }
         ?>
-        <div class="sz-desc-wrapper">
-            <?php $content;?>
-        </div>
-    <?php
+    <div class="sz-desc-wrapper">
+        <?php woocommerce_product_description_tab();?>
+    </div>
+        <?php
 }
 
     public function hide_stock_html($html, $product)
@@ -269,9 +277,20 @@ class WC_Moditec
    <?php
 }
 
+    private function display_ad($ad)
+    {
+        the_ad($ad);
+    }
+
     public function display_cart_ad()
     {
-        the_ad($this->cart_ad);
+        $this->display_ad($this->cart_ad);
+    }
+
+    public function display_size_chart()
+    {
+        // May have different size charts for different products (e.g. coats, pants, t-shirts, etc.)
+        $this->display_ad($this->size_chart);
     }
 
     public function admin_display_ad_settings($settings)

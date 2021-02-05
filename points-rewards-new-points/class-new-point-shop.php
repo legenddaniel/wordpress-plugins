@@ -8,9 +8,11 @@ class New_Point_Shop extends New_Point
 {
     private $total_amount = 0;
     private $ratio_type = '';
+    private $login = false;
 
     public function __construct()
     {
+        $this->login = is_user_logged_in();
         $this->total_amount = $this->get_total_amount(get_current_user_id());
         $this->ratio_type = $this->get_ratio_type($this->total_amount);
 
@@ -60,6 +62,10 @@ class New_Point_Shop extends New_Point
      */
     public function init_assets()
     {
+        if (!$this->login) {
+            return;
+        }
+
         $plugin_url = plugin_dir_url(__FILE__);
 
         wp_enqueue_style(
@@ -83,6 +89,10 @@ class New_Point_Shop extends New_Point
      */
     public function apply_template()
     {
+        if (!$this->login) {
+            return;
+        }
+        
         $args = [
             'points' => WC_Points_Rewards_Manager::get_users_points(get_current_user_id()),
             'sliders' => [
@@ -316,6 +326,10 @@ class New_Point_Shop extends New_Point
      */
     public function recalculate_points_cart($amount, $item_key, $item)
     {
+        if (!$this->login) {
+            return;
+        }
+
         $product = $item['product_id'];
         $variation = $item['variation_id'];
         return $this->recalculate_points($product, $amount, $variation);
@@ -409,6 +423,10 @@ class New_Point_Shop extends New_Point
      */
     public function add_item_point_earned_data($cart_item_data, $product_id, $variation)
     {
+        if (!$this->login) {
+            return;
+        }
+
         if (!$this->is_point_product($product_id)) {
             return $cart_item_data;
         }
@@ -525,8 +543,8 @@ class New_Point_Shop extends New_Point
      */
     public function replace_available_variable_product_html($data, $product, $variation)
     {
-        // Hide the msg if item already in the cart
-        if ($this->is_in_cart($product)) {
+        // Hide the msg if item already in the cart or for a guest
+        if ($this->is_in_cart($product) || !$this->login) {
             $data['price_html'] = '';
             return $data;
         }
