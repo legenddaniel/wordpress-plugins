@@ -17,8 +17,8 @@ body {
 
 body,
 .main-navigation .sub-menu li.menu-item > a,
-.sz-recommend > h2 {
-    font-family: var(--e-global-typography-text-font-family), hops and barley;
+h2 {
+    font-family: var(--e-global-typography-text-font-family), hops and barley !important;
 }
 
 table td,
@@ -80,8 +80,11 @@ table th {
 .woocommerce-form-register > .flex-container input[type="text"] {
     width: 100%;
 }
-.woocommerce-form-register > .flex-container > div {
+.woocommerce-form-register > .flex-container > p {
     width: 50%;
+}
+.woocommerce-form-register label {
+    color: #000;
 }
 .woocommerce-form-register input[type="checkbox"] {
     margin-left: 1rem;
@@ -183,6 +186,13 @@ ul.products li.product {
     font-size: 14px;
     color: #fff;
 }
+@media (max-width: 480px) {
+    .stock-label,
+    .sz-label {
+        padding: 1vw;
+        font-size: 2.5vw;
+    }
+}
 .br_alabel > span {
     padding: 6.5px !important;
     width: auto !important;
@@ -269,13 +279,33 @@ body.single-product
     width: 100%;
 }
 
-.woocommerce-variation-add-to-cart {
+.single-product div.product form.cart {
     position: relative;
+    display: block;
+}
+
+.single-product div.product .woocommerce-variation-add-to-cart {
+    display: block;
 }
 .woocommerce-variation-add-to-cart > .points {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#sz-custom-checkout {
+    display: block;
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0;
+}
+.single_add_to_cart_button {
+    width: 49%;
+    height: 50px;
+    text-align: center;
+}
+.single-product div.product .single_add_to_cart_button:before {
+    vertical-align: bottom;
 }
 
 .inventory_status.out-stock {
@@ -423,6 +453,15 @@ div.coupon:not(.under-proceed) {
 .sz-cart-ad-txt-contact-wrapper > a {
     color: var(--text);
 }
+
+/* #customer_login input {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+.sz-guest ~ .woocommerce-form-coupon-toggle {
+    display: none;
+} */
 
 body.woocommerce-checkout > #page > .site-content {
     margin: 2rem 1rem;

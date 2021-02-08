@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
 
 class WC_Moditec
 {
+    private $max_address = 2;
     private $cart_ad = 9116;
     private $size_chart = 9466;
 
@@ -19,6 +20,9 @@ class WC_Moditec
     public function __construct()
     {
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
+
+        // Change default max address of the multi-shipping-address plugin
+        add_action('init', [$this, 'set_max_address']);
 
         // Query product info during certain pages pre-load
         add_action('template_redirect', [$this, 'init_special_products']);
@@ -42,6 +46,9 @@ class WC_Moditec
         remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
         // add_action('woocommerce_after_single_product_summary', 'woocommerce_product_description_tab');
         add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc']);
+
+        // Add direct checkout button in product page
+        add_action('woocommerce_after_add_to_cart_button', [$this, 'add_checkout_in_product']);
 
         // Hide decimals
         add_filter('woocommerce_price_trim_zeros', [$this, 'hide_decimals']);
@@ -67,6 +74,10 @@ class WC_Moditec
 
         // Display gap to free shipping label in cart/checkout
         add_action('woocommerce_after_shipping_rate', [$this, 'free_shipping_notice']);
+
+        // Provide link to register in checkout
+        // add_action('woocommerce_before_checkout_form_cart_notices', [$this, 'add_checkout_register_link']);
+        // add_filter('woocommerce_checkout_must_be_logged_in_message', [$this, 'remove_default_checkout_login_msg']);
     }
 
     public function init_assets()
@@ -77,6 +88,15 @@ class WC_Moditec
             ['jquery'],
             rand(111, 9999)
         );
+        if (is_product()) {
+            wp_enqueue_script(
+                'direct-checkout',
+                get_stylesheet_directory_uri() . '/direct-checkout.js',
+                ['jquery'],
+                rand(111, 9999)
+            );
+        }
+
     }
 
     private function get_top_sellers()
@@ -231,6 +251,12 @@ class WC_Moditec
         <?php
 }
 
+    public function add_checkout_in_product()
+    {
+        // Only work for simple and variable products
+        echo '<a id="sz-custom-checkout" href="' . wc_get_checkout_url() . '?add-to-cart=$ID&quantity=$QTY" class="single_add_to_cart_button button alt">Checkout</a>';
+    }
+
     public function hide_stock_html($html, $product)
     {
         return '';
@@ -346,7 +372,27 @@ class WC_Moditec
                 printf(__('<div class="sz-free-shipping-msg-wrapper"><div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div></div>', 'woocommerce'), wc_price($remaining));
             }
         }
+    }
 
+    public function set_max_address()
+    {
+        update_option('ocwma_max_adress', strval($this->max_address));
+    }
+
+    public function add_checkout_register_link($checkout)
+    {
+        if (is_user_logged_in()) {
+            return;
+        }
+
+        echo '<p class="sz-guest">You must be logged in to checkout.</p>';
+
+        wc_get_template('myaccount/form-login.php');
+    }
+
+    public function remove_default_checkout_login_msg($msg)
+    {
+        return;
     }
 }
 

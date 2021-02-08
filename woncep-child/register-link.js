@@ -1,4 +1,4 @@
 jQuery(document).ready(function ($) {
     $('.register-link').attr('href', '/my-account');
-    $('#subscribe').val(1);
+    // $('.woncep-login-form-ajax input').attr('autocomplete', 'false');
 });
