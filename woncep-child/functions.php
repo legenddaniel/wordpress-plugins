@@ -42,13 +42,17 @@ class WC_Moditec
         add_action('woocommerce_product_meta_start', 'woocommerce_template_single_excerpt');
         // add_action('woocommerce_product_meta_start', [$this, 'display_size_chart']);
 
+        // Reset size chart
+        add_filter('woocommerce_short_description', [$this, 'custom_short_desc']);
+
         // Relocate the description box
         remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
         // add_action('woocommerce_after_single_product_summary', 'woocommerce_product_description_tab');
         add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc']);
 
         // Add direct checkout button in product page
-        add_action('woocommerce_after_add_to_cart_button', [$this, 'add_checkout_in_product']);
+        // add_action('woocommerce_after_add_to_cart_button', [$this, 'add_checkout_in_product']);
+        // add_filter('woocommerce_add_to_cart_redirect', [$this, 'direct_checkout']);
 
         // Hide decimals
         add_filter('woocommerce_price_trim_zeros', [$this, 'hide_decimals']);
@@ -83,8 +87,14 @@ class WC_Moditec
     public function init_assets()
     {
         wp_enqueue_script(
-            'register-link',
-            get_stylesheet_directory_uri() . '/register-link.js',
+            'register-form',
+            get_stylesheet_directory_uri() . '/register-form.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
+        wp_enqueue_script(
+            'abort-resubmission',
+            get_stylesheet_directory_uri() . '/abort-resubmission.js',
             ['jquery'],
             rand(111, 9999)
         );
@@ -238,6 +248,22 @@ class WC_Moditec
         echo '<span class="sz-label">' . $label . '</span>';
     }
 
+    public function custom_short_desc($short_desc)
+    {
+        if ($short_desc) {
+            preg_match('/\[the_ad id="\d+"\]/', $short_desc, $ad);
+        }
+        if ($ad) {
+            $html = do_shortcode($ad[0]);
+            preg_match('/<a href="http.*wp-content\/uploads.*(png|jpg|jpeg)">/', $html, $a_half);
+        }
+        if ($a_half) {
+            $new_desc = '<div class="sz-size-chart">' . $a_half[0] . '-- Size Chart --<a/></div>' . $html; // Must include this redundant $html.
+        }
+
+        return $new_desc ?: $short_desc;
+    }
+
     public function custom_desc()
     {
         $content = get_the_content();
@@ -255,6 +281,16 @@ class WC_Moditec
     {
         // Only work for simple and variable products
         echo '<a id="sz-custom-checkout" href="' . wc_get_checkout_url() . '?add-to-cart=$ID&quantity=$QTY" class="single_add_to_cart_button button alt">Checkout</a>';
+    }
+
+    public function direct_checkout($url)
+    {
+        $checkout_url = wc_get_checkout_url();
+        if (strpos($url, $checkout_url) !== false) {
+            // die(var_dump($url, $checkout_url));
+            return $checkout_url;
+        }
+        return $url;
     }
 
     public function hide_stock_html($html, $product)

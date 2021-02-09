@@ -9,5 +9,6 @@ jQuery(document).ready(function ($) {
         var newHref = href.replace('$ID', id).replace('$QTY', qty);
 
         $(this).attr('href', newHref);
-    })
+    });
+
 });

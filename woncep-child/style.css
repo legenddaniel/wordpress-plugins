@@ -70,6 +70,11 @@ table th {
     margin-top: 0;
     z-index: 600;
 }
+.site-header-account .account-dropdown:focus-within {
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+}
 .login-form-head > .login-form-title + span {
     position: absolute;
     bottom: 20px;
@@ -180,28 +185,28 @@ ul.products li.product {
     top: 0;
     left: 0;
     z-index: 300;
-    padding: 6.5px;
+    padding: 5px;
     border-radius: 3px;
     background-color: #000;
-    font-size: 14px;
+    font-size: 12px;
     color: #fff;
 }
 @media (max-width: 480px) {
     .stock-label,
     .sz-label {
-        padding: 1vw;
+        padding: 0.5vw;
         font-size: 2.5vw;
     }
 }
-.br_alabel > span {
+/* .br_alabel > span {
     padding: 6.5px !important;
     width: auto !important;
 }
 .br_alabel > span > b {
     font-weight: initial;
-}
+} */
 
-a.xoo-qv-button:hover {
+/* a.xoo-qv-button:hover {
     background-color: var(--primary_hover);
     color: #fff;
 }
@@ -210,7 +215,7 @@ a.xoo-qv-button:hover {
 }
 .xoo-qv-main {
     padding: 2rem;
-}
+} */
 
 .inventory_status {
     border-color: #000;
@@ -270,14 +275,18 @@ body.single-product
     margin-top: 1rem;
 }
 
-.woocommerce-product-details__short-description::before {
-    content: "Size Chart";
+.sz-size-chart {
+    padding: 2rem 0;
     font-size: 1rem;
     color: #000;
+    text-align: center;
 }
-.woocommerce-product-details__short-description img {
+.sz-size-chart + div {
+    display: none;
+}
+/* .woocommerce-product-details__short-description img {
     width: 100%;
-}
+} */
 
 .single-product div.product form.cart {
     position: relative;
@@ -293,12 +302,12 @@ body.single-product
     left: 0;
 }
 
-#sz-custom-checkout {
+/* #sz-custom-checkout {
     display: block;
     position: absolute;
     bottom: 0.5rem;
     right: 0;
-}
+} */
 .single_add_to_cart_button {
     width: 49%;
     height: 50px;
@@ -306,6 +315,21 @@ body.single-product
 }
 .single-product div.product .single_add_to_cart_button:before {
     vertical-align: bottom;
+}
+.button.pisol_single_buy_now.pisol_buy_now_button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 49% !important;
+    height: 50px;
+    margin-bottom: 8px !important;
+}
+.button.pisol_single_buy_now.pisol_buy_now_button::before {
+    font-family: "woncep-icon-1.0.1";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: "\f09d";
+    margin-right: 10px;
 }
 
 .inventory_status.out-stock {
@@ -463,8 +487,14 @@ div.coupon:not(.under-proceed) {
     display: none;
 } */
 
-body.woocommerce-checkout > #page > .site-content {
-    margin: 2rem 1rem;
+table.woocommerce-checkout-review-order-table .product-name {
+    width: 75%;
+}
+
+@media (min-width: 480px) {
+    body.woocommerce-checkout > #page > .site-content {
+        margin: 2rem 1rem;
+    }
 }
 
 @media (max-width: 420px), (min-width: 768px) and (max-width: 980px) {
