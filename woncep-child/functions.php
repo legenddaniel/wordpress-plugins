@@ -87,6 +87,12 @@ class WC_Moditec
     public function init_assets()
     {
         wp_enqueue_script(
+            'breadcrumb-home',
+            get_stylesheet_directory_uri() . '/breadcrumb-home.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
+        wp_enqueue_script(
             'register-form',
             get_stylesheet_directory_uri() . '/register-form.js',
             ['jquery'],
