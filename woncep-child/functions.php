@@ -61,7 +61,7 @@ class WC_Moditec
         add_filter('woocommerce_get_stock_html', [$this, 'hide_stock_html'], 10, 2);
 
         // Hide CAD/USD
-        add_filter('woocommerce_currency_symbol', [$this, 'hide_currency_html'], 20, 2);
+        // add_filter('woocommerce_currency_symbol', [$this, 'hide_currency_html'], 20, 2);
 
         // Display recommended products slider. Display 1st on large and 2nd on small screen
         add_action('woocommerce_after_cart_table', [$this, 'display_recommended_products']);
@@ -82,6 +82,11 @@ class WC_Moditec
         // Provide link to register in checkout
         // add_action('woocommerce_before_checkout_form_cart_notices', [$this, 'add_checkout_register_link']);
         // add_filter('woocommerce_checkout_must_be_logged_in_message', [$this, 'remove_default_checkout_login_msg']);
+
+        // Add meta box for tracking number in admin order page, as well as in my account page
+        add_action('add_meta_boxes_shop_order', [$this, 'add_order_tracking_number']);
+        add_action('woocommerce_process_shop_order_meta', [$this, 'save_order_metabox'], 10, 2);
+        add_action('woocommerce_order_details_after_order_table', [$this, 'display_tracking_number']);
     }
 
     public function init_assets()
@@ -104,6 +109,12 @@ class WC_Moditec
             ['jquery'],
             rand(111, 9999)
         );
+        // wp_enqueue_script(
+        //     'wechat-video',
+        //     get_stylesheet_directory_uri() . '/wechat-video.js',
+        //     ['jquery'],
+        //     rand(111, 9999)
+        // );
         if (is_product()) {
             wp_enqueue_script(
                 'direct-checkout',
@@ -392,8 +403,9 @@ class WC_Moditec
         return array_merge($settings, $new_settings);
     }
 
-    public function free_shipping_notice()
+    public function free_shipping_notice($rate)
     {
+
         $cart = WC()->cart;
 
         $packages = $cart->get_shipping_packages();
@@ -409,7 +421,7 @@ class WC_Moditec
         foreach ($zone->get_shipping_methods(true) as $k => $method) {
             $min_amount = $method->get_option('min_amount');
 
-            if ($method->id == 'free_shipping' && !empty($min_amount) && $cart_total < $min_amount) {
+            if ($rate->method_id == 'flat_rate' && $method->id == 'free_shipping' && !empty($min_amount) && $cart_total < $min_amount) {
                 $remaining = $min_amount - $cart_total;
                 printf(__('<div class="sz-free-shipping-msg-wrapper"><div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div></div>', 'woocommerce'), wc_price($remaining));
             }
@@ -435,6 +447,59 @@ class WC_Moditec
     public function remove_default_checkout_login_msg($msg)
     {
         return;
+    }
+
+    public function display_tracking_number_field($post)
+    {
+        $id = $post->ID;
+        $tracking_number = get_post_meta($id, 'tracking_number', true);
+
+        $field = [
+            'id' => 'sz-tracking-number',
+            'type' => 'text',
+            'value' => $tracking_number,
+        ];
+        woocommerce_wp_text_input($field);
+    }
+
+    public function add_order_tracking_number($post)
+    {
+        if ($post->post_type !== 'shop_order') {
+            return;
+        }
+
+        add_meta_box(
+            'sz-tracking-number',
+            __('UPS Tracking Number', 'woocommerce'),
+            [$this, 'display_tracking_number_field'],
+            'shop_order',
+            'side',
+            'high'
+        );
+    }
+
+    public function save_order_metabox($id, $post)
+    {
+        if ($post->post_type !== 'shop_order') {
+            return;
+        }
+
+        $tracking_number = $_POST['sz-tracking-number'] ?: '';
+        update_post_meta($id, 'tracking_number', $tracking_number);
+    }
+
+    public function display_tracking_number($order)
+    {
+        $order_id = $order->get_id();
+        $tracking_number = get_post_meta($order_id, 'tracking_number', true);
+
+        $info = $tracking_number ?: 'No tracking number info.';
+        $color = $tracking_number ? ' style="color: #000;"' : '';
+
+        echo '<div style="margin: 3rem auto;">';
+        echo '<h2>UPS Tracking Number</h2>';
+        echo '<p' . $color . '>' . esc_html__($info, 'woocommerce') . '</p>';
+        echo '</div>';
     }
 }
 

@@ -39,21 +39,28 @@ table th {
     display: none;
 }
 .page-id-9311 .site-content {
-    margin: 0;
     position: absolute;
     top: 0;
     left: 0;
     height: 100vh;
 }
-.page-id-9311 .col-full {
+/* .page-id-9311 .col-full {
     padding: 0;
+} */
+.page-id-9311 .rs-layer {
+    font-family: 'hops and barley 4' !important;
 }
+/*
 .page-id-9311 .elementor-section-height-full {
     height: 100vh;
 }
-.page-id-9311 .elementor-background-video-container + .elementor-container {
+.page-id-9311 .elementor-background-video-container + .elementor-container,
+.page-id-9311 .elementor-section.elementor-section-height-full > .elementor-container {
     height: 100%;
 }
+.page-id-9311 .elementor-background-video-container {
+    z-index: -1;
+}*/
 
 .elementor-location-header .elementor-social-icons-wrapper .elementor-icon.elementor-social-icon:hover > i {
     color: #fff;
@@ -465,6 +472,12 @@ tr.woocommerce-shipping-totals.shipping > td > * {
 table.shop_table_responsive tr.woocommerce-shipping-totals td {
     width: 100%;
 }
+#shipping_method {
+    white-space: nowrap;
+}
+.shipping_method:not(:checked) ~ .sz-free-shipping-msg-wrapper {
+    display: none;
+}
 .sz-free-shipping-msg-wrapper {
     position: relative;
     min-height: 3rem;
@@ -528,10 +541,13 @@ div.coupon:not(.under-proceed) {
 .sz-coupon-form {
     margin-top: 2rem;
 }
-.sz-coupon-form > .coupon > input {
+.sz-coupon-form > .coupon > .input-text {
     margin-bottom: 1rem;
     padding-left: 1rem;
     border: 1px solid var(--border);
+}
+.sz-coupon-form > .coupon > .button {
+    padding: 1em;
 }
 
 .sz-cart-ad {
@@ -564,6 +580,12 @@ div.coupon:not(.under-proceed) {
     display: none;
 } */
 
+.about_paypal {
+    display: block;
+    font-weight: initial;
+    color: var(--text);
+}
+
 table.woocommerce-checkout-review-order-table .product-name {
     width: 75%;
 }
@@ -574,12 +596,12 @@ table.woocommerce-checkout-review-order-table .product-name {
     }
 }
 
-@media (max-width: 420px), (min-width: 768px) and (max-width: 980px) {
+@media (max-width: 420px), (min-width: 768px) and (max-width: 1024px) {
     .checkout-review-order-table-wrapper {
         padding: 0;
     }
 }
-@media (max-width: 360px) {
+@media (max-width: 360px), (min-width: 768px) and (max-width: 864px) {
     #order_review {
         padding: 20px 16px 40px;
     }
