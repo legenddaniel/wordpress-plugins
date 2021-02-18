@@ -86,7 +86,7 @@ class WC_Moditec
         // Add meta box for tracking number in admin order page, as well as in my account page
         add_action('add_meta_boxes_shop_order', [$this, 'add_order_tracking_number']);
         add_action('woocommerce_process_shop_order_meta', [$this, 'save_order_metabox'], 10, 2);
-        add_action('woocommerce_order_details_after_order_table', [$this, 'display_tracking_number']);
+        add_action('woocommerce_order_details_after_order_table', [$this, 'display_tracking_number_myaccount']);
     }
 
     public function init_assets()
@@ -488,7 +488,7 @@ class WC_Moditec
         update_post_meta($id, 'tracking_number', $tracking_number);
     }
 
-    public function display_tracking_number($order)
+    public function display_tracking_number_myaccount($order)
     {
         $order_id = $order->get_id();
         $tracking_number = get_post_meta($order_id, 'tracking_number', true);

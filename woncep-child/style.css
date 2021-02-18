@@ -26,14 +26,12 @@ table th {
     vertical-align: middle;
 }
 
-.page-id-9311 #tidio-chat {
-    display: none;
-}
 @media (max-width: 1024px) {
     #tidio-chat-iframe {
         bottom: 4rem !important;
     }
 }
+.page-id-9311 #tidio-chat,
 .page-id-9311 .site-header,
 .page-id-9311 .site-footer {
     display: none;
@@ -48,7 +46,35 @@ table th {
     padding: 0;
 } */
 .page-id-9311 .rs-layer {
-    font-family: 'hops and barley 4' !important;
+    font-family: "hops and barley 4" !important;
+}
+@media (min-width: 1025px) {
+    .page-id-9311 .rs-layer {
+        font-size: 150px !important;
+    }
+    .page-id-9311 .rs-layer > img {
+        width: 120px !important;
+        height: 20px !important;
+    }
+}
+@media (max-width: 1024px) {
+    .page-id-9311 .rs-layer {
+        font-size: 120px !important;
+    }
+    .page-id-9311 .rs-layer > img {
+        width: 96px !important;
+        height: 16px !important;
+    }
+}
+@media (max-width: 767px) {
+    .page-id-9311 .rs-layer {
+        font-size: 90px !important;
+    }
+    .page-id-9311 .rs-layer > img {
+        width: 72px !important;
+        height: 12px !important;
+        transform: translateX(-12px);
+    }
 }
 /*
 .page-id-9311 .elementor-section-height-full {
@@ -556,16 +582,24 @@ div.coupon:not(.under-proceed) {
     border: 6px solid;
     border-color: var(--border);
 }
-
-.sz-cart-ad img {
+.sz-cart-ad-img-wrapper > img {
     margin: auto;
 }
-
 .sz-cart-ad-txt-wrapper {
     margin-top: 2rem;
     color: #000;
 }
-
+.sz-cart-cards {
+    display: flex;
+    height: 25px;
+}
+.sz-cart-cards > span {
+    flex: 1;
+}
+.sz-cart-cards > img {
+    padding-left: 3px;
+    height: 100%;
+}
 .shipping-calculator-button,
 .sz-cart-ad-txt-contact-wrapper > a {
     color: var(--text);
