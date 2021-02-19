@@ -11,8 +11,8 @@ class WC_Moditec
     private $size_chart = 9466;
 
     private $point_cat = 182; // When you change this, change also $point_cat in New_Point
-    private $new_arrival_limit = 12;
-    private $top_seller_limit = 12;
+    private $new_arrival_limit = 8;
+    private $top_seller_limit = 8;
 
     private $new_arrivals = [];
     private $top_sellers = [];
@@ -147,34 +147,52 @@ class WC_Moditec
 
         // return $wpdb->get_results(implode(' ',  $query));
 
+        // $top_sellers = $wpdb->get_results(
+        //     $wpdb->prepare(
+        //         "SELECT p.ID
+        //         FROM {$wpdb->prefix}posts p
+        //         INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim
+        //             ON p.ID = oim.meta_value
+        //         INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim2
+        //             ON oim.order_item_id = oim2.order_item_id
+        //         INNER JOIN {$wpdb->prefix}woocommerce_order_items oi
+        //             ON oim.order_item_id = oi.order_item_id
+        //         INNER JOIN {$wpdb->prefix}posts as o
+        //             ON o.ID = oi.order_id
+        //         WHERE p.post_type = 'product'
+        //         AND p.post_status = 'publish'
+        //         AND o.post_status IN ('wc-processing','wc-completed')
+        //         AND oim.meta_key = '_product_id'
+        //         AND oim2.meta_key = '_qty'
+        //         AND p.ID NOT IN (
+        //                 SELECT DISTINCT object_id
+        //                 FROM {$wpdb->prefix}term_relationships
+        //                 WHERE term_taxonomy_id = %d
+        //             )
+        //         GROUP BY p.ID
+        //         ORDER BY COUNT(oim2.meta_value) * 1 DESC
+        //         LIMIT %d",
+        //         [$this->point_cat, $this->top_seller_limit]
+        //     )
+        // );
+
         $top_sellers = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT p.ID
-                FROM {$wpdb->prefix}posts p
-                INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim
-                    ON p.ID = oim.meta_value
-                INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta oim2
-                    ON oim.order_item_id = oim2.order_item_id
-                INNER JOIN {$wpdb->prefix}woocommerce_order_items oi
-                    ON oim.order_item_id = oi.order_item_id
-                INNER JOIN {$wpdb->prefix}posts as o
-                    ON o.ID = oi.order_id
-                WHERE p.post_type = 'product'
-                AND p.post_status = 'publish'
-                AND o.post_status IN ('wc-processing','wc-completed')
-                AND oim.meta_key = '_product_id'
-                AND oim2.meta_key = '_qty'
-                AND p.ID NOT IN (
-                        SELECT DISTINCT object_id
-                        FROM {$wpdb->prefix}term_relationships
-                        WHERE term_taxonomy_id = %d
-                    )
-                GROUP BY p.ID
-                ORDER BY COUNT(oim2.meta_value) * 1 DESC
+                "SELECT p.post_id
+                FROM {$wpdb->prefix}postmeta AS p
+                WHERE 
+                    p.meta_key = 'total_sales' AND
+                        p.post_id NOT IN (
+                            SELECT DISTINCT t.object_id
+                            FROM {$wpdb->prefix}term_relationships AS t
+                            WHERE t.term_taxonomy_id = %d
+                        )
+                ORDER BY p.meta_value * 1 DESC
                 LIMIT %d",
                 [$this->point_cat, $this->top_seller_limit]
             )
         );
+
         return $top_sellers;
     }
 
@@ -186,8 +204,6 @@ class WC_Moditec
             $wpdb->prepare(
                 "SELECT DISTINCT post.ID
                 FROM {$wpdb->prefix}posts AS post
-                JOIN {$wpdb->prefix}term_relationships AS term
-                ON post.ID = term.object_id
                 WHERE
                     post.post_status = 'publish' AND
                     post.post_type = 'product' AND
@@ -218,7 +234,8 @@ class WC_Moditec
             $top_sellers = $this->get_top_sellers();
             if ($top_sellers) {
                 foreach ($top_sellers as $top_seller) {
-                    $this->top_sellers[] = $top_seller->ID;
+                    $this->top_sellers[] = $top_seller->post_id;
+                    // $this->top_sellers[] = $top_seller->ID;
                 }
             }
         }
