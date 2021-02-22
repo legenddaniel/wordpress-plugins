@@ -86,3 +86,11 @@
         display: block;
     }
 }
+
+.cart .sz-waiver {
+    margin-left: 1rem;
+}
+.cart .sz-waiver > a {
+    color: #000;
+    font-weight: bold;
+}

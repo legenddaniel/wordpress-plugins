@@ -423,6 +423,14 @@ function render_discount_field()
 // 'woocommerce_before_single_variation' not working, the calendar keeps loading
 add_action('woocommerce_before_add_to_cart_button', 'render_discount_field');
 
+function sz_render_waiver_field()
+{
+    ?>
+        <span class="sz-waiver">Before booking, make sure you have read the <a href="/safety-rules/" target="_blank">Safety Rules</a></span>
+    <?php
+}
+add_action('woocommerce_after_add_to_cart_button', 'sz_render_waiver_field');
+
 /**
  * Validate the discount quantity
  * @param array $passed
