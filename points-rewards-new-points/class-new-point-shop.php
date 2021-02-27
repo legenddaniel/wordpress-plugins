@@ -54,6 +54,9 @@ class New_Point_Shop extends New_Point
 
         // Change the price of point product
         add_action('woocommerce_before_calculate_totals', array($this, 'change_gift_price'));
+
+        // Display register for rewards msg in checkout
+        add_action('woocommerce_before_checkout_form_cart_notices', [$this, 'display_checkout_register_msg']);
     }
 
     /**
@@ -92,7 +95,7 @@ class New_Point_Shop extends New_Point
         if (!$this->login) {
             return;
         }
-        
+
         $args = [
             'points' => WC_Points_Rewards_Manager::get_users_points(get_current_user_id()),
             'sliders' => [
@@ -620,5 +623,14 @@ class New_Point_Shop extends New_Point
         echo $message;
          */
         }
+    }
+
+    public function display_checkout_register_msg()
+    {
+        if (is_user_logged_in()) {
+            return;
+        }
+        
+        echo '<div class="woocommerce-info sz-checkout-register-msg">'. __($this->text_register_checkout, 'woocommerce'). ' <a href="/my-account"><button class=".button">Register</button></a></div>';
     }
 }

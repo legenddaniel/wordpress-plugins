@@ -58,7 +58,6 @@ table th {
 }*/
 
 .page-id-9311 .rs-layer {
-    transform: translateY(-50%) !important;
     font-family: "hops and barley 4" !important;
     line-height: 150% !important;
 }
@@ -153,6 +152,67 @@ body.term-pre-order .elementor-section.woncep-breadcrumb-build {
 }
 .elementor-section.woncep-breadcrumb-build {
     margin-bottom: 2rem;
+}
+
+.sg-popup-content > div {
+    padding: 30px 10px 40px 40px;
+    overflow: hidden !important;
+    width: 50% !important;
+}
+.sg-popup-content .wp-block-image {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    width: 325px;
+}
+.js-sgpb-form-field-gdpr-wrapper {
+    position: absolute;
+    bottom: 50px;
+}
+.js-subs-gdpr-inputs.js-subs-gdpr-label {
+    vertical-align: top;
+}
+label.js-login-remember-me-label-edit {
+    font-size: 16px;
+}
+.sgpb-gdpr-error-message {
+    position: absolute;
+}
+.sgpb-alert-success {
+    background-color: #000;
+    color: #fff;
+    border: none;
+}
+@media (max-width: 767px) {
+    .sg-popup-content > div {
+        width: 100% !important;
+        padding: 5%;
+    }
+    .sg-popup-content .wp-block-image {
+        display: none;
+    }
+}
+@media (min-width: 480px) and (max-width: 767px) {
+    .js-sgpb-form-field-gdpr-wrapper {
+        width: 100%;
+        bottom: 0px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+@media (max-width: 479px) {
+    .sgpb-popup-builder-content-html > p {
+        font-size: 24px !important;
+    }
+    .sgpb-subscription-form #sgpb-form {
+        margin-top: -25px;
+    }
+    label.js-login-remember-me-label-edit {
+        font-size: 14px;
+    }
+    .sgpb-gdpr-label-wrapper {
+        width: 100% !important;
+    }
 }
 
 #page .site-content {
@@ -620,10 +680,45 @@ div.coupon:not(.under-proceed) {
     display: none;
 } */
 
+.sz-checkout-register-msg {
+    display: flex;
+    align-items: center;
+}
+.sz-checkout-register-msg > a {
+    margin-left: auto;
+    margin-right: 5px;
+}
+.sz-checkout-register-msg > a > button {
+    font-size: 20px;
+    padding: 3px 15px;
+    background-color: #fff;
+    color: #000;
+}
+.sz-checkout-register-msg > a > button:hover {
+    background-color: #fff;
+    color: #000;
+}
+@media (max-width: 767px) {
+    .sz-checkout-register-msg {
+        flex-direction: column;
+        text-align: center;
+    }
+    .sz-checkout-register-msg > a {
+        margin: auto;
+        margin-top: 8px;
+    }
+}
+
 .about_paypal {
     display: block;
     font-weight: initial;
     color: var(--text);
+}
+#payment #payment_method_stripe + label {
+    display: flex;
+}
+#payment_method_stripe + label > .stripe-icon:first-child {
+    margin-left: auto;
 }
 
 table.woocommerce-checkout-review-order-table .product-name {

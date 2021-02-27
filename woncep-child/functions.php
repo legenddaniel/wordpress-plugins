@@ -87,6 +87,10 @@ class WC_Moditec
         add_action('add_meta_boxes_shop_order', [$this, 'add_order_tracking_number']);
         add_action('woocommerce_process_shop_order_meta', [$this, 'save_order_metabox'], 10, 2);
         add_action('woocommerce_order_details_after_order_table', [$this, 'display_tracking_number_myaccount']);
+
+        // Add footer subscription to sgpb database
+        add_action('wp_ajax_elementor_pro_forms_send_form', [$this, 'handle_subscription']);
+        add_action('wp_ajax_elementor_pro_forms_send_form', [$this, 'handle_subscription']);
     }
 
     public function init_assets()
@@ -180,7 +184,7 @@ class WC_Moditec
             $wpdb->prepare(
                 "SELECT p.post_id
                 FROM {$wpdb->prefix}postmeta AS p
-                WHERE 
+                WHERE
                     p.meta_key = 'total_sales' AND
                         p.post_id NOT IN (
                             SELECT DISTINCT t.object_id
@@ -517,6 +521,41 @@ class WC_Moditec
         echo '<h2>UPS Tracking Number</h2>';
         echo '<p' . $color . '>' . esc_html__($info, 'woocommerce') . '</p>';
         echo '</div>';
+    }
+
+    public function handle_subscription()
+    {
+        $email = sanitize_email($_POST['form_fields']['email']);
+
+        global $wpdb;
+        $is_subscribed = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT email FROM {$wpdb->prefix}sgpb_subscribers
+                WHERE email = %s AND unsubscribed = 0",
+                $email
+            )
+        );
+
+        if ($is_subscribed) {
+            $res = [
+                'data' => [
+                    'data' => [],
+                    'message' => 'You have already subscribed!'
+                ],
+                'success' => false
+            ];
+            wp_send_json($res);
+        }
+
+        $date = date('Y-m-d', time());
+        $add = $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$wpdb->prefix}sgpb_subscribers
+                (email, subscriptionType, cDate, status, unsubscribed)
+                VALUES (%s, 11763, %s, 1, 0)",
+                [$email, $date]
+            )
+        );
     }
 }
 

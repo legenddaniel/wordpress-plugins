@@ -28,6 +28,7 @@ abstract class New_Point
     // HTML template
     protected $text_no_point = 'You don\'t have enough points!';
     protected $text_points_used = 'Points Used';
+    protected $text_register_checkout = 'Register to earn and redeem points every time you make a purchase.';
     protected $html_point_product_edit = '<div style="%s">↑↑↑↑↑↑↑↑↑↑↑Notice: <br>This is a gift product redeemed by Points. Here the prices are the Points to redeem them. <br>You can set the "Point Price" as if you are setting prices of a regular product, but the unit or say currency of this price is in Point instead of Dollar.<br>In this case, you don\'t need to set taxes, either.</div>';
     protected $html_cart_subtotal = '<tr class="cart-subtotal"><th>%s</th><td data-title="%s"><span class="woocommerce-Price-amount amount">%d Points</span></td></tr>';
     protected $html_minicart_subtotal = '<p class="woocommerce-mini-cart__total total"><strong>%s:</strong><span class="woocommerce-Price-amount amount">%d Points</span></p>';
@@ -148,6 +149,7 @@ abstract class New_Point
      */
     protected function is_point_product($product)
     {
+        
         if (gettype($product) === 'integer' || gettype($product) === 'string') {
             $product_id = $product;
         } else if ($product instanceof WC_Product) {
