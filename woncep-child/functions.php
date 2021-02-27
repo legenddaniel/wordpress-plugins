@@ -540,9 +540,9 @@ class WC_Moditec
             $res = [
                 'data' => [
                     'data' => [],
-                    'message' => 'You have already subscribed!'
+                    'message' => 'You have already subscribed!',
                 ],
-                'success' => false
+                'success' => false,
             ];
             wp_send_json($res);
         }
@@ -556,6 +556,12 @@ class WC_Moditec
                 [$email, $date]
             )
         );
+
+        if ($add) {
+            $site_url = get_site_url(); // http://www.domain.com (no slash)
+            $site_domain = wp_parse_url($site_url)['host']; // www.domain.com
+            setcookie('SGPBSubscription11763', '["' . $site_url . '/index/"]', time(), '/', $site_domain);
+        }
     }
 }
 

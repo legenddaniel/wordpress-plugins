@@ -348,6 +348,11 @@ ul.products li.product {
 .product-style-1 ul.products > li.product:hover .product-bottom > .list-button-action:only-child {
     transform: none;
 }
+@media (max-width: 767px) {
+    .product-style-1 ul.products .product-bottom > .list-button-action {
+        display: none;
+    }
+}
 
 .stock-label,
 .sz-label {
