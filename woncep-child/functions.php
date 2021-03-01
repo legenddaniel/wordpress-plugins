@@ -9,6 +9,7 @@ class WC_Moditec
     private $max_address = 2;
     private $cart_ad = 9116;
     private $size_chart = 9466;
+    private $popup = 10225; // 11763 for storem
 
     private $point_cat = 182; // When you change this, change also $point_cat in New_Point
     private $new_arrival_limit = 8;
@@ -110,6 +111,12 @@ class WC_Moditec
         wp_enqueue_script(
             'abort-resubmission',
             get_stylesheet_directory_uri() . '/abort-resubmission.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
+        wp_enqueue_script(
+            'subscription-cookie',
+            get_stylesheet_directory_uri() . '/subscription-cookie.js',
             ['jquery'],
             rand(111, 9999)
         );
@@ -552,15 +559,29 @@ class WC_Moditec
             $wpdb->prepare(
                 "INSERT INTO {$wpdb->prefix}sgpb_subscribers
                 (email, subscriptionType, cDate, status, unsubscribed)
-                VALUES (%s, 11763, %s, 1, 0)",
-                [$email, $date]
+                VALUES (%s, %d, %s, 1, 0)",
+                [$email, $this->popup, $date]
             )
         );
 
         if ($add) {
             $site_url = get_site_url(); // http://www.domain.com (no slash)
-            $site_domain = wp_parse_url($site_url)['host']; // www.domain.com
-            setcookie('SGPBSubscription11763', '["' . $site_url . '/index/"]', time(), '/', $site_domain);
+            $value = '["' . $site_url . '/index/"]';
+
+            $cookie = [
+                'data' => [
+                    'data' => [],
+                    'cookie' => [
+                        'type' => 'subscription',
+                        'name' => 'SGPBSubscription' . $this->popup,
+                        'value' => $value,
+                        'expire' => 365,
+                    ],
+                    'message' => 'Successfully subscribed!',
+                ],
+                'success' => true,
+            ];
+            wp_send_json($cookie);
         }
     }
 }
