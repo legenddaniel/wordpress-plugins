@@ -17,7 +17,7 @@ body {
 
 body,
 .main-navigation .sub-menu li.menu-item > a,
-h2 {
+h2:not(.product_title) {
     font-family: var(--e-global-typography-text-font-family), hops and barley !important;
 }
 
@@ -97,6 +97,10 @@ table th {
     color: #fff;
 }
 
+.elementor-widget-wrap > .elementor-element.elementor-widget-theme-site-logo {
+    width: auto;
+}
+
 .header-group-action {
     align-items: baseline;
 }
@@ -155,9 +159,12 @@ body.term-pre-order .elementor-section.woncep-breadcrumb-build {
 }
 
 .sg-popup-content > div {
-    padding: 30px 10px 40px 40px;
+    /* padding: 30px 10px 40px 40px;
     overflow: hidden !important;
-    width: 50% !important;
+    width: 50% !important; */
+    /* imageless */
+    padding: 40px;
+    overflow: hidden !important;
 }
 .sg-popup-content .wp-block-image {
     position: absolute;
@@ -167,13 +174,17 @@ body.term-pre-order .elementor-section.woncep-breadcrumb-build {
 }
 .js-sgpb-form-field-gdpr-wrapper {
     position: absolute;
-    bottom: 50px;
+    bottom: 25px;
+    /* For imageless: */
+    left: 50%;
+    transform: translateX(-50%);
 }
 .js-subs-gdpr-inputs.js-subs-gdpr-label {
     vertical-align: top;
 }
 label.js-login-remember-me-label-edit {
-    font-size: 16px;
+    display: inline;
+    /* font-size: 16px; */
 }
 .sgpb-gdpr-error-message {
     position: absolute;
@@ -183,35 +194,39 @@ label.js-login-remember-me-label-edit {
     color: #fff;
     border: none;
 }
-@media (max-width: 767px) {
-    .sg-popup-content > div {
-        width: 100% !important;
-        padding: 5%;
-    }
+/* @media (max-width: 767px) {
     .sg-popup-content .wp-block-image {
         display: none;
     }
-}
+} */
 @media (min-width: 480px) and (max-width: 767px) {
     .js-sgpb-form-field-gdpr-wrapper {
-        width: 100%;
+        /* width: 100%;
         bottom: 0px;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%); */
+        /* width: 100%;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%); */
     }
 }
 @media (max-width: 479px) {
+    .sg-popup-content > div {
+        /* width: 100% !important; */
+        padding: 5%;
+    }
     .sgpb-popup-builder-content-html > p {
         font-size: 24px !important;
     }
     .sgpb-subscription-form #sgpb-form {
         margin-top: -25px;
     }
-    label.js-login-remember-me-label-edit {
+    /* label.js-login-remember-me-label-edit {
         font-size: 14px;
-    }
+    } */
     .sgpb-gdpr-label-wrapper {
-        width: 100% !important;
+        width: 60vw !important;
     }
 }
 
@@ -397,6 +412,10 @@ ul.products li.product {
     border-color: #000;
 }
 
+.woncep-product-pagination-wrap {
+    display: none;
+}
+
 .elementor-menu-cart__product-price.product-price {
     color: #000;
 }
@@ -437,6 +456,16 @@ body.single-product
 }
 .single-product div.product .woocommerce-product-gallery .flex-control-thumbs {
     margin: auto;
+}
+
+.single-product div.product h2.product_title,
+.woocommerce-mini-cart-item,
+table.cart td.product-name a,
+#order_review .woocommerce-checkout-review-order-table td.product-name,
+.woocommerce-billing-fields__field-wrapper {
+    font-weight: 100;
+    font-family: "Cerebri Sans Pro", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial,
+        "Lucida Grande", sans-serif;
 }
 
 .cart > .wc-points-rewards-product-message {
@@ -534,6 +563,17 @@ body.single-product
     .sz-desc-wrapper > h2 {
         font-size: 1.2em;
     }
+}
+.single-product .woocommerce-tabs ul.tabs {
+    border-bottom: none;
+}
+.single-product .woocommerce-tabs ul.tabs li a {
+    font-size: 32px;
+    font-family: var(--e-global-typography-primary-font-family);
+    font-weight: bold;
+}
+.single-product .woocommerce-tabs ul.tabs li::after {
+    display: none;
 }
 
 .products-no-gutter ul.products li.product {
@@ -714,6 +754,10 @@ div.coupon:not(.under-proceed) {
     }
 }
 
+.showlogin {
+    text-decoration-line: underline;
+}
+
 .about_paypal {
     display: block;
     font-weight: initial;
@@ -722,7 +766,7 @@ div.coupon:not(.under-proceed) {
 #payment #payment_method_stripe + label {
     display: flex;
 }
-#payment_method_stripe + label > .stripe-icon:first-child {
+.woocommerce-checkout #payment ul.payment_methods li img.stripe-icon:first-child {
     margin-left: auto;
 }
 

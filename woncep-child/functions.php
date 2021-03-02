@@ -47,9 +47,9 @@ class WC_Moditec
         add_filter('woocommerce_short_description', [$this, 'custom_short_desc']);
 
         // Relocate the description box
-        remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
-        // add_action('woocommerce_after_single_product_summary', 'woocommerce_product_description_tab');
-        add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc']);
+        // remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
+        add_filter('woocommerce_product_tabs', [$this, 'display_review_only']);
+        add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc'], 9);
 
         // Add direct checkout button in product page
         // add_action('woocommerce_after_add_to_cart_button', [$this, 'add_checkout_in_product']);
@@ -65,14 +65,14 @@ class WC_Moditec
         // add_filter('woocommerce_currency_symbol', [$this, 'hide_currency_html'], 20, 2);
 
         // Display recommended products slider. Display 1st on large and 2nd on small screen
-        add_action('woocommerce_after_cart_table', [$this, 'display_recommended_products']);
-        add_action('woocommerce_cart_collaterals', [$this, 'display_recommended_products']);
+        // add_action('woocommerce_after_cart_table', [$this, 'display_recommended_products']);
+        // add_action('woocommerce_cart_collaterals', [$this, 'display_recommended_products']);
 
         // Relocate coupon field
         add_action('woocommerce_after_cart_totals', [$this, 'relocate_coupon_field']);
 
         // Display cart ad
-        add_action('woocommerce_cart_collaterals', [$this, 'display_cart_ad']);
+        // add_action('woocommerce_cart_collaterals', [$this, 'display_cart_ad']);
 
         // Display cart ad settings in admin
         // add_filter('woocommerce_general_settings', [$this, 'admin_display_ad_settings']);
@@ -307,6 +307,13 @@ class WC_Moditec
         }
 
         return $new_desc ?: $short_desc;
+    }
+
+    public function display_review_only($tabs)
+    {
+        $new_tab = [];
+        $new_tab['reviews'] = $tabs['reviews'];
+        return $new_tab;
     }
 
     public function custom_desc()
