@@ -233,7 +233,7 @@ class WC_Moditec
 
     public function init_special_products()
     {
-        if (is_shop() || is_product_category() || is_product() || strpos(get_page_link(), 'index') !== false) {
+        if (is_home() || is_shop() || is_product_category() || is_product() || strpos(get_page_link(), 'index') !== false) {
 
             $new_arrivals = $this->get_new_arrivals();
             if ($new_arrivals) {
