@@ -360,14 +360,15 @@ ul.products li.product {
     text-align: left;
     line-height: unset !important;
 }
-.product-style-1 ul.products > li.product:hover .product-bottom > .list-button-action:only-child {
+.product-style-1 ul.products li.product-type-variable:hover .product-bottom .list-button-action,
+.product-style-1 ul.products li.product-type-variable:hover .product-bottom .price {
     transform: none;
 }
-@media (max-width: 767px) {
+/* @media (max-width: 767px) {
     .product-style-1 ul.products .product-bottom > .list-button-action {
         display: none;
     }
-}
+} */
 
 .stock-label,
 .sz-label {

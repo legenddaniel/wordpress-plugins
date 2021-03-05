@@ -28,7 +28,7 @@ class WC_Moditec
         // Query product info during certain pages pre-load
         add_action('template_redirect', [$this, 'init_special_products']);
 
-        // Display 'New Arrival' label
+        // Display 'New Arrival/Top Sellers/Sales' label
         add_action('woocommerce_before_shop_loop_item_title', [$this, 'display_label']);
         add_action('woocommerce_product_thumbnails', [$this, 'display_label']);
 
@@ -37,6 +37,9 @@ class WC_Moditec
 
         // Hide default sale label
         add_filter('woocommerce_sale_flash', [$this, 'hide_sale_label']);
+
+        // Hide 'Select Options' for variable products
+        add_filter('woocommerce_loop_add_to_cart_link', [$this, 'hide_select_option'], 10, 2);
 
         // Display size chart
         remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
@@ -49,14 +52,18 @@ class WC_Moditec
         // Relocate the description box
         // remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
         add_filter('woocommerce_product_tabs', [$this, 'display_review_only']);
-        add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc'], 9);
+        add_action('woocommerce_after_single_product_summary', [$this, 'custom_desc'], 9); // priority < 10
 
         // Add direct checkout button in product page
         // add_action('woocommerce_after_add_to_cart_button', [$this, 'add_checkout_in_product']);
         // add_filter('woocommerce_add_to_cart_redirect', [$this, 'direct_checkout']);
 
-        // Hide decimals
+        // Ceil price and hide decimals, care the priority
         add_filter('woocommerce_price_trim_zeros', [$this, 'hide_decimals']);
+        add_filter('woocommerce_get_price_html', [$this, 'ceil_product_price_product'], 9, 2);
+        // add_filter('woocommerce_cart_item_price', [$this, 'ceil_product_price_cart'], 9, 3);
+        // add_filter('woocommerce_cart_item_subtotal', [$this, 'ceil_product_subtotal'], 9, 3);
+        add_action('woocommerce_before_calculate_totals', [$this, 'change_product_price'], 9);
 
         // Hide stock
         add_filter('woocommerce_get_stock_html', [$this, 'hide_stock_html'], 10, 2);
@@ -79,6 +86,8 @@ class WC_Moditec
 
         // Display gap to free shipping label in cart/checkout
         add_action('woocommerce_after_shipping_rate', [$this, 'free_shipping_notice']);
+
+        add_filter('woocommerce_package_rates', [$this, 'hide_flat_when_free_shipping'], 10, 2);
 
         // Provide link to register in checkout
         // add_action('woocommerce_before_checkout_form_cart_notices', [$this, 'add_checkout_register_link']);
@@ -293,6 +302,14 @@ class WC_Moditec
         echo '<span class="sz-label">' . $label . '</span>';
     }
 
+    public function hide_select_option($html, $product)
+    {
+        if ($product->get_type() !== 'simple') {
+            return;
+        }
+        return $html;
+    }
+
     public function custom_short_desc($short_desc)
     {
         if ($short_desc) {
@@ -339,7 +356,6 @@ class WC_Moditec
     {
         $checkout_url = wc_get_checkout_url();
         if (strpos($url, $checkout_url) !== false) {
-            // die(var_dump($url, $checkout_url));
             return $checkout_url;
         }
         return $url;
@@ -358,6 +374,101 @@ class WC_Moditec
     public function hide_decimals($display)
     {
         return true;
+    }
+
+    private function get_currency_rate()
+    {
+        $currency_params = get_option('woo_multi_currency_params');
+        $currencies = $currency_params['currency'];
+        $currency_rates = $currency_params['currency_rate'];
+        $rates = [];
+        foreach ($currencies as $k => $currency) {
+            $rates[$currency] = $currency_rates[$k];
+        }
+        $rate = $rates['CAD'] / $rates['USD'];
+
+        return $rate;
+    }
+
+    private function get_product_active_price($product)
+    {
+        $product_id = $product->get_id();
+        $price = $product->is_on_sale() ?
+        get_post_meta($product_id, '_sale_price', true) :
+        get_post_meta($product_id, '_regular_price', true);
+
+        return $price;
+    }
+
+    private function ceil_product_price($price_html, $product, $qty = 1)
+    {
+        if (is_admin()) {
+            return $price_html;
+        }
+
+        if (get_woocommerce_currency() === 'USD') {
+            return $price_html;
+        }
+
+        if ($product->is_on_sale()) {
+            if ($product->is_type('variable')) {
+                // Assume all variations have same price
+                $prices = $product->get_variation_prices(true);
+
+                $regular_price = ceil(min($prices['regular_price']));
+                $sale_price = ceil(min($prices['sale_price']));
+
+                return wc_format_sale_price($regular_price, $sale_price);
+            }
+            return $price_html;
+        }
+
+        $price = $this->get_product_active_price($product);
+
+        $rate = $this->get_currency_rate();
+
+        if (is_cart() || is_checkout()) {
+            $price = $price * $rate;
+        } else {
+            $price = wc_get_price_to_display($product);
+        }
+
+        return wc_price(ceil($price) * $qty);
+    }
+
+    public function ceil_product_price_product($price_html, $product)
+    {
+        return $this->ceil_product_price($price_html, $product);
+    }
+
+    public function ceil_product_price_cart($price_html, $cart_item, $cart_item_key)
+    {
+        return $this->ceil_product_price($price_html, $cart_item['data']);
+    }
+
+    public function ceil_product_subtotal($subtotal_html, $cart_item, $cart_item_key)
+    {
+        return $this->ceil_product_price($subtotal_html, $cart_item['data'], $cart_item['quantity']);
+    }
+
+    public function change_product_price($cart)
+    {
+        if (get_woocommerce_currency() === 'USD') {
+            return;
+        }
+
+        $rate = $this->get_currency_rate();
+
+        foreach ($cart->get_cart() as $cart_item) {
+            $product = $cart_item['data'];
+            // if ($product->is_on_sale()) {
+            //     continue;
+            // }
+            $price = $this->get_product_active_price($product);
+
+            $product->set_price(ceil($price * $rate) / $rate);
+        }
+
     }
 
     private function render_slider($cat_id)
@@ -461,6 +572,29 @@ class WC_Moditec
                 printf(__('<div class="sz-free-shipping-msg-wrapper"><div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div></div>', 'woocommerce'), wc_price($remaining));
             }
         }
+    }
+
+    public function hide_flat_when_free_shipping($rates, $package)
+    {
+        $new_rates = array();
+        foreach ($rates as $rate_id => $rate) {
+            if ('free_shipping' === $rate->method_id) {
+                $new_rates[$rate_id] = $rate;
+                break;
+            }
+        }
+
+        if (!empty($new_rates)) {
+            foreach ($rates as $rate_id => $rate) {
+                if ($rate->label === 'Priority') {
+                    $new_rates[$rate_id] = $rate;
+                    break;
+                }
+            }
+            return $new_rates;
+        }
+
+        return $rates;
     }
 
     public function set_max_address()
