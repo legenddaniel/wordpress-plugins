@@ -300,6 +300,19 @@ class New_Point_Order extends New_Point
             return;
         }
 
+        // $currency = get_post_meta($order_id, '_order_currency', true);
+        // if ($currency && $currency === 'CAD') {
+        //     $rates = get_post_meta($order_id, 'wmc_order_info', true);
+        //     $rate = $rates['CAD']['rate'] / $rates['USD']['rate'];
+
+        //     $total = 0;
+        //     foreach($order->get_items() as $item) {
+        //         $qty = $item->get_quantity();
+        //         $subtotal = $item->get_subtotal();
+        //         $total += floor($subtotal / $qty / $rate) * $qty;
+        //     }
+        // }
+
         $user = $order->get_user_id();
         $total = $order->get_subtotal();
 
@@ -345,6 +358,10 @@ class New_Point_Order extends New_Point
     public function reset_total_when_cancel_refund($order_id)
     {
         $order = wc_get_order($order_id);
+        if (!$order->is_paid()) {
+            return;
+        }
+
         $user = $order->get_user_id();
         if (!$user) {
             return;
@@ -411,6 +428,10 @@ class New_Point_Order extends New_Point
     public function reset_total_when_partially_refunded($order_id, $refund_id)
     {
         $order = wc_get_order($order_id);
+        if (!$order->is_paid()) {
+            return;
+        }
+        
         $user = $order->get_user_id();
         if (!$user) {
             return;
@@ -448,6 +469,9 @@ class New_Point_Order extends New_Point
         }
 
         $order = wc_get_order($order_id);
+        if (!$order->is_paid()) {
+            return;
+        }
 
         // Points that have been refunded (negative integer)
         global $wpdb;
