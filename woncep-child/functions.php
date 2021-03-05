@@ -87,6 +87,7 @@ class WC_Moditec
         // Display gap to free shipping label in cart/checkout
         add_action('woocommerce_after_shipping_rate', [$this, 'free_shipping_notice']);
 
+        // Hide flat_rate if free shipping is applicable
         add_filter('woocommerce_package_rates', [$this, 'hide_flat_when_free_shipping'], 10, 2);
 
         // Provide link to register in checkout
@@ -129,6 +130,12 @@ class WC_Moditec
             ['jquery'],
             rand(111, 9999)
         );
+        // wp_enqueue_script(
+        //     'hide-zone',
+        //     get_stylesheet_directory_uri() . '/hide-zone.js',
+        //     ['jquery'],
+        //     rand(111, 9999)
+        // );
         // wp_enqueue_script(
         //     'wechat-video',
         //     get_stylesheet_directory_uri() . '/wechat-video.js',

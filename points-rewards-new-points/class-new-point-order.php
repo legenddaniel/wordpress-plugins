@@ -229,6 +229,16 @@ class New_Point_Order extends New_Point
     }
 
     /**
+     * $order->is_paid() will return false when cancelling/refunding the entire order
+     * @param int $order_id
+     * @return bool
+     */
+    private function is_paid($order_id)
+    {
+        return !!get_post_meta($order_id, '_date_paid', true);
+    }
+
+    /**
      * Set total amount in db
      * @param int $user_id
      * @param int|double $total_amount
@@ -306,7 +316,7 @@ class New_Point_Order extends New_Point
         //     $rate = $rates['CAD']['rate'] / $rates['USD']['rate'];
 
         //     $total = 0;
-        //     foreach($order->get_items() as $item) {
+        //     foreach ($order->get_items() as $item) {
         //         $qty = $item->get_quantity();
         //         $subtotal = $item->get_subtotal();
         //         $total += floor($subtotal / $qty / $rate) * $qty;
@@ -357,11 +367,11 @@ class New_Point_Order extends New_Point
      */
     public function reset_total_when_cancel_refund($order_id)
     {
-        $order = wc_get_order($order_id);
-        if (!$order->is_paid()) {
+        if (!$this->is_paid($order_id)) {
             return;
         }
 
+        $order = wc_get_order($order_id);
         $user = $order->get_user_id();
         if (!$user) {
             return;
@@ -427,11 +437,11 @@ class New_Point_Order extends New_Point
      */
     public function reset_total_when_partially_refunded($order_id, $refund_id)
     {
-        $order = wc_get_order($order_id);
-        if (!$order->is_paid()) {
+        if (!$this->is_paid($order_id)) {
             return;
         }
-        
+        $order = wc_get_order($order_id);
+
         $user = $order->get_user_id();
         if (!$user) {
             return;
@@ -469,9 +479,9 @@ class New_Point_Order extends New_Point
         }
 
         $order = wc_get_order($order_id);
-        if (!$order->is_paid()) {
-            return $points;
-        }
+        // if (!$order->is_paid()) {
+        //     return $points; // Points & Rewards Plugin will handle this
+        // }
 
         // Points that have been refunded (negative integer)
         global $wpdb;
