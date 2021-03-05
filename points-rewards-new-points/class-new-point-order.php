@@ -470,7 +470,7 @@ class New_Point_Order extends New_Point
 
         $order = wc_get_order($order_id);
         if (!$order->is_paid()) {
-            return;
+            return $points;
         }
 
         // Points that have been refunded (negative integer)
