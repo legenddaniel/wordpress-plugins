@@ -43,7 +43,8 @@ class New_Point_Account extends New_Point
      */
     public function display_endpoint_in_account($items)
     {
-        $items['new-points'] = 'Total Expense & Point Earned Ratio';
+        $items['new-points'] = 'Point Earned Ratio';
+        // $items['new-points'] = 'Total Expense & Point Earned Ratio';
         return $items;
     }
 
@@ -58,7 +59,8 @@ class New_Point_Account extends New_Point
         $ratio = $this->process_ratio($this->get_ratio($total_amount));
 
         ?>
-            <h2>Total Expense & Point Earned Ratio</h2>
+            <h2>Point Earned Ratio</h2>
+            <!-- <h2>Total Expense & Point Earned Ratio</h2> -->
         <?php
 
         if (!$ratio) {
@@ -83,10 +85,15 @@ class New_Point_Account extends New_Point
                 break;
         }
 
+        if (false):
         ?>
             <p style="font-size: 2rem">As a <strong><?=esc_html__($member);?></strong> member, you have spent <strong>USD$<?=esc_html__($total_amount);?></strong> on Moditec</p>
             <p style="font-size: 2rem"><strong><?=esc_html__($ratio);?></strong> <?= $ratio == 1 ? 'Point is' : 'Points are';?> earned for every USD$1 you spend</p>
             <p>Some introduction here or another page to introduce</p>
+        <?php
+        endif;
+        ?>
+            <p style="font-size: 2rem">As a <strong><?=esc_html__($member);?></strong> member, <strong><?=esc_html__($ratio);?></strong> <?= $ratio == 1 ? 'Point is' : 'Points are';?> earned for every USD$1 you spend</p>
         <?php
     }
 

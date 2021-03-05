@@ -568,6 +568,7 @@ class WC_Moditec
             $min_amount = $method->get_option('min_amount');
 
             if ($rate->method_id == 'flat_rate' && $method->id == 'free_shipping' && !empty($min_amount) && $cart_total < $min_amount) {
+                $min_amount = get_woocommerce_currency() === 'USD' ? $min_amount : round($min_amount);
                 $remaining = $min_amount - $cart_total;
                 printf(__('<div class="sz-free-shipping-msg-wrapper"><div class="sz-free-shipping-msg"><span>%s to free shipping!</span></div></div>', 'woocommerce'), wc_price($remaining));
             }

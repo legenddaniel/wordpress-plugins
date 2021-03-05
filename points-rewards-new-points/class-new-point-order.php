@@ -276,7 +276,8 @@ class New_Point_Order extends New_Point
             $rate = get_post_meta($order_id, 'wmc_order_info', true);
             $total = $total * $rate['USD']['rate'] / $rate['CAD']['rate'];
             if ($round) {
-                $total = number_format($total, 2);
+                $total = floor($total);
+                // $total = number_format($total, 2);
             }
         }
         return $total;
