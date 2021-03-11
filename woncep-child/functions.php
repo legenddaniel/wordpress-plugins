@@ -130,6 +130,12 @@ class WC_Moditec
             ['jquery'],
             rand(111, 9999)
         );
+        wp_enqueue_script(
+            'search-result',
+            get_stylesheet_directory_uri() . '/search-result.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
         // wp_enqueue_script(
         //     'hide-zone',
         //     get_stylesheet_directory_uri() . '/hide-zone.js',
@@ -327,7 +333,7 @@ class WC_Moditec
             preg_match('/<a href="http.*wp-content\/uploads.*(png|jpg|jpeg)">/', $html, $a_half);
         }
         if ($a_half) {
-            $new_desc = '<div class="sz-size-chart">' . $a_half[0] . '-- Size Chart --<a/></div>' . $html; // Must include this redundant $html.
+            $new_desc = '<div class="sz-size-chart"><span class="button">' . $a_half[0] . '-- Size Chart --<a/></span></div>' . $html; // Must include this redundant $html.
         }
 
         return $new_desc ?: $short_desc;

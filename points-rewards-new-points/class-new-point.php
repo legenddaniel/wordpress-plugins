@@ -18,12 +18,9 @@ abstract class New_Point
 
     // moditec.site
     protected $point_cat = 182; // When you change this, change also $point_cat in child theme functions
-    // protected $point_500_cat = 174; // 183, 174
     protected $point_1000_cat = 183; // 184, 169
-    protected $point_up1000_cat = 183; // 185, 124
-    protected $point_500_cat = 183; // 183, 174
-    // protected $point_1000_cat = 184; // 184, 169
-    // protected $point_up1000_cat = 185; // 185, 124
+    protected $point_up1000_cat = 185; // 185, 124
+    protected $point_500_cat = 184; // 183, 174
 
     // HTML template
     protected $text_no_point = 'You don\'t have enough points!';
