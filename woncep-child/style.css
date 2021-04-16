@@ -230,6 +230,13 @@ label.js-login-remember-me-label-edit {
     }
 }
 
+body:not(.page-template-template-homepage) #PopupSignupForm_0 {
+    display: none;
+}
+body .mc-modal {
+    width: 360px;
+}
+
 #page .site-content {
     margin: 0;
 }

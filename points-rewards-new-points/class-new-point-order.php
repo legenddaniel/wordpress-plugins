@@ -130,7 +130,7 @@ class New_Point_Order extends New_Point
     public function display_points_used_in_order_details($total_rows, $order, $tax_display)
     {
         if (!$order->get_user_id()) {
-            return;
+            return $total_rows;
         }
 
         $order_id = $order->get_id();
@@ -163,7 +163,7 @@ class New_Point_Order extends New_Point
     public function change_gift_subtotal_html_frontend($subtotal_html, $item, $order)
     {
         if (!$order->get_user_id()) {
-            return;
+            return $subtotal_html;
         }
 
         $points = $item->get_meta('points_subtotal');

@@ -118,6 +118,12 @@ class WC_Moditec
             ['jquery'],
             rand(111, 9999)
         );
+        // wp_enqueue_script(
+        //     'mailchimp',
+        //     get_stylesheet_directory_uri() . '/mailchimp.js',
+        //     [],
+        //     rand(111, 9999)
+        // );
         wp_enqueue_script(
             'abort-resubmission',
             get_stylesheet_directory_uri() . '/abort-resubmission.js',
