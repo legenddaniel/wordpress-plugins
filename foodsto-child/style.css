@@ -1,0 +1,11 @@
+/**
+* Theme Name: Foodsto Child
+* Description: This is a child theme of Foodsto.
+* Author: Daniel Siyuan Zuo
+* Template: foodsto
+* Version: 1.0.0
+*/
+
+.tax-product_cat .site-main > .container > .row {
+    flex-direction: row-reverse;
+}
