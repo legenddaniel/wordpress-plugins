@@ -15,12 +15,14 @@ class SZ_TomatoGo
     // From Tomato Go /lib/config.js
     private $business_area = ['Markham', 'Richmond Hill', 'Vaughan', 'North York', 'Etobicoke', 'Toronto Downtown', 'Scarborough'];
 
-    private $url = 'https://578b5fc649f88d.localhost.run/api/v0/order';
+    private $url = 'https://7ee22ba5d2a651.localhost.run/api/v0/order';
 
     public function __construct()
     {
-        // add_action('woocommerce_payment_complete', array($this, 'send_order'));
-        add_action('woocommerce_order_status_completed', array($this, 'send_order'));
+        add_action('woocommerce_payment_complete', [$this, 'send_order']);
+        add_action('woocommerce_order_status_completed', [$this, 'send_order']);
+
+        add_action('add_meta_boxes_shop_order', [$this, 'add_tomatogo_barcode']);
     }
 
     /**
@@ -70,10 +72,13 @@ class SZ_TomatoGo
     {
         $order = wc_get_order($order_id);
 
-        $billing_info = $order->data['billing'];
+        $billing_info = array_map(function ($v) {
+            return sanitize_text_field($v);
+        }, $order->data['billing']);
+
         $info = [
             // 'paymentId' => '?',
-            'createdBy' => '?',
+            'createdBy' => null,
             'type' => 'package',
             'status' => 'collecting',
             // 'statusChangedAt' => '?',
@@ -86,13 +91,13 @@ class SZ_TomatoGo
             // 'subtotal' => $order->get_subtotal(),
             // 'tax' => $order->get_total_tax(),
             // 'total' => $order->get_total(),
-            'from' => '?',
-            'fromAddress1' => '?',
-            'fromAddress2' => '?',
-            'fromCity' => '?',
-            'fromPostCode' => '?',
-            'fromTel' => '?',
-            'fromEmail' => '?',
+            'from' => 'tomatoproduce',
+            'fromAddress1' => '151 Esna Park Dr',
+            'fromAddress2' => '',
+            'fromCity' => 'Markham',
+            'fromPostCode' => 'L3R3B1',
+            'fromTel' => '9056043088',
+            'fromEmail' => 'daniel@itcg.ca',
             'to' => $this->format_general_str($billing_info['first_name'] . ' ' . $billing_info['last_name'], 30),
             'toAddress1' => $this->format_general_str($billing_info['address_1'], 50),
             'toAddress2' => $this->format_general_str($billing_info['address_2'], 50),
@@ -100,7 +105,7 @@ class SZ_TomatoGo
             'toPostCode' => $this->format_postcode($billing_info['postcode']),
             'toTel' => $billing_info['phone'],
             'toEmail' => $billing_info['email'],
-            // 'verified': false,
+            'verified' => true,
         ];
 
         $curl = curl_init($this->url);
@@ -111,11 +116,45 @@ class SZ_TomatoGo
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($info),
         ]);
-        $res = curl_exec($curl);
-
-        die(var_dump($res));
-
+        $res = json_decode(curl_exec($curl));
         curl_close($curl);
+
+        $barcode = sanitize_text_field($res->barcode);
+        if ($barcode) {
+            update_post_meta($order_id, 'barcode', $barcode);
+        }
+    }
+
+    /**
+     * Template of the Tomato Go meta box
+     * @param WP_Post $post
+     */
+    public function create_tomatogo_barcode_field($post)
+    {
+        $id = $post->ID;
+        $barcode = sanitize_text_field(get_post_meta($id, 'barcode', true));
+
+        echo '<p>' . $barcode . '</p>';
+    }
+
+    /**
+     * Display the Tomato Go template
+     * @param WP_Post $post
+     */
+    public function add_tomatogo_barcode($post)
+    {
+        if ($post->post_type !== 'shop_order') {
+            return;
+        }
+
+        add_meta_box(
+            'sz-tomatogo-barcode',
+            __('Tomato Go Barcode', 'woocommerce'),
+            [$this, 'create_tomatogo_barcode_field'],
+            'shop_order',
+            'side',
+            'high'
+        );
     }
 }
 
