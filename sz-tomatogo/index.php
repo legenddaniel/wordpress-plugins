@@ -9,16 +9,20 @@
 
 defined('WPINC') || die;
 
+include_once 'config.php';
+
 class SZ_TomatoGo
 {
 
     // From Tomato Go /lib/config.js
     private $business_area = ['Markham', 'Richmond Hill', 'Vaughan', 'North York', 'Etobicoke', 'Toronto Downtown', 'Scarborough'];
 
-    private $url = 'https://7ee22ba5d2a651.localhost.run/api/v0/order';
+    private $store_info;
 
     public function __construct()
     {
+        $this->store_info = $this->get_store_info();
+
         add_action('woocommerce_payment_complete', [$this, 'send_order']);
         add_action('woocommerce_order_status_completed', [$this, 'send_order']);
 
@@ -26,89 +30,143 @@ class SZ_TomatoGo
     }
 
     /**
-     * Format some general string info as per Tomato Go rules
-     * @param string $str - String to validate
-     * @param int $l - Max string length
-     * @return string Formatted string
+     * Data formatter. Rules are from Tomato Go.
+     * @param array $data Raw data
+     * @return array Filtered data
      */
-    private function format_general_str($str, $l)
+    private function format_fields($data)
     {
-        return substr($str, 0, $l);
-    }
-
-    /**
-     * Check if the city is in business area
-     * @param string $city
-     * @return string City
-     */
-    private function format_city($city)
-    {
-        /**
-         *
-         *
-         *
-         * Need validation
-         */
-        if (in_array($city, $this->business_area)) {
-            return $city;
+        if (!is_array($data)) {
+            throw new Exception('Data must be an array');
         }
-        return $city;
+
+        $result = [];
+
+        foreach ($data as $k => $v) {
+            switch ($k) {
+                case 'from':
+                case 'to':
+                    $result[$k] = substr($v, 0, 30);
+                    break;
+                case 'fromAddress1':
+                case 'fromAddress2':
+                case 'toAddress1':
+                case 'toAddress2':
+                case 'note':
+                    $result[$k] = substr($v, 0, 50);
+                    break;
+                case 'fromPostCode':
+                case 'toPostCode':
+                    $result[$k] = str_replace(' ', '', $v);
+                    break;
+                case 'fromCity':
+                case 'toCity':
+                    /**
+                     *
+                     *
+                     *
+                     * What if city is not valid?
+                     */
+                    if (in_array($v, $this->business_area)) {
+                        $result[$k] = $v;
+                    } else {
+                        $result[$k] = $v;
+                    }
+                    break;
+                default:
+                    $result[$k] = $v;
+                    break;
+            }
+        }
+
+        return $result;
     }
 
     /**
-     * Remove whitespace in the post code
-     * @param string $pc - Postcode
-     * @return string Formatted post code
+     * Get Store info
+     * @return array Associate array of row object
      */
-    private function format_postcode($pc)
+    private function get_store_info()
     {
-        return str_replace(' ', '', $pc);
+        global $wpdb;
+        $store_info = $wpdb->get_results(
+            "SELECT option_name, option_value
+            FROM {$wpdb->prefix}options
+            WHERE
+                option_name = 'woocommerce_store_address' OR
+                option_name = 'woocommerce_store_address_2' OR
+                option_name = 'woocommerce_store_city' OR
+                option_name = 'woocommerce_store_postcode' OR
+                option_name = 'blogname'",
+            OBJECT_K
+        );
+        return $store_info;
     }
 
     /**
+     * Retrieve value from store info by key
+     * @param string $key - option_name
+     * @return mixed Value - option_value
+     */
+    private function get_store_info_value($key)
+    {
+        if ($this->store_info) {
+            $row = $this->store_info[$key];
+            return $row ? sanitize_text_field($row->option_value) : '';
+        }
+        return '';
+    }
+
+    /**
+     * Sync order to Tomato Go and get the barcode
      * @param integer $order_id - Order id
      */
     public function send_order($order_id)
     {
+        if (get_post_meta($order_id, 'barcode', true)) {
+            return;
+        }
+
         $order = wc_get_order($order_id);
+
+        $description = [];
+        foreach ($order->get_items() as $k => $item) {
+            $product = $item->get_product_id();
+            $description[] = get_the_excerpt($product);
+        }
+        $description = sanitize_text_field(implode("\n", $description));
 
         $billing_info = array_map(function ($v) {
             return sanitize_text_field($v);
-        }, $order->data['billing']);
+        }, $order->get_data()['billing']);
 
-        $info = [
-            // 'paymentId' => '?',
+        $info = $this->format_fields([
             'createdBy' => null,
             'type' => 'package',
-            'status' => 'collecting',
-            // 'statusChangedAt' => '?',
+            'status' => 'in_warehouse',
             'collectType' => 'pickup',
-            // 'collectedBy' => '?',
-            // 'deliveredBy' => '?',
-            'dimensions' => '1*1*1',
-            'weight' => 1,
-            'note' => $this->format_general_str($order->get_customer_note(), 50),
-            // 'subtotal' => $order->get_subtotal(),
-            // 'tax' => $order->get_total_tax(),
-            // 'total' => $order->get_total(),
-            'from' => 'tomatoproduce',
-            'fromAddress1' => '151 Esna Park Dr',
-            'fromAddress2' => '',
-            'fromCity' => 'Markham',
-            'fromPostCode' => 'L3R3B1',
-            'fromTel' => '9056043088',
-            'fromEmail' => 'daniel@itcg.ca',
-            'to' => $this->format_general_str($billing_info['first_name'] . ' ' . $billing_info['last_name'], 30),
-            'toAddress1' => $this->format_general_str($billing_info['address_1'], 50),
-            'toAddress2' => $this->format_general_str($billing_info['address_2'], 50),
-            'toCity' => $this->format_city($billing_info['city']),
-            'toPostCode' => $this->format_postcode($billing_info['postcode']),
+            'collectedBy' => null,
+            'description' => $description,
+            'note' => $order->get_customer_note(),
+            'from' => $this->get_store_info_value('blogname'),
+            'fromAddress1' => $this->get_store_info_value('woocommerce_store_address'),
+            'fromAddress2' => $this->get_store_info_value('woocommerce_store_address_2'),
+            'fromCity' => $this->get_store_info_value('woocommerce_store_city'),
+            'fromPostCode' => $this->get_store_info_value('woocommerce_store_postcode'),
+            'fromTel' => STORE_TEL,
+            'fromEmail' => STORE_EMAIL,
+            'to' => $billing_info['first_name'] . ' ' . $billing_info['last_name'],
+            'toAddress1' => $billing_info['address_1'],
+            'toAddress2' => $billing_info['address_2'],
+            'toCity' => $billing_info['city'],
+            'toPostCode' => $billing_info['postcode'],
             'toTel' => $billing_info['phone'],
             'toEmail' => $billing_info['email'],
             'verified' => true,
-        ];
+            'tomatoProduceId' => $order_id,
+        ]);
 
-        $curl = curl_init($this->url);
+        $curl = curl_init(TOMATOGO_URL);
         curl_setopt_array($curl, [
             CURLOPT_HEADER => false,
             CURLOPT_RETURNTRANSFER => true,
