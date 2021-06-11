@@ -59,20 +59,6 @@ class SZ_TomatoGo
                 case 'toPostCode':
                     $result[$k] = str_replace(' ', '', $v);
                     break;
-                case 'fromCity':
-                case 'toCity':
-                    /**
-                     *
-                     *
-                     *
-                     * What if city is not valid?
-                     */
-                    if (in_array($v, $this->business_area)) {
-                        $result[$k] = $v;
-                    } else {
-                        $result[$k] = $v;
-                    }
-                    break;
                 default:
                     $result[$k] = $v;
                     break;
@@ -84,7 +70,7 @@ class SZ_TomatoGo
 
     /**
      * Get Store info
-     * @return array Associate array of row object
+     * @return array Associate array of key-value
      */
     private function get_store_info()
     {
@@ -97,22 +83,37 @@ class SZ_TomatoGo
                 option_name = 'woocommerce_store_address_2' OR
                 option_name = 'woocommerce_store_city' OR
                 option_name = 'woocommerce_store_postcode' OR
-                option_name = 'blogname'",
+                option_name = 'blogname' OR
+                option_name = 'foodsto_options'",
             OBJECT_K
         );
-        return $store_info;
+
+        $result = [];
+        foreach ($store_info as $k => $info) {
+            $value = $info ? $info->option_value : '';
+            if ($k === 'foodsto_options') {
+                $value = unserialize($value);
+                $result['email'] = sanitize_text_field($value['email']);
+                $result['phone'] = sanitize_text_field($value['phone']);
+            } else {
+                $result[$k] = sanitize_text_field($value);
+            }
+        }
+
+        return $result;
     }
 
     /**
      * Retrieve value from store info by key
-     * @param string $key - option_name
-     * @return mixed Value - option_value
+     * @param string $key
+     * @return mixed
      */
     private function get_store_info_value($key)
     {
-        if ($this->store_info) {
-            $row = $this->store_info[$key];
-            return $row ? sanitize_text_field($row->option_value) : '';
+        $info = $this->store_info;
+        if ($info) {
+            $result = $info[$key];
+            return $result ?: '';
         }
         return '';
     }
@@ -123,22 +124,30 @@ class SZ_TomatoGo
      */
     public function send_order($order_id)
     {
+        // Return if barcode exists
         if (get_post_meta($order_id, 'barcode', true)) {
             return;
         }
 
         $order = wc_get_order($order_id);
 
+        // Return if the city is out of area
+        $billing_info = $order->get_data()['billing'];
+        if (!in_array(sanitize_text_field($billing_info['city']), $this->business_area)) {
+            return;
+        }
+
+        $billing_info = array_map(function ($v) {
+            return sanitize_text_field($v);
+        }, $billing_info);
+
+        // The short description of order items
         $description = [];
         foreach ($order->get_items() as $k => $item) {
             $product = $item->get_product_id();
             $description[] = get_the_excerpt($product);
         }
         $description = sanitize_text_field(implode("\n", $description));
-
-        $billing_info = array_map(function ($v) {
-            return sanitize_text_field($v);
-        }, $order->get_data()['billing']);
 
         $info = $this->format_fields([
             'createdBy' => null,
@@ -153,8 +162,8 @@ class SZ_TomatoGo
             'fromAddress2' => $this->get_store_info_value('woocommerce_store_address_2'),
             'fromCity' => $this->get_store_info_value('woocommerce_store_city'),
             'fromPostCode' => $this->get_store_info_value('woocommerce_store_postcode'),
-            'fromTel' => STORE_TEL,
-            'fromEmail' => STORE_EMAIL,
+            'fromTel' => $this->get_store_info_value('phone'),
+            'fromEmail' => $this->get_store_info_value('email'),
             'to' => $billing_info['first_name'] . ' ' . $billing_info['last_name'],
             'toAddress1' => $billing_info['address_1'],
             'toAddress2' => $billing_info['address_2'],
@@ -175,6 +184,7 @@ class SZ_TomatoGo
             CURLOPT_POSTFIELDS => json_encode($info),
         ]);
         $res = json_decode(curl_exec($curl));
+
         curl_close($curl);
 
         $barcode = sanitize_text_field($res->barcode);
