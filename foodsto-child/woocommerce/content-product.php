@@ -18,9 +18,9 @@
 defined('ABSPATH') || exit;
 
 // Hide Woocommerce/theme default loop items in category pages
-if (is_product_category()) {
-    return;
-}
+// if (is_product_category()) {
+//     return;
+// }
 
 global $product;
 
@@ -28,9 +28,7 @@ global $product;
 if (empty($product) || false === wc_get_loop_product_visibility($product->get_id()) || !$product->is_visible()) {
     return;
 }
-?>
-<div <?php wc_product_class('iq-sub-product', $product);?>>
-	<?php
+
 /**
  * Hook: woocommerce_before_shop_loop_item.
  *
@@ -68,5 +66,4 @@ do_action('woocommerce_after_shop_loop_item_title');
  * @hooked woocommerce_template_loop_add_to_cart - 10
  */
 do_action('woocommerce_after_shop_loop_item');
-?>
-</div>
+
