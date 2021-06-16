@@ -9,3 +9,111 @@
 .tax-product_cat .site-main > .container > .row {
     flex-direction: row-reverse;
 }
+
+.products > table {
+    border: none;
+}
+.products > table > thead th {
+    border-top: none;
+}
+.products > table tr > * {
+    border-left: none;
+    border-right: none;
+}
+.products > table > tbody > tr > td:first-of-type img {
+    width: 3rem;
+}
+.products > table > tbody > tr:last-of-type > td {
+    border-bottom: none;
+}
+.sz-addtocart {
+    display: flex;
+    align-items: center;
+}
+.sz-qty {
+    min-width: 2rem;
+    max-width: 3rem;
+    height: 40px;
+    padding: 0;
+    text-align: center;
+}
+.woocommerce .sz-addtocart a.button {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    background: var(--secondary-color);
+}
+.woocommerce .sz-addtocart a.button.added {
+    background: var(--primary-color);
+}
+.woocommerce .sz-addtocart a.button:hover {
+    background: var(--primary-color);
+}
+.woocommerce a.added_to_cart {
+    display: none;
+}
+
+@media (min-width: 576px) {
+    .sz-addtocart {
+        justify-content: flex-end;
+    }
+}
+@media (max-width: 575px) {
+    .products > table {
+        font-size: 3vw;
+    }
+    .sz-addtocart {
+        flex-direction: column;
+    }
+}
+
+#sz-cats {
+    padding: 0.5rem 1rem;
+    height: 48px;
+}
+.sz-closecats {
+    position: absolute;
+    top: 2rem;
+    padding-left: 1rem;
+    font-size: 3rem;
+    cursor: pointer;
+}
+.yith-wcan-filters .yith-wcan-filter .filter-items .filter-item.active > label > a,
+.yith-wcan-filters .yith-wcan-filter .filter-items .filter-item > label > a:hover {
+    color: var(--secondary-color);
+}
+.yith-wcan-tooltip {
+    display: none !important;
+}
+@media (max-width: 991px) {
+    .woocommerce-ordering {
+        max-width: calc(100% - 129.016px);
+    }
+    .yith-wcan-filters {
+        position: fixed;
+        top: 0;
+        left: -200%;
+        width: 100vw;
+        height: 100vh;
+        z-index: 999;
+        transition: left 0.2s;
+        overflow-x: hidden;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .filters-container {
+        min-width: 16rem;
+        max-width: 50vw;
+        height: 100%;
+        padding: 99px 1rem;
+        box-shadow: 1px 0px 2px var(--primary-color);
+        background-color: #fff;
+    }
+    .filter-content {
+        margin-top: 1rem;
+    }
+}
+@media (min-width: 992px) {
+    .sz-closecats,
+    #sz-cats {
+        display: none;
+    }
+}

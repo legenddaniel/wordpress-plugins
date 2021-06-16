@@ -17,11 +17,6 @@
 
 defined('ABSPATH') || exit;
 
-// Hide Woocommerce/theme default loop items in category pages
-// if (is_product_category()) {
-//     return;
-// }
-
 global $product;
 
 // Ensure visibility.

@@ -19,8 +19,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 ?>
+<button type="button" class="button" id="sz-cats">Categories</button>
 <div class="products columns-<?php echo esc_attr(wc_get_loop_prop('columns')); ?>">
-<table id="sz-products">
+<table>
 <thead>
     <tr>
         <th>Image</th>
@@ -29,4 +30,4 @@ if (!defined('ABSPATH')) {
         <th>Description</th>
     </tr>
 </thead>
-<tbody>
+<tbody id="sz-products">
