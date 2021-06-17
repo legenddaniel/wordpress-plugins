@@ -28,6 +28,7 @@ if (!defined('ABSPATH')) {
         <th>Name</th>
         <th>Price</th>
         <th>Description</th>
+        <th>Unit</th>
     </tr>
 </thead>
 <tbody id="sz-products">

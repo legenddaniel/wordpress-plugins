@@ -19,9 +19,14 @@ class SZ_Foodsto
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
         // add_action('woocommerce_after_shop_loop', [$this, 'add_yith_form']);
 
+        add_filter('yith_wcan_filter_get_title', [$this, 'change_filter_title']);
+
         add_action('woocommerce_before_shop_loop_item', [$this, 'render_custom_loop']);
     }
 
+    /**
+     * Remove theme default layout of loop item
+     */
     public function reset_theme()
     {
         remove_action('woocommerce_before_shop_loop_item_title', 'foodsto_template_loop_product_thumbnail', 10);
@@ -63,39 +68,64 @@ class SZ_Foodsto
         }
     }
 
+    /**
+     * Change filter title
+     * @param string $title - Original title
+     */
+    public function change_filter_title($title)
+    {
+        return 'Categories';
+    }
+
+    /**
+     * New loop item html
+     */
     public function render_custom_loop()
     {
         global $product;
-        $link = get_permalink($product->get_id());
+        global $wp;
+        $id = $product->get_id();
+
+        $url = home_url($wp->request) . '/?add-to-cart=' . $id . '&quantity=1';
+
+        $variable = new WC_Product_Variable($id);
+        if ($variations = $variable->get_available_variations()) {
+            $default_var = $variations[0];
+
+            $default_var_id = $default_var['variation_id'];
+            $url .= '&variation_id=' . $default_var_id;
+
+            $price = wc_price($default_var['display_price']);
+            $max = $default_var['max_qty'];
+
+            $unit_html = '';
+            $unit_html_head = '<select value="' . $default_var_id . '"';
+            foreach ($variations as $v) {
+                $var_id = $v['variation_id'];
+                $unit_html .= '<option value="' . $var_id . '" class="attached enabled">' . $v['attributes']['attribute_unit'] . '</option>';
+                $unit_html_head .= ' data-price-' . $var_id . '="' . esc_attr(wc_price($v['display_price'])) . '"';
+            }
+            $unit_html = $unit_html_head . '">' . $unit_html . '</select>';
+        } else {
+            $price = $product->get_price_html();
+            $max = $product->get_max_purchase_quantity();
+            $unit_html = '<select><option value="Case" selected="selected" class="attached enabled">Case</option></select>';
+        }
+
+        $link = get_permalink($id);
         ?>
             <tr>
                 <td><a href="<?=esc_attr($link)?>"><?=woocommerce_get_product_thumbnail()?></a></td>
                 <td><a href="<?=esc_attr($link)?>"><?=esc_html($product->get_name())?></a></td>
-                <td><?php
-if ($product->get_sale_price()) {
-            ?>
-                        <del>
-                            <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol"><?=esc_attr(get_woocommerce_currency_symbol());?></span><?=esc_html($product->get_regular_price());?></span>
-                            </del>
-                        <?php
-}
-        if ($product->get_sale_price()) {
-            $price = $product->get_sale_price();
-        } else {
-            $price = $product->get_price();
-        }
-        ?>
-                        <ins>
-                            <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol"><?=esc_attr(get_woocommerce_currency_symbol());?></span><?=esc_html($price);?></span>
-                        </ins></td>
+                <td><span class="price"><?=$price?></span></td>
                 <td><?=esc_html('variation' == $product->get_type() ? $product->get_description() : $product->get_short_description());
         ?></td>
-                <td><div class="sz-addtocart"><input class="sz-qty" type="number" value="1" min="1" <?php
-$max = $product->get_max_purchase_quantity();
-        if ($max > 0) {
+                <td class="sz-td--2"><?=$unit_html?></td>
+                <td class="sz-td--1"><div class="sz-addtocart"><input class="sz-qty" type="number" value="1" min="1" <?php
+if ($max > 0) {
             echo "max='$max'";
         }
-        ?> /><?=woocommerce_template_loop_add_to_cart();?></div></td>
+        ?> /><a href=<?=esc_url($url)?> class="button add_to_cart_button" rel="nofollow">Add to cart</a></div></td>
             </tr>
         <?php
 }

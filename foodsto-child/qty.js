@@ -1,3 +1,4 @@
+// Debounce function
 function debounce(fn, delay) {
     var timer;
     return function () {
@@ -13,12 +14,13 @@ function debounce(fn, delay) {
     };
 };
 
+// Set `add to cart` button text on various device widths
 function setBtnTxt() {
     if (typeof window === 'undefined') return;
 
     var addtocart = document.getElementsByClassName('add_to_cart_button');
     var l = addtocart.length;
-    if (window.innerWidth < 576) {
+    if (window.innerWidth < 1200) {
         for (var i = 0; i < l; i++) {
             addtocart[i].innerHTML = '<i class="fa fa-shopping-basket" aria-hidden="true"></i>';
         }
@@ -29,6 +31,7 @@ function setBtnTxt() {
     }
 }
 
+// Filter sidebar toggling
 function setFilters() {
     if (typeof window === 'undefined') return;
 
@@ -51,12 +54,27 @@ window.addEventListener('load', function () {
     // Set filter as a sidebar with toggling on mobile
     setFilters();
 
-    // Apply quantity
+    // Apply quantity & variation
     document.getElementById('sz-products').addEventListener('change', function (e) {
         var target = e.target;
+        var value = target.value;
+
+        var regex;
+        var button;
         if (target.className === 'sz-qty') {
-            target.nextSibling.setAttribute('data-quantity', target.value);
+            regex = /(quantity=)(\d+)/;
+            button = target.nextSibling;
         }
+        if (target.tagName === 'SELECT') {
+            regex = /(variation_id=)(\d+)/;
+
+            var tr = target.parentElement.parentElement;
+            button = tr.querySelector('.add_to_cart_button');
+            tr.querySelector('.price').innerHTML = target.getAttribute('data-price-' + value);
+        }
+
+        var url = button.href.replace(regex, '$1' + value);
+        button.setAttribute('href', url);
     });
 
     // Restore all listeners
