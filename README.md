@@ -1,2 +1,2 @@
 # wordpress-plugins
- Some wordpress plugins I made
+ Some wordpress plugins and child themes I made
