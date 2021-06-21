@@ -6,6 +6,10 @@
 * Version: 1.0.0
 */
 
+input[type="number"] {
+    padding: 0;
+}
+
 .tax-product_cat .site-main > .container > .row {
     flex-direction: row-reverse;
 }
@@ -42,7 +46,6 @@
     min-width: 2rem;
     max-width: 3rem;
     height: 40px;
-    padding: 0;
     text-align: center;
 }
 .woocommerce .sz-addtocart a.button {
@@ -59,29 +62,6 @@
 }
 .woocommerce a.added_to_cart {
     display: none;
-}
-@media (min-width: 576px) {
-    .products > table > tbody > tr > td > select {
-        width: auto;
-    }
-}
-@media (max-width: 575px) {
-    .products > table {
-        font-size: 3vw;
-    }
-    .sz-addtocart {
-        justify-content: center;
-    }
-    .sz-td--2,
-    .sz-td--1 {
-        float: right;
-        width: 100%;
-        border-bottom: none;
-    }
-    .products > table > tbody > tr:first-of-type > .sz-td--2,
-    .sz-td--1 {
-        border: none;
-    }
 }
 
 #sz-cats {
@@ -101,6 +81,80 @@
 }
 .yith-wcan-tooltip {
     display: none !important;
+}
+
+.globalcartbtn {
+    max-width: 100%;
+}
+.vartable_globalcart {
+    display: none;
+}
+.woocommerce .product table.table.vartable tr > * {
+    min-width: 20%;
+}
+.vartable > thead > tr {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+.vartable > tbody > tr {
+    margin-bottom: 0.5rem;
+}
+table.table.vartable tr {
+    display: flex;
+    align-items: center;
+}
+.woocommerce .product table.table.vartable tr > * {
+    text-align: center;
+}
+table.table.vartable td.qtycol {
+    display: flex;
+    justify-content: center;
+}
+table.table.vartable .qtycol > input.qty {
+    text-align: center;
+}
+@media (max-width: 767px) {
+    table.table.vartable > thead {
+        display: table-header-group;
+    }
+    table.table.vartable tr {
+        border-bottom: none;
+    }
+    table.table.vartable td {
+        display: table-cell;
+    }
+    table.table.vartable td:before {
+        content: "";
+    }
+}
+@media (min-width: 576px) {
+    .products > table > tbody > tr > td > select {
+        width: auto;
+    }
+}
+@media (max-width: 575px) {
+    .product > .summary.entry-summary {
+        padding: 15px;
+    }
+    .products > table {
+        font-size: 3vw;
+    }
+    table.table.vartable .qtycol > input.qty {
+        width: 30px;
+    }
+    .sz-addtocart {
+        justify-content: center;
+    }
+    .sz-td--2,
+    .sz-td--1 {
+        float: right;
+        width: 100%;
+        border-bottom: none;
+    }
+    .products > table > tbody > tr:first-of-type > .sz-td--2,
+    .sz-td--1 {
+        border: none;
+    }
 }
 @media (max-width: 991px) {
     .woocommerce-ordering {

@@ -22,6 +22,8 @@ class SZ_Foodsto
         add_filter('yith_wcan_filter_get_title', [$this, 'change_filter_title']);
 
         add_action('woocommerce_before_shop_loop_item', [$this, 'render_custom_loop']);
+
+        add_filter('vartable_header_text', [$this, 'remove_selectall_label']);
     }
 
     /**
@@ -69,12 +71,21 @@ class SZ_Foodsto
     }
 
     /**
-     * Change filter title
+     * Change category filter title
      * @param string $title - Original title
      */
     public function change_filter_title($title)
     {
         return 'Categories';
+    }
+
+    /**
+     * Remove `select all` label in single product page
+     * @param string $label - Original label
+     */
+    public function remove_selectall_label($label)
+    {
+        return $label === 'Select All' ? '' : $label;
     }
 
     /**
@@ -121,7 +132,7 @@ class SZ_Foodsto
                 <td><?=esc_html('variation' == $product->get_type() ? $product->get_description() : $product->get_short_description());
         ?></td>
                 <td class="sz-td--2"><?=$unit_html?></td>
-                <td class="sz-td--1"><div class="sz-addtocart"><input class="sz-qty" type="number" value="1" min="1" <?php
+                <td class="sz-td--1"><div class="sz-addtocart"><input class="sz-qty" type="number" value="1" min="0" <?php
 if ($max > 0) {
             echo "max='$max'";
         }
