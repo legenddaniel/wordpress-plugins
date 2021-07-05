@@ -3,6 +3,7 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+include 'config.php';
 
 class SZ_Foodsto
 {
@@ -24,6 +25,9 @@ class SZ_Foodsto
         add_action('woocommerce_before_shop_loop_item', [$this, 'render_custom_loop']);
 
         add_filter('vartable_header_text', [$this, 'remove_selectall_label']);
+
+        add_filter('get_terms', [$this, 'hide_dahu'], 10, 3);
+        add_action('woocommerce_before_shop_loop_item', [$this, 'render_custom_loop_dahu']);
     }
 
     /**
@@ -31,7 +35,9 @@ class SZ_Foodsto
      */
     public function reset_theme()
     {
-        remove_action('woocommerce_before_shop_loop_item_title', 'foodsto_template_loop_product_thumbnail', 10);
+        if (!is_page(DAHU)) {
+            remove_action('woocommerce_before_shop_loop_item_title', 'foodsto_template_loop_product_thumbnail', 10);
+        }
         remove_action('woocommerce_before_shop_loop', 'woocommerce_result_count', 20);
     }
 
@@ -93,11 +99,13 @@ class SZ_Foodsto
      */
     public function render_custom_loop()
     {
-        global $product;
-        global $wp;
-        $id = $product->get_id();
+        if (is_page(DAHU)) {
+            return;
+        }
 
-        $url = home_url($wp->request) . '/?add-to-cart=' . $id . '&quantity=1';
+        global $product;
+        $id = $product->get_id();
+        $url = '/?add-to-cart=' . $id . '&quantity=1';
 
         $variable = new WC_Product_Variable($id);
         if ($variations = $variable->get_available_variations()) {
@@ -141,6 +149,49 @@ if ($max > 0) {
         <?php
 }
 
+    /**
+     * Hide dahu category
+     */
+    public function hide_dahu($terms, $taxonomies, $args)
+    {
+        $new_terms = array();
+
+        if (in_array('product_cat', $taxonomies) && is_page(250)) {
+            foreach ($terms as $key => $term) {
+                if (!in_array($term->term_id, array(63))) {
+                    $new_terms[] = $term;
+                }}
+            $terms = $new_terms;
+        }
+        return $terms;
+    }
+
+    /**
+     * Loop item html for Dahu
+     */
+    public function render_custom_loop_dahu()
+    {
+        if (!is_page(DAHU)) {
+            return;
+        }
+
+        global $product;
+        $id = $product->get_id();
+        $url = '/?add-to-cart=' . $id . '&quantity=1';
+        $max = $product->get_max_purchase_quantity();
+
+        ?>
+            <div>
+                <?=woocommerce_get_product_thumbnail()?>
+                <?=esc_html($product->get_description());?>
+                <div class="sz-addtocart"><input class="sz-qty" type="number" value="1" min="0" <?php
+if ($max > 0) {
+            echo "max='$max'";
+        }
+        ?> /><a href=<?=esc_url($url)?> class="button add_to_cart_button" rel="nofollow">立刻下单</a></div>
+            </div>
+        <?php
+}
 }
 
 new SZ_Foodsto();

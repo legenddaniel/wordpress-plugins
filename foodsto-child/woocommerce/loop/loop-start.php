@@ -18,6 +18,7 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+if (!is_page(DAHU)):
 ?>
 <button type="button" class="button" id="sz-cats">Categories</button>
 <div class="products columns-<?php echo esc_attr(wc_get_loop_prop('columns')); ?>">
@@ -32,3 +33,10 @@ if (!defined('ABSPATH')) {
     </tr>
 </thead>
 <tbody id="sz-products">
+<?php
+else:
+?>
+<ul class="products columns-<?php echo esc_attr( wc_get_loop_prop( 'columns' ) ); ?>">
+<?php
+endif;
+?>

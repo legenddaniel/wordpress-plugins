@@ -15,10 +15,18 @@
  * @version     2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
+if (!is_page(DAHU)):
 ?>
 </tbody>
 </table>
+<?php
+else:
+?>
+	</ul>
+	<?php
+endif;
+?>
 </div>
