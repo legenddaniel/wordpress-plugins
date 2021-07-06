@@ -16,7 +16,7 @@ function debounce(fn, delay) {
 
 // Set `add to cart` button text on various device widths
 function setBtnTxt() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || document.querySelector('body.page-id-4848')) return;
 
     var addtocart = document.getElementsByClassName('add_to_cart_button');
     var l = addtocart.length;
@@ -36,6 +36,8 @@ function setFilters() {
     if (typeof window === 'undefined') return;
 
     var cats = document.getElementsByClassName('yith-wcan-filters')[0];
+    if (!cats) return;
+
     cats.insertAdjacentHTML('beforeend', '<span class="sz-closecats">×</span>');
     document.getElementById('sz-cats').addEventListener('click', function () {
         cats.style.left = 0;
@@ -55,35 +57,40 @@ window.addEventListener('load', function () {
     setFilters();
 
     // Apply quantity & variation
-    document.getElementById('sz-products').addEventListener('change', function (e) {
-        var target = e.target;
-        var value = target.value;
+    var products = document.getElementById('sz-products');
+    if (products) {
+        products.addEventListener('change', function (e) {
+            var target = e.target;
+            var value = target.value;
 
-        var regex;
-        var button;
-        if (target.className === 'sz-qty') {
-            regex = /(quantity=)(\d+)/;
-            button = target.nextSibling;
-        }
-        if (target.tagName === 'SELECT') {
-            regex = /(variation_id=)(\d+)/;
+            var regex;
+            var button;
+            if (target.className === 'sz-qty') {
+                regex = /(quantity=)(\d+)/;
+                button = target.nextSibling;
+            }
+            if (target.tagName === 'SELECT') {
+                regex = /(variation_id=)(\d+)/;
 
-            var tr = target.parentElement.parentElement;
-            button = tr.querySelector('.add_to_cart_button');
-            tr.querySelector('.price').innerHTML = target.getAttribute('data-price-' + value);
-        }
+                var tr = target.parentElement.parentElement;
+                button = tr.querySelector('.add_to_cart_button');
+                tr.querySelector('.price').innerHTML = target.getAttribute('data-price-' + value);
+            }
 
-        var url = button.href.replace(regex, '$1' + value);
-        button.setAttribute('href', url);
-    });
+            var url = button.href.replace(regex, '$1' + value);
+            button.setAttribute('href', url);
+        });
+    }
 
     // Restore all listeners
-    var observer = new MutationObserver(function (mutations, observer) {
-        mutations.forEach(function (mutation) {
-            setBtnTxt();
-            setFilters();
-        })
-    });
-    observer.observe(document.getElementsByClassName('site-content-contain')[0], { childList: true });
-
+    var target = document.getElementsByClassName('site-content-contain')[0];
+    if (target) {
+        var observer = new MutationObserver(function (mutations, observer) {
+            mutations.forEach(function (mutation) {
+                setBtnTxt();
+                setFilters();
+            })
+        });
+        observer.observe(target, { childList: true });
+    }
 })

@@ -15,7 +15,12 @@ class SZ_Foodsto
 
     public function __construct()
     {
+        remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10);
+
         add_action('init', [$this, 'reset_theme']);
+        // add_action('init', [$this, 'add_shortcode_checkout_dahu']);
+
+        add_action('woocommerce_add_to_cart_redirect', [$this, 'prevent_duplicate_addtocart']);
 
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
         // add_action('woocommerce_after_shop_loop', [$this, 'add_yith_form']);
@@ -28,6 +33,9 @@ class SZ_Foodsto
 
         add_filter('get_terms', [$this, 'hide_dahu'], 10, 3);
         add_action('woocommerce_before_shop_loop_item', [$this, 'render_custom_loop_dahu']);
+        add_filter('wc_add_to_cart_message_html', '__return_false');
+        add_action('template_redirect', [$this, 'prevent_thankyou_redirect']);
+
     }
 
     /**
@@ -105,7 +113,7 @@ class SZ_Foodsto
 
         global $product;
         $id = $product->get_id();
-        $url = '/?add-to-cart=' . $id . '&quantity=1';
+        $url = get_permalink(DAHU) . '?add-to-cart=' . $id . '&quantity=1';
 
         $variable = new WC_Product_Variable($id);
         if ($variations = $variable->get_available_variations()) {
@@ -177,13 +185,14 @@ if ($max > 0) {
 
         global $product;
         $id = $product->get_id();
-        $url = '/?add-to-cart=' . $id . '&quantity=1';
+        $url = get_permalink(DAHU) . '?add-to-cart=' . $id . '&quantity=1';
         $max = $product->get_max_purchase_quantity();
 
         ?>
             <div>
                 <?=woocommerce_get_product_thumbnail()?>
-                <?=esc_html($product->get_description());?>
+                <p><?=esc_html($product->get_description());?></p>
+                <span class="price"><?=$product->get_price_html();?></span>
                 <div class="sz-addtocart"><input class="sz-qty" type="number" value="1" min="0" <?php
 if ($max > 0) {
             echo "max='$max'";
@@ -192,6 +201,38 @@ if ($max > 0) {
             </div>
         <?php
 }
+
+    public function render_checkout_dahu()
+    {
+        woocommerce_checkout_payment();
+    }
+
+    public function add_shortcode_checkout_dahu()
+    {
+        add_shortcode('dahu_checkout', [$this, 'render_checkout_dahu']);
+    }
+
+    /**
+     * Stay in checkout page after checkout
+     */
+    public function prevent_thankyou_redirect()
+    {
+        global $wp;
+        if (strpos($wp->request, 'checkout/order-received') !== false) {
+            return;
+        }
+    }
+
+    /**
+     * Prevent duplicate order submission using url addtocart
+     */
+    public function prevent_duplicate_addtocart($url = false)
+    {
+        if (!empty($url)) {
+            return $url;
+        }
+        return get_home_url() . add_query_arg(array(), remove_query_arg(['add-to-cart', 'quantity']));
+    }
 }
 
 new SZ_Foodsto();

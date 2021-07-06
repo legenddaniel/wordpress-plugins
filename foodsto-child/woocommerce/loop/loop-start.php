@@ -36,7 +36,7 @@ if (!is_page(DAHU)):
 <?php
 else:
 ?>
-<ul class="products columns-<?php echo esc_attr( wc_get_loop_prop( 'columns' ) ); ?>">
+<ul id="sz-products" class="products columns-<?php echo esc_attr( wc_get_loop_prop( 'columns' ) ); ?>">
 <?php
 endif;
 ?>

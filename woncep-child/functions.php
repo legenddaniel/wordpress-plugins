@@ -142,12 +142,12 @@ class WC_Moditec
             ['jquery'],
             rand(111, 9999)
         );
-        // wp_enqueue_script(
-        //     'hide-zone',
-        //     get_stylesheet_directory_uri() . '/hide-zone.js',
-        //     ['jquery'],
-        //     rand(111, 9999)
-        // );
+        wp_enqueue_script(
+            'hide-zone',
+            get_stylesheet_directory_uri() . '/hide-zone.js',
+            ['jquery'],
+            rand(111, 9999)
+        );
         // wp_enqueue_script(
         //     'wechat-video',
         //     get_stylesheet_directory_uri() . '/wechat-video.js',
