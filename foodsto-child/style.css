@@ -189,3 +189,163 @@ table.table.vartable .qtycol > input.qty {
         display: none;
     }
 }
+
+/* Dahu starts */
+.page-id-4848 {
+    font-family: anton, san-serif;
+}
+.page-id-4848 a {
+    color: #e21c21;
+}
+.page-id-4848 button[type="submit"],
+.page-id-4848 button[type="submit"]:hover {
+    background-color: #e21c21;
+}
+
+.page-id-4848 > .elementor-4852 {
+    min-height: 200px;
+}
+
+.page-id-4848,
+.page-id-4848 footer {
+    background-color: #000;
+}
+
+.page-id-4848 .sf-content {
+    display: none;
+}
+
+.page-id-4848 ul {
+    margin-bottom: 0;
+    padding-left: 0;
+}
+.page-id-4848 li {
+    list-style: none;
+}
+
+.page-id-4848 header,
+.page-id-4848 header > nav > ul,
+.page-id-4848 .dahu-icons {
+    display: flex;
+    align-items: center;
+}
+.page-id-4848 header {
+    justify-content: center;
+}
+.page-id-4848 header > nav > ul {
+    justify-content: space-around;
+}
+.page-id-4848 header > nav {
+    flex-grow: 1;
+}
+
+.page-id-4848 header a {
+    color: rgb(51, 51, 51);
+    font-size: 20px;
+}
+.page-id-4848 header a:hover {
+    color: #e21c21;
+}
+
+.page-id-4848 li > ul {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    padding: 0 1rem;
+}
+.page-id-4848 li:hover > ul {
+    display: block;
+}
+.page-id-4848 li > ul > li {
+    padding: 0.2rem 0;
+}
+
+.page-id-4848 .products > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.page-id-4848 .products > div > p {
+    margin-bottom: auto;
+    font-size: 18px;
+    color: #fff;
+}
+.page-id-4848 .products > div > .price {
+    margin: 1rem auto;
+    font-size: 20px;
+    color: #e21c21;
+}
+.page-id-4848 .products > div > .sz-addtocart > .add_to_cart_button {
+    background-color: #e21c21;
+    font-size: 1rem;
+}
+
+.page-id-4848 .woocommerce h2,
+.page-id-4848 .woocommerce h3,
+.page-id-4848 .woocommerce label,
+.page-id-4848 .woocommerce-order,
+.page-id-4848 tr > *,
+.page-id-4848 .woocommerce .woocommerce-checkout-review-order,
+.page-id-4848 .woocommerce #order_review .woocommerce-checkout-review-order-table .amount,
+.page-id-4848 .woocommerce-order-details > h2,
+.page-id-4848 .woocommerce-customer-details > h2 {
+    font-family: anton, san-serif;
+    font-weight: 100;
+    color: #fff;
+}
+.page-id-4848 .woocommerce #order_review .woocommerce-checkout-review-order-table .order-total .amount,
+.page-id-4848 .woocommerce-order tfoot > tr:last-of-type .amount {
+    color: #e21c21;
+    font-size: 20px;
+}
+.page-id-4848 .woocommerce table.shop_table th {
+    font-weight: 100;
+}
+.page-id-4848 #place_order::after,
+header .woocommerce-mini-cart__buttons a::after {
+    content: "";
+    margin-left: 0;
+}
+
+.page-id-4848 .woocommerce-order {
+    color: #fff;
+}
+.page-id-4848 .woocommerce-order-details > h2,
+.page-id-4848 .woocommerce-customer-details > h2 {
+    margin: 1rem 0;
+}
+
+.page-id-4848 footer {
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.05em;
+}
+
+@media (min-width: 576px) {
+    .page-id-4848 .products {
+        display: flex;
+        justify-content: center;
+    }
+    .page-id-4848 .products > div {
+        width: 300px;
+    }
+    .page-id-4848 .products > div:first-of-type {
+        margin-right: 1rem;
+    }
+
+    .page-id-4848 .woocommerce-order-details {
+        float: right;
+        width: 50%;
+    }
+    .page-id-4848 .woocommerce-customer-details {
+        float: left;
+        width: 50%;
+    }
+}
+@media (max-width: 575px) {
+    .page-id-4848 .products > div:first-of-type {
+        padding-bottom: 1rem;
+        border-bottom: 2px dashed #333;
+    }
+}
+/* Dahu ends */

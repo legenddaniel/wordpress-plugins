@@ -17,6 +17,8 @@ class SZ_Foodsto
     {
         remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10);
 
+        add_shortcode('dahu_order', [$this, 'render_order_dahu']);
+
         add_action('init', [$this, 'reset_theme']);
         // add_action('init', [$this, 'add_shortcode_checkout_dahu']);
 
@@ -33,8 +35,9 @@ class SZ_Foodsto
 
         add_filter('get_terms', [$this, 'hide_dahu'], 10, 3);
         add_action('woocommerce_before_shop_loop_item', [$this, 'render_custom_loop_dahu']);
-        add_filter('wc_add_to_cart_message_html', '__return_false');
+        add_filter('wc_add_to_cart_message_html', [$this, 'remove_addtocart_msg']);
         add_action('template_redirect', [$this, 'prevent_thankyou_redirect']);
+        add_filter('woocommerce_order_item_name', [$this, 'remove_order_item_link_dahu']);
 
     }
 
@@ -164,9 +167,9 @@ if ($max > 0) {
     {
         $new_terms = array();
 
-        if (in_array('product_cat', $taxonomies) && is_page(250)) {
+        if (in_array('product_cat', $taxonomies) && is_page(CAT)) {
             foreach ($terms as $key => $term) {
-                if (!in_array($term->term_id, array(63))) {
+                if (!in_array($term->term_id, array(DAHU_CAT))) {
                     $new_terms[] = $term;
                 }}
             $terms = $new_terms;
@@ -202,25 +205,50 @@ if ($max > 0) {
         <?php
 }
 
-    public function render_checkout_dahu()
-    {
-        woocommerce_checkout_payment();
-    }
-
-    public function add_shortcode_checkout_dahu()
-    {
-        add_shortcode('dahu_checkout', [$this, 'render_checkout_dahu']);
-    }
-
     /**
      * Stay in checkout page after checkout
      */
     public function prevent_thankyou_redirect()
     {
-        global $wp;
-        if (strpos($wp->request, 'checkout/order-received') !== false) {
-            return;
+        $from = wp_get_referer();
+        if (is_page(THANKYOU) && strpos($from, '/' . DAHU_SLUG) !== false) {
+            global $wp;
+            $order_id = $wp->query_vars['order-received'];
+            $key = get_post_meta($order_id, '_order_key', true);
+            wp_redirect(
+                add_query_arg([
+                    'order_id' => $order_id,
+                    'key' => $key,
+                ], $from)
+            );
         }
+    }
+
+    /**
+     * Display order details
+     */
+    public function render_order_dahu()
+    {
+        $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
+        $key = isset($_GET['key']) ? $_GET['key'] : null;
+
+        if ($order_id && $key) {
+            $order_id = sanitize_text_field($order_id);
+            $key = sanitize_text_field($key);
+
+            $order = wc_get_order($order_id);
+            if ($order && get_post_meta($order_id, '_order_key', true) === $key) {
+                wc_get_template('checkout/thankyou.php', ['order' => $order]);
+            }
+        }
+    }
+
+    /**
+     * Remove order item link
+     */
+    public function remove_order_item_link_dahu($html)
+    {
+        return is_page(DAHU) ? preg_replace('/^<a href=(.*)>(.*)<\/a>$/', '$2', $html) : $html;
     }
 
     /**
@@ -231,7 +259,15 @@ if ($max > 0) {
         if (!empty($url)) {
             return $url;
         }
-        return get_home_url() . add_query_arg(array(), remove_query_arg(['add-to-cart', 'quantity']));
+        return get_home_url() . add_query_arg([], remove_query_arg(['add-to-cart', 'quantity']));
+    }
+
+    /**
+     * Hide addtocart message
+     */
+    public function remove_addtocart_msg($msg)
+    {
+        return '';
     }
 }
 
