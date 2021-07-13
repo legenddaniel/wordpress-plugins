@@ -115,8 +115,9 @@ class SZ_Foodsto
         }
 
         global $product;
+        global $wp;
         $id = $product->get_id();
-        $url = get_permalink(DAHU) . '?add-to-cart=' . $id . '&quantity=1';
+        $url = home_url($wp->request) . '/?add-to-cart=' . $id . '&quantity=1';
 
         $variable = new WC_Product_Variable($id);
         if ($variations = $variable->get_available_variations()) {
