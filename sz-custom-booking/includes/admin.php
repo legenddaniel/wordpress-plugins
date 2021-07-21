@@ -274,15 +274,3 @@ function sz_admin_save_user_passes_field($user_id)
 }
 add_action('personal_options_update', 'sz_admin_save_user_passes_field');
 add_action('edit_user_profile_update', 'sz_admin_save_user_passes_field');
-
-/**
- * Sync unpaid orders to google calendar
- * @param array $statuses - Order statuses that should be synced
- * @return array
- */
-function sz_sync_unpaid_order_to_google($statuses)
-{
-    $statuses[] = 'unpaid';
-    return $statuses;
-}
-add_filter('woocommerce_booking_is_paid_statuses', 'sz_sync_unpaid_order_to_google');
