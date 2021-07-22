@@ -15,7 +15,7 @@ class SZ_TomatoGo
 {
 
     // From Tomato Go /lib/config.js
-    private $business_area = ['Markham', 'Richmond Hill', 'Vaughan', 'North York', 'Etobicoke', 'Toronto Downtown', 'Scarborough'];
+    private $business_area = ['Markham', 'Richmond Hill', 'Vaughan', 'Thornhill', 'North York', 'Toronto Downtown', 'Scarborough', 'Etobicoke', 'Mississauga', 'Oakville', 'Burlington', 'Hamilton', 'Stouffville', 'King City', 'Aurora', 'Newmarket'];
 
     private $store_info;
 
@@ -23,10 +23,22 @@ class SZ_TomatoGo
     {
         $this->store_info = $this->get_store_info();
 
+        add_action('woocommerce_before_checkout_process', [$this, 'check_city']);
+
         add_action('woocommerce_payment_complete', [$this, 'send_order']);
         add_action('woocommerce_order_status_completed', [$this, 'send_order']);
 
         add_action('add_meta_boxes_shop_order', [$this, 'add_tomatogo_barcode']);
+    }
+
+    /**
+     * Check if the city input is within business area
+     */
+    public function check_city()
+    {
+        if (!in_array(ucwords(sanitize_text_field($_POST['billing_city'])), $this->business_area)) {
+            throw new Exception(__('Your city is not within our business area', 'woocommerce'));
+        }
     }
 
     /**
@@ -133,7 +145,7 @@ class SZ_TomatoGo
 
         // Return if the city is out of area
         $billing_info = $order->get_data()['billing'];
-        if (!in_array(sanitize_text_field($billing_info['city']), $this->business_area)) {
+        if (!in_array(ucwords(sanitize_text_field($billing_info['city'])), $this->business_area)) {
             return;
         }
 
