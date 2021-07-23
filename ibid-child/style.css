@@ -1,0 +1,14 @@
+/**
+* Theme Name: Ibid Child
+* Description: This is a child theme of Ibid.
+* Author: Daniel Siyuan Zuo
+* Template: ibid
+* Version: 1.0.0
+*/
+
+.sz-gdpr-row {
+    display: flex;
+}
+.sz-gdpr-row > .woocommerce-privacy-policy-text {
+    margin: 0 1rem;
+}
