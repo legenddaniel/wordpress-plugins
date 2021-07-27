@@ -44,8 +44,14 @@ class SZ_Ibid
      */
     public function render_registration_form()
     {
+        // For password strength check
         wp_enqueue_script('wc-password-strength-meter');
-        wc_get_template('registration-form.php');
+
+        // Parts of registration form
+        wc_get_template('registration-form/start.php');
+        wc_get_template('registration-form/account.php');
+        wc_get_template('registration-form/card.php');
+        wc_get_template('registration-form/end.php');
     }
 
     /**
@@ -56,6 +62,7 @@ class SZ_Ibid
         /**
          * send cURL to authorize.net here
          */
+        
         $errors->add( 'bad_email_domain', '<strong>ERROR</strong>: This email domain is not allowed.' );
     }
 }
