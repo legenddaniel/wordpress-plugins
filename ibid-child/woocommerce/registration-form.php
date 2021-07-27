@@ -1,7 +1,5 @@
 <?php
 
-// namespace SkyVerge\WooCommerce\Authorize_Net;
-
 defined('ABSPATH') || exit;
 
 // Template from `form-login.php`.
@@ -78,8 +76,8 @@ defined('ABSPATH') || exit;
 
 <section>
     <?php
-        // echo (new Payment_Form(true)).render_payment_fields();
-    ?>
+
+?>
 </section>
 
 <div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide sz-gdpr-row">
