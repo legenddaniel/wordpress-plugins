@@ -4,7 +4,7 @@ defined('ABSPATH') || exit;
 
 ?>
 
-<section>
+<section id="form-account">
 <h3>Account Information</h3>
 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
     <label>
@@ -17,10 +17,7 @@ defined('ABSPATH') || exit;
 	<label>
         Password
         <span class="required">*</span>
-        <span class="password-input">
-            <input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password" id="reg_password" required>
-            <span class="show-password-input"></span>
-        </span>
+        <input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password" id="reg_password" required>
     </label>
 </p>
 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
@@ -29,7 +26,6 @@ defined('ABSPATH') || exit;
         <span class="required">*</span>
         <span class="password-input">
             <input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="confirm-password" required>
-            <span class="show-password-input"></span>
         </span>
     </label>
 </p>

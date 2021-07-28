@@ -3,19 +3,8 @@
 defined('ABSPATH') || exit;
 
 ?>
-<section>
-    <h3>Credit/Debit Card Information</h3>
-<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-    <label>
-        Card Type
-        <span class="required">*</span>
-        <select class="woocommerce-Input woocommerce-Input--text input-text" name="card-type" required>
-            <option value="debit">Debit</option>
-            <option value="visa">Credit - Visa</option>
-            <option value="mastercard">Credit - MasterCard</option>
-        </select>
-    </label>
-</p>
+<section id="form-card">
+    <h3>Credit Card Information</h3>
 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
     <label>
         Name On Card
@@ -31,12 +20,13 @@ defined('ABSPATH') || exit;
     </label>
 </p>
 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-    <label>
+    <label class="card-expiry">
         Card Expiry (mm/yy)
         <span class="required">*</span>
-        <input pattern="^(0[1-9])|(1[012])$" maxLength="2" class="woocommerce-Input woocommerce-Input--text input-text" name="card-expiry-month" placeholder="mm" required />
-        /
-        <input pattern="^\d{2}$" maxLength="2" class="woocommerce-Input woocommerce-Input--text input-text" name="card-expiry-year" placeholder="yy" required />
+        <span class="card-expiry-input">
+            <input pattern="^(0[1-9])|(1[012])$" maxLength="2" class="woocommerce-Input woocommerce-Input--text input-text" name="card-expiry-month" placeholder="mm" required />
+            <input pattern="^\d{2}$" maxLength="2" class="woocommerce-Input woocommerce-Input--text input-text" name="card-expiry-year" placeholder="yy" required />
+        </span>
     </label>
 </p>
 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">

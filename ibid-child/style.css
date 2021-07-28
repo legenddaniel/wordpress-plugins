@@ -6,6 +6,39 @@
 * Version: 1.0.0
 */
 
+@media (min-width: 576px) {
+    #form-contact,
+    #form-account,
+    #form-card {
+        width: 48%;
+    }
+    #form-contact {
+        float: left;
+    }
+    #form-account,
+    #form-card {
+        float: right;
+    }
+}
+
+.card-expiry {
+    position: relative;
+}
+.card-expiry::after {
+    content: '/';
+    position: absolute;
+    bottom: 3.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.card-expiry-input {
+    display: flex;
+    justify-content: space-between;
+}
+.woocommerce form .form-row .card-expiry-input > input {
+    width: 46%;
+}
+
 .sz-gdpr-row {
     display: flex;
 }

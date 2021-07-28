@@ -8,3 +8,4 @@
 .env.production.local
 
 /sz-tomatogo/config.php
+/ibid-child/config.php
