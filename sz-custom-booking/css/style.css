@@ -45,6 +45,10 @@
     margin-bottom: 3em;
 }
 
+.wc-bookings-booking-form label {
+    font-size: 1.25rem;
+}
+
 .sz-sum-row > .wpb_column {
     margin-bottom: 1em;
 }

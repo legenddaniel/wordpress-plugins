@@ -16,7 +16,7 @@ jQuery(document).ready(function ($) {
     var $resources = $('#sz-resources'); 
     
     // Set label text of persons to 'Persons'
-    $persons.children('label').text('Persons:'); 
+    $persons.children('label').text('Number of people:'); 
     
     // Set Archery persons to 1 and hide other inputs
     $persons.eq(0).children('input').val($resources.attr('data-persons'));

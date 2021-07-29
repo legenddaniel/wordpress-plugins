@@ -6,6 +6,17 @@
 * Version: 1.0.0
 */
 
+.woocommerce form.login {
+    position: relative;
+}
+@media (min-width: 768px) {
+    .sz-signup-link {
+        position: absolute;
+        bottom: 65px;
+        right: 42px;
+    }
+}
+
 @media (min-width: 576px) {
     #form-contact,
     #form-account,
@@ -25,7 +36,7 @@
     position: relative;
 }
 .card-expiry::after {
-    content: '/';
+    content: "/";
     position: absolute;
     bottom: 3.5rem;
     left: 50%;

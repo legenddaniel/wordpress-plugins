@@ -27,7 +27,7 @@ require_once $plugin_dir . 'includes/booking.php';
 require_once $plugin_dir . 'includes/vip.php';
 
 // Google Calendar sync unpaid orders
-require_once $plugin_dir . 'includes/calendar.php';
+// require_once $plugin_dir . 'includes/calendar.php';
 
 // ---------------Config Area Starts
 

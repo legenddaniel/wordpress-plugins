@@ -9,11 +9,12 @@ class SZ_Ibid
 
     public function __construct()
     {
-        add_shortcode('sz_registration_form', [$this, 'render_registration_form']);
+        add_shortcode('sz_signup_form', [$this, 'render_signup_form']);
 
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
 
-        add_action('woocommerce_register_post', [$this, 'verify_card_before_registration'], 10, 3);
+        add_action('woocommerce_login_form_end', [$this, 'add_signup_link']);
+        add_action('woocommerce_register_post', [$this, 'verify_card_before_signup'], 10, 3);
 
     }
 
@@ -36,30 +37,46 @@ class SZ_Ibid
     }
 
     /**
-     * Custom registration form.
+     * Display the link to signup in login form
      */
-    public function render_registration_form()
+    public function add_signup_link()
+    {
+        echo '<p class="sz-signup-link">Not a member? <a href="/' . SIGNUP_PAGE . '"><strong>Become a member NOW!</strong></a></p>';
+    }
+
+    /**
+     * Custom signup form.
+     */
+    public function render_signup_form()
     {
         // For password strength check
         wp_enqueue_script('wc-password-strength-meter');
 
-        // Parts of registration form
-        wc_get_template('registration-form/start.php');
-        wc_get_template('registration-form/account.php');
-        wc_get_template('registration-form/contact.php');
-        wc_get_template('registration-form/card.php');
-        wc_get_template('registration-form/end.php');
+        // Parts of signup form
+        wc_get_template('signup-form/start.php');
+        wc_get_template('signup-form/account.php');
+        wc_get_template('signup-form/contact.php');
+        wc_get_template('signup-form/card.php');
+        wc_get_template('signup-form/end.php');
     }
 
     /**
-     * Verify the card info on third party payment platform before registration
+     * Verify the card info on third party payment platform before signup
+     * @param string $username
+     * @param string $email
+     * @param WP_Error $errors
      */
-    public function verify_card_before_registration($username, $email, $errors)
+    public function verify_card_before_signup($username, $email, $errors)
     {
+        $payment_profile_id = time();
+
         $tax_rates = WC_Tax::get_rates();
-        $rate = $tax_rates[
-            array_search(TAX_LABEL, array_column($tax_rates, 'label'))
-        ]['rate'];
+        $rate = sanitize_text_field(
+            $tax_rates[
+                array_search(TAX_LABEL, array_column($tax_rates, 'label')) + 1
+            ]['rate']
+        );
+        $amount = SIGNUP_FEE * (1 + $rate / 100);
 
         $to = [
             'firstName' => sanitize_text_field($_POST['first-name']),
@@ -69,10 +86,11 @@ class SZ_Ibid
             'city' => sanitize_text_field($_POST['city']),
             'state' => sanitize_text_field($_POST['province']),
             'zip' => sanitize_text_field($_POST['postcode']),
-            'country' => sanitize_text_field($_POST['coountry']),
+            'country' => sanitize_text_field($_POST['country']),
         ];
 
-        die(var_dump($tax_rates));
+        $expiry = '20' . sanitize_text_field($_POST['card-expiry-year']) . '-' . sanitize_text_field($_POST['card-expiry-month']);
+
         $info = [
             'createTransactionRequest' => [
                 'merchantAuthentication' => [
@@ -81,72 +99,64 @@ class SZ_Ibid
                 ],
                 'refId' => '123456',
                 'transactionRequest' => [
-                    'transactionType' => 'authOnlyTransaction',
-                    'amount' => SIGNUP_FEE * (1 + sanitize_text_field($rate) / 100),
+                    'transactionType' => 'authCaptureTransaction',
+                    'amount' => $amount,
+                    'currencyCode' => 'CAD',
                     'payment' => [
                         'creditCard' => [
                             'cardNumber' => sanitize_text_field($_POST['card-number']),
-                            'expirationDate' => sanitize_text_field($_POST['card-expiry-year']) . '-' . sanitize_text_field($_POST['card-expiry-month']),
+                            'expirationDate' => $expiry,
                             'cardCode' => sanitize_text_field($_POST['card-code']),
                         ],
                     ],
-                    'lineItems' => [
-                        'lineItem' => [
-                            'itemId' => '1',
-                            'name' => 'vase',
-                            'description' => 'Cannes logo',
-                            'quantity' => '18',
-                            'unitPrice' => '45.00',
-                        ],
+                    'profile' => [
+                        'createProfile' => true,
                     ],
-                    'tax' => [
-                        'amount' => '4.26',
-                        'name' => 'level2 tax name',
-                        'description' => 'level2 tax',
-                    ],
-                    'duty' => [
-                        'amount' => '8.55',
-                        'name' => 'duty name',
-                        'description' => 'duty description',
-                    ],
-                    'shipping' => [
-                        'amount' => '4.26',
-                        'name' => 'level2 tax name',
-                        'description' => 'level2 tax',
-                    ],
-                    'poNumber' => '456654',
+                    // 'poNumber' => '456654',
                     'customer' => [
-                        'id' => '99999456654',
+                        // 'type' => 'individual',
+                        'id' => $payment_profile_id,
+                        'email' => $email,
                     ],
                     'billTo' => $to,
                     'shipTo' => $to,
                     'customerIP' => sanitize_text_field($_SERVER['REMOTE_ADDR']),
-                    'userFields' => [
-                        'userField' => [
-                            0 => [
-                                'name' => 'MerchantDefinedFieldName1',
-                                'value' => 'MerchantDefinedFieldValue1',
-                            ],
-                            1 => [
-                                'name' => 'favorite_color',
-                                'value' => 'blue',
-                            ],
+                    "transactionSettings" => [
+                        "setting" => [
+                            "settingName" => "emailCustomer",
+                            "settingValue" => true,
                         ],
                     ],
+                    // 'userFields' => [
+                    //     'userField' => [
+                    //         [
+                    //             'name' => 'MerchantDefinedFieldName1',
+                    //             'value' => 'MerchantDefinedFieldValue1',
+                    //         ],
+                    //         [
+                    //             'name' => 'favorite_color',
+                    //             'value' => 'blue',
+                    //         ],
+                    //     ],
+                    // ],
                     'processingOptions' => [
-                        'isSubsequentAuth' => 'true',
+                        'isFirstRecurringPayment' => false,
+                        'isFirstSubsequentAuth' => true,
+                        'isSubsequentAuth' => true,
+                        'isStoredCredentials' => true,
                     ],
                     'subsequentAuthInformation' => [
                         'originalNetworkTransId' => '123456789NNNH',
-                        'originalAuthAmount' => '45.00',
+                        'originalAuthAmount' => $amount,
                         'reason' => 'resubmission',
                     ],
                     'authorizationIndicatorType' => [
-                        'authorizationIndicator' => 'pre',
+                        'authorizationIndicator' => 'final',
                     ],
                 ],
             ],
         ];
+
         $curl = curl_init(AUTHORIZE_ENDPOINT);
         curl_setopt_array($curl, [
             CURLOPT_HEADER => false,
@@ -155,12 +165,20 @@ class SZ_Ibid
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($info),
         ]);
-        $res = json_decode(curl_exec($curl));
-
-        die(var_dump($res));
-
+        $res = curl_exec($curl);
         curl_close($curl);
 
+        if (strpos($res, '{') > 0) {
+            $res = preg_replace('/^.*?{/', '{', $res);
+        }
+        $res = json_decode($res, true);
+
+        if ($error = $res['transactionResponse']['errors']) {
+            $errors->add('payment_error', sanitize_text_field($error[0]['errorText']));
+        } else {
+            // update_post_meta($user_id?????, 'payment_profile_id', $payment_profile_id);
+            // update_post_meta($user_id?????, 'payment_transaction_id', $res['transactionResponse']['transId']);
+        }
     }
 }
 
