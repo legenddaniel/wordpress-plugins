@@ -1,0 +1,12 @@
+.wc_input_table.widefat.buyer {
+    width: 50%;
+}
+
+.wc_input_table.widefat.buyer input {
+    box-shadow: 0 0 0 transparent;
+    border-radius: 4px;
+    border: 1px solid #8c8f94;
+    background-color: #fff;
+    color: #2c3338;
+    width: auto !important;
+}

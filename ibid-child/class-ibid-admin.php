@@ -4,10 +4,17 @@ defined('ABSPATH') || exit;
 
 class Ibid_Auction_Admin
 {
-    private $tab = 'auction-contract';
+    private $tab = 'custom-auction';
+
+    private $contract_amount = 3;
+
+    private $point_min = 0;
+    private $point_max = 100;
 
     public function __construct()
     {
+        add_action('admin_enqueue_scripts', [$this, 'init_assets']);
+
         add_action('show_user_profile', [$this, 'add_contract_config']);
         add_action('edit_user_profile', [$this, 'add_contract_config']);
         add_action('personal_options_update', [$this, 'save_contract_config']);
@@ -15,7 +22,25 @@ class Ibid_Auction_Admin
 
         add_filter('woocommerce_settings_tabs_array', [$this, 'add_woocommerce_settings_tab']);
         add_action('woocommerce_settings_tabs_' . $this->tab, [$this, 'add_woocommerce_settings_content']);
-        add_action('woocommerce_update_options_' . $this->tab, [$this, 'update_woocommerce_settings_content']);
+        add_action('woocommerce_update_options' . $this->tab, [$this, 'update_woocommerce_settings_content']);
+    }
+
+    public function init_assets()
+    {
+        wp_enqueue_style(
+            'admin-style',
+            get_stylesheet_directory_uri() . '/admin-style.css',
+            array(),
+            wp_get_theme()->parent()->get('Version')
+        );
+
+        // For table row add-delete in WooCommerce->Settings->Custom Auction
+        // wp_enqueue_script(
+        //     'settings-views-html-settings-tax',
+        //     WC()->plugin_url() . '/assets/js/admin/settings-views-html-settings-tax.min.js',
+        //     array('jquery', 'wp-util', 'underscore', 'backbone', 'jquery-blockui'),
+        //     get_bloginfo('version')
+        // );
     }
 
     /**
@@ -65,7 +90,7 @@ class Ibid_Auction_Admin
      */
     public function add_woocommerce_settings_tab($tabs)
     {
-        $tabs[$this->tab] = 'Auction Contract';
+        $tabs[$this->tab] = 'Custom Auction';
         return $tabs;
     }
 
@@ -75,7 +100,46 @@ class Ibid_Auction_Admin
     public function add_woocommerce_settings_content()
     {
         woocommerce_admin_fields($this->create_woocommerce_settings_content());
-    }
+
+        ?>
+    <table class="wc_input_table widefat buyer">
+	    <thead>
+		    <tr>
+                <th>Points</th>
+                <th>Service Fee (% on the final bidding price)</th>
+		    </tr>
+	    </thead>
+        <tbody>
+<?php
+$buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fee' => null]];
+        $l = count($buyer_service_fee);
+        for ($i = 0; $i < $l; $i++) {
+            ?>
+            <tr>
+                <td>
+                    <span><?=esc_html__(isset($buyer_service_fee[$i + 1]) ? $buyer_service_fee[$i + 1]['point'] : $this->point_min)?></span>
+                    <span>-</span>
+                    <input type="number" min="<?=esc_attr__($this->point_min)?>" max="<?=esc_attr__($this->point_max)?>" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? $this->point_max)?>" id="point-<?=esc_attr__($i)?>" />
+                </td>
+                <td>
+                    <input type="number" min="0" step="1" value="<?=esc_html__($buyer_service_fee[$i]['fee'])?>" id="fee-<?=esc_attr__($i)?>"/>
+                </td>
+            </tr>
+<?php
+}
+        ?>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="9">
+                    <button type="button" class="button plus"><?php _e('Insert row', 'woocommerce');?></button>
+                    <button type="button" class="button minus"><?php _e('Remove selected row(s)', 'woocommerce');?></button>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+        <?php
+}
 
     /**
      * Save the content
@@ -87,35 +151,48 @@ class Ibid_Auction_Admin
 
     /**
      * Content template
-     * @return string
+     * @return array
      */
     private function create_woocommerce_settings_content()
     {
         $settings = array(
-            'section_title' => array(
-                'name' => __('Section Title', 'woocommerce-settings-tab-demo'),
+            'section_title-seller' => array(
+                'name' => __('Auction Service Fee Settings - Seller', 'woocommerce'),
                 'type' => 'title',
-                'desc' => '',
-                'id' => 'wc_settings_tab_demo_section_title',
-            ),
-            'title' => array(
-                'name' => __('Title', 'woocommerce-settings-tab-demo'),
-                'type' => 'text',
-                'desc' => __('This is some helper text', 'woocommerce-settings-tab-demo'),
-                'id' => 'wc_settings_tab_demo_title',
-            ),
-            'description' => array(
-                'name' => __('Description', 'woocommerce-settings-tab-demo'),
-                'type' => 'textarea',
-                'desc' => __('This is a paragraph describing the setting. Lorem ipsum yadda yadda yadda. Lorem ipsum yadda yadda yadda. Lorem ipsum yadda yadda yadda. Lorem ipsum yadda yadda yadda.', 'woocommerce-settings-tab-demo'),
-                'id' => 'wc_settings_tab_demo_description',
-            ),
-            'section_end' => array(
-                'type' => 'sectionend',
-                'id' => 'wc_settings_tab_demo_section_end',
             ),
         );
+        for ($i = 1; $i <= $this->contract_amount; $i++) {
+            $settings = array_merge(
+                $settings,
+                [
+                    'section_subtitle-' . $i => array(
+                        'name' => 'Contract ' . $i,
+                        'type' => 'title',
+                    ),
+                    'title-' . $i => array(
+                        'name' => 'Title',
+                        'type' => 'text',
+                        'desc' => 'This is some helper text',
+                        'id' => $this->tab . '-title-' . $i,
+                    ),
+                    'description-' . $i => array(
+                        'name' => __('Description', 'woocommerce'),
+                        'type' => 'text',
+                        'desc' => __('This is some helper text', 'woocommerce'),
+                        'id' => $this->tab . '_description-' . $i,
+                    ),
+                    'section_end-' . $i => array(
+                        'type' => 'sectionend',
+                    ),
+                ]
+            );
+        }
 
-        return apply_filters('wc_' . $this->tab . '_settings', $settings);
+        $settings['section_title-buyer'] = array(
+            'name' => __('Auction Service Fee Settings - Buyer', 'woocommerce'),
+            'type' => 'title',
+        );
+
+        return $settings;
     }
 }
