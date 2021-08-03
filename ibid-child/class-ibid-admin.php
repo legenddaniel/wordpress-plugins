@@ -35,12 +35,14 @@ class Ibid_Auction_Admin
         );
 
         // For table row add-delete in WooCommerce->Settings->Custom Auction
-        // wp_enqueue_script(
-        //     'settings-views-html-settings-tax',
-        //     WC()->plugin_url() . '/assets/js/admin/settings-views-html-settings-tax.min.js',
-        //     array('jquery', 'wp-util', 'underscore', 'backbone', 'jquery-blockui'),
-        //     get_bloginfo('version')
-        // );
+        if (is_admin() && sanitize_title_for_query($_GET['page']) === 'wc-settings' && sanitize_title_for_query($_GET['tab']) === $this->tab) {
+            $sig = 'points-setting';
+            wp_enqueue_script(
+                $sig,
+                get_stylesheet_directory_uri() . "/$sig.js"
+            );
+        }
+
     }
 
     /**
@@ -102,7 +104,7 @@ class Ibid_Auction_Admin
         woocommerce_admin_fields($this->create_woocommerce_settings_content());
 
         ?>
-    <table class="wc_input_table widefat buyer">
+    <table class="wc_input_table widefat buyer" data-min="<?=esc_attr__($this->point_min)?>" data-max="<?=esc_attr__($this->point_max)?>">
 	    <thead>
 		    <tr>
                 <th>Points</th>
@@ -116,10 +118,10 @@ $buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fe
         for ($i = 0; $i < $l; $i++) {
             ?>
             <tr>
-                <td>
-                    <span><?=esc_html__(isset($buyer_service_fee[$i + 1]) ? $buyer_service_fee[$i + 1]['point'] : $this->point_min)?></span>
+                <td class="auction-points">
+                    <span id="point-min-<?=esc_attr__($i)?>"><?=esc_html__(isset($buyer_service_fee[$i + 1]) ? $buyer_service_fee[$i + 1]['point'] : $this->point_min)?></span>
                     <span>-</span>
-                    <input type="number" min="<?=esc_attr__($this->point_min)?>" max="<?=esc_attr__($this->point_max)?>" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? $this->point_max)?>" id="point-<?=esc_attr__($i)?>" />
+                    <input type="number" min="<?=esc_attr__($this->point_min)?>" max="<?=esc_attr__($this->point_max)?>" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? $this->point_max)?>" id="point-max-<?=esc_attr__($i)?>" />
                 </td>
                 <td>
                     <input type="number" min="0" step="1" value="<?=esc_html__($buyer_service_fee[$i]['fee'])?>" id="fee-<?=esc_attr__($i)?>"/>
@@ -132,7 +134,7 @@ $buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fe
         <tfoot>
             <tr>
                 <th colspan="9">
-                    <button type="button" class="button plus"><?php _e('Insert row', 'woocommerce');?></button>
+                    <button type="button" class="button plus"><?php _e('Add new row', 'woocommerce');?></button>
                     <button type="button" class="button minus"><?php _e('Remove selected row(s)', 'woocommerce');?></button>
                 </th>
             </tr>
