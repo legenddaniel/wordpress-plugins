@@ -15,7 +15,7 @@ jQuery(document).ready(function ($) {
     $('fieldset.wc-bookings-date-picker').before($resourcesHtml);
     var $resources = $('#sz-resources'); 
     
-    // Set label text of persons to 'Persons'
+    // Set label text of `Persons`
     $persons.children('label').text('Number of people:'); 
     
     // Set Archery persons to 1 and hide other inputs

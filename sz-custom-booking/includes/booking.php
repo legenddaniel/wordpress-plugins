@@ -296,7 +296,7 @@ function render_discount_field()
     ?>
 
     <div class="sz-discount-field d-none" id="sz-discount-field" data-price=<?=esc_attr($price);?>>
-        <div style=<?=esc_attr($byoe_display);?>>
+        <div id="byoe-enable-field" style=<?=esc_attr($byoe_display);?>>
             <input type="checkbox" id="byoe-enable" name="byoe-enable" data-price=<?=esc_attr($price_off);?>>
             <label for="byoe-enable">Bring Your Own Equipment</label>
         </div>
@@ -359,11 +359,12 @@ function render_discount_field()
     if ($promo_cart_count && $vip_cart_count) {
         $promo_label .= " ($promo_cart_count Promo, $vip_cart_count VIP being deducted in the cart)";
     }
+    $promo_label .= ' (Must Bring Your Own Equipment)';
     $available_promo_count = $total_promo_count - $promo_cart_count - $vip_cart_count;
 
     ?>
 
-        <div>
+        <div id="promo-enable-field">
             <input type="checkbox" id="promo-enable" name="promo-enable" data-price=<?=esc_attr($price);?> data-promo=<?=esc_attr($available_promo_count);?> <?=esc_attr($available_promo_count ? '' : 'disabled');?>>
             <label for="promo-enable"><?=esc_html__($promo_label);?></label>
         </div>

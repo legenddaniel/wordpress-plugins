@@ -1,5 +1,8 @@
 jQuery(document).ready(function ($) {
 
+    // For now only archery has promo
+    var archery = 70541;
+
     /**
      * @desc Fetch discount data for various resources
      * @param {interface} e - Event
@@ -26,7 +29,8 @@ jQuery(document).ready(function ($) {
 
                 $('#promo-enable').prop('disabled', !has_promo);
                 $('#promo-enable').next('label').text(promo_label);
-                $('#sz-discount-field div').eq(0).toggle(byoe_enable);
+                $('#promo-enable-field').toggle(resource == archery);
+                $('#byoe-enable-field').toggle(byoe_enable);
                 $('#sz-discount-field, #promo-enable, #guest-enable').attr('data-price', price);
                 $('#byoe-enable').attr('data-price', price_off);
 
