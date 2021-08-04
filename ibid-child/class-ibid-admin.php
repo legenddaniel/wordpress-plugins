@@ -5,9 +5,11 @@ defined('ABSPATH') || exit;
 class Ibid_Auction_Admin
 {
     private $tab = 'custom-auction';
+    private $buyer_fee_field = 'custom_auction_buyer';
 
     private $contract_amount = 3;
 
+    // Initial min and max values
     private $point_min = 0;
     private $point_max = 100;
 
@@ -22,7 +24,7 @@ class Ibid_Auction_Admin
 
         add_filter('woocommerce_settings_tabs_array', [$this, 'add_woocommerce_settings_tab']);
         add_action('woocommerce_settings_tabs_' . $this->tab, [$this, 'add_woocommerce_settings_content']);
-        add_action('woocommerce_update_options' . $this->tab, [$this, 'update_woocommerce_settings_content']);
+        add_action('woocommerce_update_options_' . $this->tab, [$this, 'update_woocommerce_settings_content']);
     }
 
     public function init_assets()
@@ -35,7 +37,7 @@ class Ibid_Auction_Admin
         );
 
         // For table row add-delete in WooCommerce->Settings->Custom Auction
-        if (is_admin() && sanitize_title_for_query($_GET['page']) === 'wc-settings' && sanitize_title_for_query($_GET['tab']) === $this->tab) {
+        if (is_admin() && isset($_GET['page']) && sanitize_title_for_query($_GET['page']) === 'wc-settings' && isset($_GET['tab']) && sanitize_title_for_query($_GET['tab']) === $this->tab) {
             $sig = 'points-setting';
             wp_enqueue_script(
                 $sig,
@@ -108,12 +110,12 @@ class Ibid_Auction_Admin
 	    <thead>
 		    <tr>
                 <th>Points</th>
-                <th>Service Fee (% on the final bidding price)</th>
+                <th>Service Fee (%)</th>
 		    </tr>
 	    </thead>
         <tbody>
 <?php
-$buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fee' => null]];
+$buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'fee' => null]];
         $l = count($buyer_service_fee);
         for ($i = 0; $i < $l; $i++) {
             ?>
@@ -121,10 +123,10 @@ $buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fe
                 <td class="auction-points">
                     <span id="point-min-<?=esc_attr__($i)?>"><?=esc_html__(isset($buyer_service_fee[$i + 1]) ? $buyer_service_fee[$i + 1]['point'] : $this->point_min)?></span>
                     <span>-</span>
-                    <input type="number" min="<?=esc_attr__($this->point_min)?>" max="<?=esc_attr__($this->point_max)?>" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? $this->point_max)?>" id="point-max-<?=esc_attr__($i)?>" />
+                    <input type="number" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? $this->point_max)?>" id="point-max-<?=esc_attr__($i)?>" name="point-max-<?=esc_attr__($i)?>"/>
                 </td>
                 <td>
-                    <input type="number" min="0" step="1" value="<?=esc_html__($buyer_service_fee[$i]['fee'])?>" id="fee-<?=esc_attr__($i)?>"/>
+                    <input type="number" min="0" step="1" value="<?=esc_html__($buyer_service_fee[$i]['fee'])?>" id="fee-<?=esc_attr__($i)?>" name="fee-<?=esc_attr__($i)?>" />
                 </td>
             </tr>
 <?php
@@ -135,7 +137,8 @@ $buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fe
             <tr>
                 <th colspan="9">
                     <button type="button" class="button plus"><?php _e('Add new row', 'woocommerce');?></button>
-                    <button type="button" class="button minus"><?php _e('Remove selected row(s)', 'woocommerce');?></button>
+                    <button type="button" class="button minus"><?php _e('Remove last row', 'woocommerce');?></button>
+                    <button type="button" class="button reset"><?php _e('Reset table', 'woocommerce');?></button>
                 </th>
             </tr>
         </tfoot>
@@ -149,6 +152,18 @@ $buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fe
     public function update_woocommerce_settings_content()
     {
         woocommerce_update_options($this->create_woocommerce_settings_content());
+
+        $options = [];
+        foreach ($_POST as $k => $v) {
+            if (strpos($k, 'point-max-') === 0) {
+                $index = preg_replace('/.*-(\d+)$/', '$1', $k);
+                $options[$index]['point'] = sanitize_text_field($v);
+            } else if (strpos($k, 'fee-') === 0) {
+                $index = preg_replace('/.*-(\d+)$/', '$1', $k);
+                $options[$index]['fee'] = sanitize_text_field($v);
+            }
+        }
+        update_option(sanitize_text_field($this->buyer_fee_field), $options);
     }
 
     /**
@@ -181,7 +196,7 @@ $buyer_service_fee = get_option($this->tab . '_buyer') ?: [['point' => null, 'fe
                         'name' => __('Description', 'woocommerce'),
                         'type' => 'text',
                         'desc' => __('This is some helper text', 'woocommerce'),
-                        'id' => $this->tab . '_description-' . $i,
+                        'id' => $this->tab . '-description-' . $i,
                     ),
                     'section_end-' . $i => array(
                         'type' => 'sectionend',
