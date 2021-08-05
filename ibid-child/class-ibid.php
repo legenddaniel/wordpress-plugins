@@ -5,6 +5,9 @@ defined('ABSPATH') || exit;
 class Ibid_Auction
 {
 
+    // Self service page id
+    private $self_service_page = 6903;
+
     public function __construct()
     {
         add_shortcode('sz_signup_form', [$this, 'render_signup_form']);
@@ -13,6 +16,8 @@ class Ibid_Auction
 
         add_action('woocommerce_login_form_end', [$this, 'add_signup_link']);
         add_action('woocommerce_register_post', [$this, 'verify_card_before_signup'], 10, 3);
+
+        add_action('publish_product', [$this, 'create_product_frontend'], 10, 2);
 
     }
 
@@ -176,6 +181,58 @@ class Ibid_Auction
         } else {
             // update_post_meta($user_id?????, 'wc_authorize_net_cim_customer_profile_id', $payment_profile_id);
             // update_post_meta($user_id?????, 'sz_wc_authorize_net_cim_transaction_id', $res['transactionResponse']['transId']);
+        }
+    }
+
+    /**
+     * Set the product as auction when creating product at frontend
+     * @param int $id - Post id
+     * @param WP_Post $post
+     */
+    public function create_product_frontend($id, $post)
+    {
+        check_ajax_referer('ns-apf-special-string', 'security');
+
+        if (!isset($_POST['action']) || sanitize_text_field($_POST['action']) !== 'save_simple_product') {
+            return;
+        }
+
+        $data = $_POST['formdata'];
+        if (!is_array($data)) {
+            throw new Exception('Invalid Form Data!');
+        }
+
+        // Mark it as self service product
+        update_post_meta($id, 'self_service', true);
+
+        // Some other auction meta data
+        if (isset($_POST['_auction_dates_from'])) {
+            $date1 = new DateTime(sanitize_text_field($_POST['_auction_dates_from']));
+            $date2 = new DateTime(current_time('mysql'));
+            if ($date1 < $date2) {
+                update_post_meta($id, '_auction_has_started', '1');
+                delete_post_meta($id, '_auction_started');
+                do_action('woocommerce_simple_auction_started', $id);
+            } else {
+                update_post_meta($id, '_auction_started', '0');
+            }
+        }
+        if (isset($_POST['_auction_proxy'])) {
+            update_post_meta($id, '_auction_proxy', stripslashes($_POST['_auction_proxy']));
+        } else {
+            update_post_meta($id, '_auction_proxy', '0');
+        }
+
+        // Change product type to 'auction'
+        wp_remove_object_terms($id, 'simple', 'product_type');
+        wp_set_object_terms($id, 'auction', 'product_type');
+
+        // Add auction related post meta
+        $auction_keys = ['_auction_item_condition', '_auction_type', '_auction_proxy', '_auction_start_price', '_auction_bid_increment', '_auction_reserved_price', '_auction_dates_from', '_auction_dates_to'];
+        foreach ($auction_keys as $k) {
+            $index = array_search($k, array_column($data, 'name'));
+            $value = sanitize_text_field($data[$index]['value']);
+            update_post_meta($id, $k, $value);
         }
     }
 }
