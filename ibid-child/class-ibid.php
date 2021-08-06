@@ -4,9 +4,7 @@ defined('ABSPATH') || exit;
 
 class Ibid_Auction
 {
-
-    // Self service page id
-    private $self_service_page = 6903;
+    private $key_verification = 'wc_authorize_net_cim_customer_profile_id';
 
     public function __construct()
     {
@@ -15,7 +13,8 @@ class Ibid_Auction
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
 
         add_action('woocommerce_login_form_end', [$this, 'add_signup_link']);
-        add_action('woocommerce_register_post', [$this, 'verify_card_before_signup'], 10, 3);
+        add_action('woocommerce_created_customer', [$this, 'verify_card_when_signup'], 10, 3);
+        add_filter('wp_authenticate_user', [$this, 'verify_login'], 10, 2);
 
         add_action('publish_product', [$this, 'create_product_frontend'], 10, 2);
 
@@ -64,12 +63,12 @@ class Ibid_Auction
     }
 
     /**
-     * Verify the card info on third party payment platform before signup
-     * @param string $username
-     * @param string $email
-     * @param WP_Error $errors
+     * Verify the card info on third party payment platform when signup. User must be verified to log in.
+     * @param int $customer_id
+     * @param array $new_customer_data
+     * @param bool $password_generated
      */
-    public function verify_card_before_signup($username, $email, $errors)
+    public function verify_card_when_signup($customer_id, $new_customer_data, $password_generated)
     {
         $payment_profile_id = time();
 
@@ -119,7 +118,7 @@ class Ibid_Auction
                     'customer' => [
                         // 'type' => 'individual',
                         'id' => $payment_profile_id,
-                        'email' => $email,
+                        'email' => sanitize_text_field($_POST['email']),
                     ],
                     'billTo' => $to,
                     'shipTo' => $to,
@@ -130,18 +129,14 @@ class Ibid_Auction
                             "settingValue" => true,
                         ],
                     ],
-                    // 'userFields' => [
-                    //     'userField' => [
-                    //         [
-                    //             'name' => 'MerchantDefinedFieldName1',
-                    //             'value' => 'MerchantDefinedFieldValue1',
-                    //         ],
-                    //         [
-                    //             'name' => 'favorite_color',
-                    //             'value' => 'blue',
-                    //         ],
-                    //     ],
-                    // ],
+                    'userFields' => [
+                        'userField' => [
+                            [
+                                'name' => 'woocommerce_id',
+                                'value' => sanitize_text_field($customer_id),
+                            ],
+                        ],
+                    ],
                     'processingOptions' => [
                         'isFirstRecurringPayment' => false,
                         'isFirstSubsequentAuth' => true,
@@ -171,17 +166,61 @@ class Ibid_Auction
         $res = curl_exec($curl);
         curl_close($curl);
 
-        if (strpos($res, '{') > 0) {
-            $res = preg_replace('/^.*?{/', '{', $res);
+        if ($res) {
+            if (strpos($res, '{') > 0) {
+                $res = preg_replace('/^.*?{/', '{', $res);
+            }
+            $res = json_decode($res, true);
         }
-        $res = json_decode($res, true);
 
-        if ($error = $res['transactionResponse']['errors']) {
-            $errors->add('payment_error', sanitize_text_field($error[0]['errorText']));
+        if (!$res || $res['transactionResponse']['errors']) {
+            wc_add_notice(__('<strong>Error</strong>: You must verify your credit card first.'), 'error');
+            wp_delete_user($customer_id);
         } else {
-            // update_post_meta($user_id?????, 'wc_authorize_net_cim_customer_profile_id', $payment_profile_id);
-            // update_post_meta($user_id?????, 'sz_wc_authorize_net_cim_transaction_id', $res['transactionResponse']['transId']);
+            update_user_meta($customer_id, $this->key_verification, $payment_profile_id);
+            update_user_meta($customer_id, 'wc_authorize_net_cim_verification_id', $res['transactionResponse']['transId']);
+            update_user_meta($customer_id, 'auction_point', DEFAULT_POINT);
+
+            $billings = [
+                'first_name' => sanitize_text_field($_POST['first-name']),
+                'last_name' => sanitize_text_field($_POST['last-name']),
+                'company' => sanitize_text_field($_POST['company'] || ''),
+                'address_1' => sanitize_text_field($_POST['address1']),
+                'address_2' => sanitize_text_field($_POST['address2']),
+                'city' => sanitize_text_field($_POST['city']),
+                'state' => sanitize_text_field($_POST['province']),
+                'postcode' => sanitize_text_field($_POST['postcode']),
+                'country' => sanitize_text_field($_POST['country']),
+                'email' => sanitize_text_field($_POST['email']),
+            ];
+            foreach ($billings as $k => $v) {
+                update_user_meta($customer_id, 'billing_' . $k, $v);
+            }
         }
+    }
+
+    /**
+     * Verify user when login. Users must have verified their credit card.
+     * @param WP_User|WP_Error|null $user
+     * @param string $pwd
+     * @return WP_User|WP_Error|null
+     */
+    public function verify_login($user, $pwd)
+    {
+        if (!($user instanceof WP_User)) {
+            return $user;
+        }
+
+        $id = $user->ID;
+        $verified = get_user_meta($id, $this->key_verification, true);
+        if ($verified) {
+            return $user;
+        }
+
+        return new WP_Error(
+            'payment_unverified',
+            __('<strong>Error</strong>: You must verify your credit card first.')
+        );
     }
 
     /**
@@ -191,9 +230,11 @@ class Ibid_Auction
      */
     public function create_product_frontend($id, $post)
     {
-        check_ajax_referer('ns-apf-special-string', 'security');
-
-        if (!isset($_POST['action']) || sanitize_text_field($_POST['action']) !== 'save_simple_product') {
+        if (
+            check_ajax_referer('ns-apf-special-string', 'security', false) === -1 ||
+            !isset($_POST['action']) ||
+            sanitize_text_field($_POST['action']) !== 'save_simple_product'
+        ) {
             return;
         }
 

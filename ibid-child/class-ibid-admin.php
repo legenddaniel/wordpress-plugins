@@ -7,12 +7,6 @@ class Ibid_Auction_Admin
     private $tab = 'custom-auction';
     private $buyer_fee_field = 'custom_auction_buyer';
 
-    private $contract_amount = 3;
-
-    // Initial min and max values
-    private $point_min = 0;
-    private $point_max = 100;
-
     public function __construct()
     {
         add_action('admin_enqueue_scripts', [$this, 'init_assets']);
@@ -25,6 +19,8 @@ class Ibid_Auction_Admin
         add_filter('woocommerce_settings_tabs_array', [$this, 'add_woocommerce_settings_tab']);
         add_action('woocommerce_settings_tabs_' . $this->tab, [$this, 'add_woocommerce_settings_content']);
         add_action('woocommerce_update_options_' . $this->tab, [$this, 'update_woocommerce_settings_content']);
+
+        add_action('woocommerce_product_options_auction', [$this, 'add_max_fee_option']);
     }
 
     public function init_assets()
@@ -82,7 +78,7 @@ class Ibid_Auction_Admin
     {
         update_user_meta(
             $user_id,
-            'sz_wc_authorize_net_cim_contract_type',
+            'wc_authorize_net_cim_contract_type',
             sanitize_text_field($_POST['auction-contract'])
         );
     }
@@ -106,7 +102,7 @@ class Ibid_Auction_Admin
         woocommerce_admin_fields($this->create_woocommerce_settings_content());
 
         ?>
-    <table class="wc_input_table widefat buyer" data-min="<?=esc_attr__($this->point_min)?>" data-max="<?=esc_attr__($this->point_max)?>">
+    <table class="wc_input_table widefat buyer" data-min="<?=esc_attr__(POINT_MIN)?>" data-max="<?=esc_attr__(POINT_MAX)?>">
 	    <thead>
 		    <tr>
                 <th>Points</th>
@@ -121,9 +117,9 @@ $buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'f
             ?>
             <tr>
                 <td class="auction-points">
-                    <span id="point-min-<?=esc_attr__($i)?>"><?=esc_html__(isset($buyer_service_fee[$i + 1]) ? $buyer_service_fee[$i + 1]['point'] : $this->point_min)?></span>
+                    <span id="point-min-<?=esc_attr__($i)?>"><?=esc_html__(isset($buyer_service_fee[$i + 1]) ? $buyer_service_fee[$i + 1]['point'] + 1 : POINT_MIN)?></span>
                     <span>-</span>
-                    <input type="number" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? $this->point_max)?>" id="point-max-<?=esc_attr__($i)?>" name="point-max-<?=esc_attr__($i)?>"/>
+                    <input type="number" step="1" value="<?=esc_html__($buyer_service_fee[$i]['point'] ?? POINT_MAX)?>" id="point-max-<?=esc_attr__($i)?>" name="point-max-<?=esc_attr__($i)?>"/>
                 </td>
                 <td>
                     <input type="number" min="0" step="1" value="<?=esc_html__($buyer_service_fee[$i]['fee'])?>" id="fee-<?=esc_attr__($i)?>" name="fee-<?=esc_attr__($i)?>" />
@@ -178,7 +174,7 @@ $buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'f
                 'type' => 'title',
             ),
         );
-        for ($i = 1; $i <= $this->contract_amount; $i++) {
+        for ($i = 1; $i <= CONTRACT_AMOUNT; $i++) {
             $settings = array_merge(
                 $settings,
                 [
@@ -211,5 +207,23 @@ $buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'f
         );
 
         return $settings;
+    }
+
+    /**
+     * Max service fee setting in Woocommerce product editing page
+     */
+    public function add_max_fee_option()
+    {
+        woocommerce_wp_text_input(
+            array(
+                'id' => '_auction_max_service_fee',
+                'name' => '_auction_max_service_fee',
+                'class' => 'wc_input_price short',
+                'label' => __('Maximum Service Fee', 'wc_simple_auctions') . ' (' . get_woocommerce_currency_symbol() . ')',
+                'data_type' => 'price',
+                'desc_tip' => 'true',
+                'description' => __('Leave it blank if using only general rules'),
+            )
+        );
     }
 }
