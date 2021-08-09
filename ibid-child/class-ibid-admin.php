@@ -13,8 +13,6 @@ class Ibid_Auction_Admin
 
         add_action('show_user_profile', [$this, 'add_contract_config']);
         add_action('edit_user_profile', [$this, 'add_contract_config']);
-        add_action('personal_options_update', [$this, 'save_contract_config']);
-        add_action('edit_user_profile_update', [$this, 'save_contract_config']);
 
         add_filter('woocommerce_settings_tabs_array', [$this, 'add_woocommerce_settings_tab']);
         add_action('woocommerce_settings_tabs_' . $this->tab, [$this, 'add_woocommerce_settings_content']);
@@ -69,19 +67,6 @@ class Ibid_Auction_Admin
 </table>
         <?php
 }
-
-    /**
-     * Save the contract field in db
-     * @param int $user_id
-     */
-    public function save_contract_config($user_id)
-    {
-        update_user_meta(
-            $user_id,
-            'wc_authorize_net_cim_contract_type',
-            sanitize_text_field($_POST['auction-contract'])
-        );
-    }
 
     /**
      * Add a tab to woocommerce settings
