@@ -50,9 +50,25 @@
     width: 46%;
 }
 
+.woocommerce-form-row.form-row.sz-confirm-email-row,
+.woocommerce-form-row.form-row.sz-confirm-password-row {
+    position: relative;
+}
+.woocommerce-form-row.form-row.sz-confirm-email-row::after,
+.woocommerce-form-row.form-row.sz-confirm-password-row::after {
+    content: attr(data-msg);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: red;
+}
 .sz-gdpr-row {
     display: flex;
 }
 .sz-gdpr-row > .woocommerce-privacy-policy-text {
     margin: 0 1rem;
+}
+.woocommerce-terms-and-conditions-link,
+.woocommerce-privacy-policy-link {
+    text-transform: capitalize;
 }

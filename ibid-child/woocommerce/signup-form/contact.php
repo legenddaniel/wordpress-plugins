@@ -51,7 +51,7 @@ defined('ABSPATH') || exit;
         Province
         <span class="required">*</span>
         <select class="woocommerce-Input woocommerce-Input--text input-text" name="province" required>
-            <option value="MN">MN</option>
+            <option value="MB">MB</option>
         </select>
     </label>
 </p>
@@ -87,9 +87,9 @@ defined('ABSPATH') || exit;
 </p>
 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
     <label>
-        Driver's License
+        Driver's License (with hyphen)
         <span class="required">*</span>
-        <input type="tel" class="woocommerce-Input woocommerce-Input--text input-text" name="driver-license" required />
+        <input pattern="^[A-Z]\d{4}-\d{5}-\d{5}$" class="woocommerce-Input woocommerce-Input--text input-text" name="driver-license" required />
     </label>
 </p>
 </section>

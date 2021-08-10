@@ -22,20 +22,17 @@ class Ibid_Auction
 
     public function init_assets()
     {
-        $parenthandle = 'parent-style';
-        $theme = wp_get_theme();
         wp_enqueue_style(
-            $parenthandle,
+            'parent-style',
             get_template_directory_uri() . '/style.css',
             array(),
-            $theme->parent()->get('Version')
+            wp_get_theme()->parent()->get('Version')
         );
-        // wp_enqueue_script(
-        //     'qty',
-        //     get_stylesheet_directory_uri() . '/qty.js',
-        //     array(),
-        //     rand(111, 9999)
-        // );
+        wp_enqueue_script(
+            'login-validation',
+            get_stylesheet_directory_uri() . '/login.js',
+            array()
+        );
     }
 
     /**
@@ -70,6 +67,10 @@ class Ibid_Auction
      */
     public function verify_card_when_signup($customer_id, $new_customer_data, $password_generated)
     {
+        /**
+         * May add validation here
+         */
+
         $payment_profile_id = time();
 
         $tax_rates = WC_Tax::get_rates();
@@ -92,6 +93,7 @@ class Ibid_Auction
         ];
 
         $expiry = '20' . sanitize_text_field($_POST['card-expiry-year']) . '-' . sanitize_text_field($_POST['card-expiry-month']);
+        $email = sanitize_text_field($_POST['email']);
 
         $info = [
             'createTransactionRequest' => [
@@ -118,7 +120,7 @@ class Ibid_Auction
                     'customer' => [
                         // 'type' => 'individual',
                         'id' => $payment_profile_id,
-                        'email' => sanitize_text_field($_POST['email']),
+                        'email' => $email,
                     ],
                     'billTo' => $to,
                     'shipTo' => $to,
@@ -174,7 +176,7 @@ class Ibid_Auction
         }
 
         if (!$res || $res['transactionResponse']['errors']) {
-            wc_add_notice(__('<strong>Error</strong>: You must verify your credit card first.'), 'error');
+            wc_add_notice(__('<strong>Error</strong>: Credit card verification failed. Please try again.'), 'error');
             wp_delete_user($customer_id);
         } else {
             update_user_meta($customer_id, $this->key_verification, $payment_profile_id);
@@ -191,11 +193,25 @@ class Ibid_Auction
                 'state' => sanitize_text_field($_POST['province']),
                 'postcode' => sanitize_text_field($_POST['postcode']),
                 'country' => sanitize_text_field($_POST['country']),
-                'email' => sanitize_text_field($_POST['email']),
+                'email' => $email,
             ];
             foreach ($billings as $k => $v) {
                 update_user_meta($customer_id, 'billing_' . $k, $v);
             }
+
+            $other = [
+                'account_type' => sanitize_text_field($_POST['account-type']),
+                'birthday' => new DateTime(sanitize_text_field($_POST['birthday'])),
+                'driver_license' => sanitize_text_field($_POST['driver-license']),
+                // 'security_question' => sanitize_text_field($_POST['security-question']),
+                // 'security_answer' => sanitize_text_field($_POST['security-answer']),
+            ];
+            foreach ($other as $k => $v) {
+                update_user_meta($customer_id, $k, $v);
+            }
+
+            $attachments = [];
+            Ibid_Auction_Email::send($email, 'signup', $attachments);
         }
     }
 
@@ -212,15 +228,23 @@ class Ibid_Auction
         }
 
         $id = $user->ID;
+
+        $freezed = get_user_meta($id, 'breach_count', true);
+        if ($freezed && $freezed > BREACH_LIMIT) {
+            return new WP_Error(
+                'account_freezed',
+                __('<strong>Error</strong>: Your account has been freezed. Please contact the store.')
+            );
+        }
         $verified = get_user_meta($id, $this->key_verification, true);
-        if ($verified) {
-            return $user;
+        if (!$verified) {
+            return new WP_Error(
+                'payment_unverified',
+                __('<strong>Error</strong>: You must verify your credit card first.')
+            );
         }
 
-        return new WP_Error(
-            'payment_unverified',
-            __('<strong>Error</strong>: You must verify your credit card first.')
-        );
+        return $user;
     }
 
     /**
