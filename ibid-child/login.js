@@ -16,7 +16,7 @@ window.addEventListener('load', function () {
         }
 
         // Trigger the real submission if OK
-        this.checkValidity() && this['submit-true'].click();
+        this['submit-true'].click();
     })
 
     // Remove errors when input changes

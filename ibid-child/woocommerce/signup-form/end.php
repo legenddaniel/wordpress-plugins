@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
     <?php do_action('woocommerce_register_form');?>
 </div>
 <div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide sz-gdpr-row">
-    <input type="checkbox" name="gdpr" required />
+    <input type="checkbox" name="subscription" required />
     <span class="required">*</span>
     <span>Subscription here</span>
 </div>

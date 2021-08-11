@@ -175,9 +175,10 @@ class Ibid_Auction
             $res = json_decode($res, true);
         }
 
+        $attachments = [];
         if (!$res || $res['transactionResponse']['errors']) {
-            wc_add_notice(__('<strong>Error</strong>: Credit card verification failed. Please try again.'), 'error');
             wp_delete_user($customer_id);
+            wc_add_notice(__('<strong>Error</strong>: Credit card verification failed. Please try again.'), 'error');
         } else {
             update_user_meta($customer_id, $this->key_verification, $payment_profile_id);
             update_user_meta($customer_id, 'wc_authorize_net_cim_verification_id', $res['transactionResponse']['transId']);
@@ -209,10 +210,10 @@ class Ibid_Auction
             foreach ($other as $k => $v) {
                 update_user_meta($customer_id, $k, $v);
             }
-
-            $attachments = [];
-            Ibid_Auction_Email::send($email, 'signup', $attachments);
         }
+
+        $mailer = new Ibid_Auction_Email('signup');
+        $email && $mailer->send($email, $attachments);
     }
 
     /**
