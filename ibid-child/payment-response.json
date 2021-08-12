@@ -1,0 +1,48 @@
+{
+    "transactionResponse": {
+        "responseCode": "1",
+        "authCode": "000000",
+        "avsResultCode": "P",
+        "cvvResultCode": "",
+        "cavvResultCode": "",
+        "transId": "0",
+        "refTransID": "",
+        "transHash": "",
+        "testRequest": "1",
+        "accountNumber": "XXXX8161",
+        "accountType": "Visa",
+        "messages": [
+            {
+                "code": "1",
+                "description": "This transaction has been approved."
+            }
+        ],
+        "transHashSha2": "03AC9A4B6738B54B724664CD5269E50FC097EB7F12228DDAE0B5CDAB37876AAD7AA9C2CD62F907C8F68C10AA000D1E79F5CA85AF7B14FB39F301CA97DE087AB4",
+        "SupplementalDataQualificationIndicator": 0
+    },
+    "profileResponse": {
+        "messages": {
+            "resultCode": "Ok",
+            "message": [
+                {
+                    "code": "I00001",
+                    "text": "Successful."
+                }
+            ]
+        },
+        "customerProfileId": "513017952",
+        "customerPaymentProfileIdList": [
+            "512551121"
+        ],
+        "customerShippingAddressIdList": []
+    },
+    "messages": {
+        "resultCode": "Ok",
+        "message": [
+            {
+                "code": "I00001",
+                "text": "Successful."
+            }
+        ]
+    }
+}

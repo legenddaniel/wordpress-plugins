@@ -8,6 +8,8 @@ class Ibid_Auction
 
     public function __construct()
     {
+        add_action('init', [$this, 'disable_signup_email']);
+
         add_shortcode('sz_signup_form', [$this, 'render_signup_form']);
 
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
@@ -33,6 +35,18 @@ class Ibid_Auction
             get_stylesheet_directory_uri() . '/login.js',
             array()
         );
+    }
+
+    /**
+     * Disable front end signup emails
+     */
+    public function disable_signup_email()
+    {
+        remove_action('register_new_user', 'wp_send_new_user_notifications');
+        remove_action('edit_user_created_user', 'wp_send_new_user_notifications', 10, 2);
+        remove_action('network_site_new_created_user', 'wp_send_new_user_notifications');
+        remove_action('network_site_users_created_user', 'wp_send_new_user_notifications');
+        remove_action('network_user_new_created_user', 'wp_send_new_user_notifications');
     }
 
     /**
@@ -71,15 +85,9 @@ class Ibid_Auction
          * May add validation here
          */
 
-        $payment_profile_id = time();
-
-        $tax_rates = WC_Tax::get_rates();
-        $rate = sanitize_text_field(
-            $tax_rates[
-                array_search(TAX_LABEL, array_column($tax_rates, 'label')) + 1
-            ]['rate']
-        );
-        $amount = SIGNUP_FEE * (1 + $rate / 100);
+        $tax_rates = WC_Tax::get_rates('');
+        $rate = sanitize_text_field($tax_rates[STANDARD_RATE_ID]['rate']);
+        $amount = number_format(SIGNUP_FEE * (1 + $rate / 100), 2, '.', '');
 
         $to = [
             'firstName' => sanitize_text_field($_POST['first-name']),
@@ -94,6 +102,7 @@ class Ibid_Auction
 
         $expiry = '20' . sanitize_text_field($_POST['card-expiry-year']) . '-' . sanitize_text_field($_POST['card-expiry-month']);
         $email = sanitize_text_field($_POST['email']);
+        $account_type = sanitize_text_field($_POST['account-type']);
 
         $info = [
             'createTransactionRequest' => [
@@ -101,7 +110,7 @@ class Ibid_Auction
                     'name' => AUTHORIZE_NAME,
                     'transactionKey' => AUTHORIZE_KEY,
                 ],
-                'refId' => '123456',
+                // 'refId' => '123456',
                 'transactionRequest' => [
                     'transactionType' => 'authCaptureTransaction',
                     'amount' => $amount,
@@ -118,41 +127,41 @@ class Ibid_Auction
                     ],
                     // 'poNumber' => '456654',
                     'customer' => [
-                        // 'type' => 'individual',
-                        'id' => $payment_profile_id,
+                        'type' => strtolower($account_type) === 'business' ? 'business' : 'individual',
+                        'id' => $customer_id,
                         'email' => $email,
                     ],
                     'billTo' => $to,
-                    'shipTo' => $to,
-                    'customerIP' => sanitize_text_field($_SERVER['REMOTE_ADDR']),
+                    // 'shipTo' => $to,
+                    // 'customerIP' => sanitize_text_field($_SERVER['REMOTE_ADDR']),
                     "transactionSettings" => [
                         "setting" => [
                             "settingName" => "emailCustomer",
                             "settingValue" => true,
                         ],
                     ],
-                    'userFields' => [
-                        'userField' => [
-                            [
-                                'name' => 'woocommerce_id',
-                                'value' => sanitize_text_field($customer_id),
-                            ],
-                        ],
-                    ],
-                    'processingOptions' => [
-                        'isFirstRecurringPayment' => false,
-                        'isFirstSubsequentAuth' => true,
-                        'isSubsequentAuth' => true,
-                        'isStoredCredentials' => true,
-                    ],
-                    'subsequentAuthInformation' => [
-                        'originalNetworkTransId' => '123456789NNNH',
-                        'originalAuthAmount' => $amount,
-                        'reason' => 'resubmission',
-                    ],
-                    'authorizationIndicatorType' => [
-                        'authorizationIndicator' => 'final',
-                    ],
+                    // 'userFields' => [
+                    //     'userField' => [
+                    //         [
+                    //             'name' => 'woocommerce_id',
+                    //             'value' => sanitize_text_field($customer_id),
+                    //         ],
+                    //     ],
+                    // ],
+                    // 'processingOptions' => [
+                    //     'isFirstRecurringPayment' => false,
+                    //     'isFirstSubsequentAuth' => true,
+                    //     'isSubsequentAuth' => true,
+                    //     'isStoredCredentials' => true,
+                    // ],
+                    // 'subsequentAuthInformation' => [
+                    //     'originalNetworkTransId' => '123456789NNNH',
+                    //     'originalAuthAmount' => $amount,
+                    //     'reason' => 'resubmission',
+                    // ],
+                    // 'authorizationIndicatorType' => [
+                    //     'authorizationIndicator' => 'final',
+                    // ],
                 ],
             ],
         ];
@@ -168,6 +177,7 @@ class Ibid_Auction
         $res = curl_exec($curl);
         curl_close($curl);
 
+        // Remove BOM
         if ($res) {
             if (strpos($res, '{') > 0) {
                 $res = preg_replace('/^.*?{/', '{', $res);
@@ -176,12 +186,29 @@ class Ibid_Auction
         }
 
         $attachments = [];
-        if (!$res || $res['transactionResponse']['errors']) {
+        if (
+            // cURL failed || payment failed || profile creation failed
+            !$res ||
+            $res['messages']['resultCode'] !== 'Ok' ||
+            !$res['transactionResponse'] ||
+            !$res['profileResponse'] ||
+            $res['transactionResponse']['responseCode'] != '1' ||
+            !$res['profileResponse']['customerProfileId']
+        ) {
             wp_delete_user($customer_id);
+
             wc_add_notice(__('<strong>Error</strong>: Credit card verification failed. Please try again.'), 'error');
+
+            if ($email) {
+                $mailer = new Ibid_Auction_Email('signup_error');
+                $mailer->send($email, $attachments);
+            }
         } else {
-            update_user_meta($customer_id, $this->key_verification, $payment_profile_id);
-            update_user_meta($customer_id, 'wc_authorize_net_cim_verification_id', $res['transactionResponse']['transId']);
+            update_user_meta(
+                $customer_id,
+                $this->key_verification,
+                sanitize_text_field($res['profileResponse']['customerProfileId'])
+            );
             update_user_meta($customer_id, 'auction_point', DEFAULT_POINT);
 
             $billings = [
@@ -195,14 +222,17 @@ class Ibid_Auction
                 'postcode' => sanitize_text_field($_POST['postcode']),
                 'country' => sanitize_text_field($_POST['country']),
                 'email' => $email,
+                'phone' => sanitize_text_field($_POST['phone']),
             ];
             foreach ($billings as $k => $v) {
                 update_user_meta($customer_id, 'billing_' . $k, $v);
             }
 
             $other = [
-                'account_type' => sanitize_text_field($_POST['account-type']),
-                'birthday' => new DateTime(sanitize_text_field($_POST['birthday'])),
+                'first_name' => sanitize_text_field($_POST['first-name']),
+                'last_name' => sanitize_text_field($_POST['last-name']),
+                'account_type' => $account_type,
+                'birthday' => sanitize_text_field($_POST['birthday']),
                 'driver_license' => sanitize_text_field($_POST['driver-license']),
                 // 'security_question' => sanitize_text_field($_POST['security-question']),
                 // 'security_answer' => sanitize_text_field($_POST['security-answer']),
@@ -210,10 +240,20 @@ class Ibid_Auction
             foreach ($other as $k => $v) {
                 update_user_meta($customer_id, $k, $v);
             }
-        }
 
-        $mailer = new Ibid_Auction_Email('signup');
-        $email && $mailer->send($email, $attachments);
+            // Replace the default WordPress new user emails
+            if ($email) {
+                $mailer = new Ibid_Auction_Email('signup_ok');
+                $mailer->send($email, $attachments);
+                wp_send_new_user_notifications($customer_id, 'admin');
+            }
+
+            wp_signon([
+                'user_login' => $email,
+                'user_password' => sanitize_text_field($_POST['password']),
+                'remember' => true,
+            ]);
+        }
     }
 
     /**
@@ -225,6 +265,11 @@ class Ibid_Auction
     public function verify_login($user, $pwd)
     {
         if (!($user instanceof WP_User)) {
+            return $user;
+        }
+
+        // Do not verify admin
+        if (in_array('administrator', $user->roles)) {
             return $user;
         }
 

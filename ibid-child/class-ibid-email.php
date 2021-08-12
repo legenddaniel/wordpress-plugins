@@ -18,8 +18,10 @@ class Ibid_Auction_Email
     private function subject()
     {
         switch ($this->template) {
-            case 'signup':
+            case 'signup_ok':
                 return 'You have successfully created your account';
+            case 'signup_error':
+                return 'We can\'t verify your credit card';
             default:
                 throw new Exception('Invalid parameter passed!');
         }
@@ -32,10 +34,15 @@ class Ibid_Auction_Email
     private function content()
     {
         switch ($this->template) {
-            case 'signup':
+            case 'signup_ok':
                 return <<<EOD
                     <p>You have successfully created your account</p>
                     <p>Invoice printed</p>
+                EOD;
+            case 'signup_error':
+                return <<<EOD
+                    <p>We can't verify your credit card</p>
+                    <p>Please sign up again</p>
                 EOD;
             default:
                 throw new Exception('Invalid parameter passed!');

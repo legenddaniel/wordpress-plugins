@@ -2,7 +2,7 @@
 
 defined('ABSPATH') || exit;
 
-// echo 'aaa';
+echo 'aaa';
 
 ?>
     <div class="woocommerce">
