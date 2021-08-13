@@ -8,11 +8,9 @@ class Ibid_Auction
 
     public function __construct()
     {
-        add_action('init', [$this, 'disable_signup_email']);
+        add_action('wp_enqueue_scripts', [$this, 'init_assets']);
 
         add_shortcode('sz_signup_form', [$this, 'render_signup_form']);
-
-        add_action('wp_enqueue_scripts', [$this, 'init_assets']);
 
         add_action('woocommerce_login_form_end', [$this, 'add_signup_link']);
         add_action('woocommerce_created_customer', [$this, 'verify_card_when_signup'], 10, 3);
@@ -35,18 +33,6 @@ class Ibid_Auction
             get_stylesheet_directory_uri() . '/login.js',
             array()
         );
-    }
-
-    /**
-     * Disable front end signup emails
-     */
-    public function disable_signup_email()
-    {
-        remove_action('register_new_user', 'wp_send_new_user_notifications');
-        remove_action('edit_user_created_user', 'wp_send_new_user_notifications', 10, 2);
-        remove_action('network_site_new_created_user', 'wp_send_new_user_notifications');
-        remove_action('network_site_users_created_user', 'wp_send_new_user_notifications');
-        remove_action('network_user_new_created_user', 'wp_send_new_user_notifications');
     }
 
     /**
@@ -134,12 +120,12 @@ class Ibid_Auction
                     'billTo' => $to,
                     // 'shipTo' => $to,
                     // 'customerIP' => sanitize_text_field($_SERVER['REMOTE_ADDR']),
-                    "transactionSettings" => [
-                        "setting" => [
-                            "settingName" => "emailCustomer",
-                            "settingValue" => true,
-                        ],
-                    ],
+                    // "transactionSettings" => [
+                    //     "setting" => [
+                    //         "settingName" => "emailCustomer",
+                    //         "settingValue" => true,
+                    //     ],
+                    // ],
                     // 'userFields' => [
                     //     'userField' => [
                     //         [
@@ -253,6 +239,7 @@ class Ibid_Auction
                 'user_password' => sanitize_text_field($_POST['password']),
                 'remember' => true,
             ]);
+            wp_safe_redirect(wc_get_page_permalink('myaccount')) && exit;
         }
     }
 
