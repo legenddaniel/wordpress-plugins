@@ -5,7 +5,9 @@ defined('ABSPATH') || exit;
 class Ibid_Auction_Admin
 {
     private $tab = 'custom-auction';
-    private $buyer_fee_field = 'custom_auction_buyer';
+    private $self_service_fee = 'auction_self_service_fee';
+    private $service_fee_delegation_buyer = 'auction_service_fee_delegation_buyer';
+    private $service_fee_delegation_seller = 'auction_service_fee_delegation_seller';
 
     public function __construct()
     {
@@ -18,7 +20,8 @@ class Ibid_Auction_Admin
         add_action('woocommerce_settings_tabs_' . $this->tab, [$this, 'add_woocommerce_settings_content']);
         add_action('woocommerce_update_options_' . $this->tab, [$this, 'update_woocommerce_settings_content']);
 
-        add_action('woocommerce_product_options_auction', [$this, 'add_max_fee_option']);
+        add_action('woocommerce_product_options_auction', [$this, 'add_service_fee_delegation_option']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_service_fee_delegation_option'], 10, 2);
     }
 
     public function init_assets()
@@ -30,15 +33,33 @@ class Ibid_Auction_Admin
             wp_get_theme()->parent()->get('Version')
         );
 
+        global $pagenow;
+
         // For table row add-delete in WooCommerce->Settings->Custom Auction
-        if (is_admin() && isset($_GET['page']) && sanitize_title_for_query($_GET['page']) === 'wc-settings' && isset($_GET['tab']) && sanitize_title_for_query($_GET['tab']) === $this->tab) {
-            $sig = 'points-setting';
+        if (
+            $pagenow === 'admin.php' &&
+            isset($_GET['page']) &&
+            sanitize_title_for_query($_GET['page']) === 'wc-settings' &&
+            isset($_GET['tab']) &&
+            sanitize_title_for_query($_GET['tab']) === $this->tab
+        ) {
             wp_enqueue_script(
-                $sig,
-                get_stylesheet_directory_uri() . "/$sig.js"
+                'points-setting',
+                get_stylesheet_directory_uri() . "/points-setting.js"
             );
         }
 
+        // For service fee fields display in product editing page
+        if (
+            in_array($pagenow, ['post.php', 'post-new.php']) &&
+            isset($_GET['action']) &&
+            sanitize_title_for_query($_GET['action']) === 'edit'
+        ) {
+            wp_enqueue_script(
+                'service-fee-field',
+                get_stylesheet_directory_uri() . "/service-fee-field.js"
+            );
+        }
     }
 
     /**
@@ -84,7 +105,7 @@ class Ibid_Auction_Admin
      */
     public function add_woocommerce_settings_content()
     {
-        woocommerce_admin_fields($this->create_woocommerce_settings_content());
+        // woocommerce_admin_fields($this->create_woocommerce_settings_content());
 
         ?>
     <table class="wc_input_table widefat buyer" data-min="<?=esc_attr__(POINT_MIN)?>" data-max="<?=esc_attr__(POINT_MAX)?>">
@@ -96,7 +117,7 @@ class Ibid_Auction_Admin
 	    </thead>
         <tbody>
 <?php
-$buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'fee' => null]];
+$buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, 'fee' => null]];
         $l = count($buyer_service_fee);
         for ($i = 0; $i < $l; $i++) {
             ?>
@@ -132,7 +153,7 @@ $buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'f
      */
     public function update_woocommerce_settings_content()
     {
-        woocommerce_update_options($this->create_woocommerce_settings_content());
+        // woocommerce_update_options($this->create_woocommerce_settings_content());
 
         $options = [];
         foreach ($_POST as $k => $v) {
@@ -144,71 +165,153 @@ $buyer_service_fee = get_option($this->buyer_fee_field) ?: [['point' => null, 'f
                 $options[$index]['fee'] = sanitize_text_field($v);
             }
         }
-        update_option(sanitize_text_field($this->buyer_fee_field), $options);
+        update_option(sanitize_text_field($this->self_service_fee), $options);
     }
 
     /**
      * Content template
      * @return array
      */
-    private function create_woocommerce_settings_content()
-    {
-        $settings = array(
-            'section_title-seller' => array(
-                'name' => __('Auction Service Fee Settings - Seller', 'woocommerce'),
-                'type' => 'title',
-            ),
-        );
-        for ($i = 1; $i <= CONTRACT_AMOUNT; $i++) {
-            $settings = array_merge(
-                $settings,
-                [
-                    'section_subtitle-' . $i => array(
-                        'name' => 'Contract ' . $i,
-                        'type' => 'title',
-                    ),
-                    'title-' . $i => array(
-                        'name' => 'Title',
-                        'type' => 'text',
-                        'desc' => 'This is some helper text',
-                        'id' => $this->tab . '-title-' . $i,
-                    ),
-                    'description-' . $i => array(
-                        'name' => __('Description', 'woocommerce'),
-                        'type' => 'text',
-                        'desc' => __('This is some helper text', 'woocommerce'),
-                        'id' => $this->tab . '-description-' . $i,
-                    ),
-                    'section_end-' . $i => array(
-                        'type' => 'sectionend',
-                    ),
-                ]
-            );
-        }
+    // private function create_woocommerce_settings_content()
+    // {
+    //     $settings = array(
+    //         'section_title-seller' => array(
+    //             'name' => __('Auction Service Fee Settings - Seller', 'woocommerce'),
+    //             'type' => 'title',
+    //         ),
+    //     );
+    //     for ($i = 1; $i <= CONTRACT_AMOUNT; $i++) {
+    //         $settings = array_merge(
+    //             $settings,
+    //             [
+    //                 'section_subtitle-' . $i => array(
+    //                     'name' => 'Contract ' . $i,
+    //                     'type' => 'title',
+    //                 ),
+    //                 'title-' . $i => array(
+    //                     'name' => 'Title',
+    //                     'type' => 'text',
+    //                     'desc' => 'This is some helper text',
+    //                     'id' => $this->tab . '-title-' . $i,
+    //                 ),
+    //                 'description-' . $i => array(
+    //                     'name' => __('Description', 'woocommerce'),
+    //                     'type' => 'text',
+    //                     'desc' => __('This is some helper text', 'woocommerce'),
+    //                     'id' => $this->tab . '-description-' . $i,
+    //                 ),
+    //                 'section_end-' . $i => array(
+    //                     'type' => 'sectionend',
+    //                 ),
+    //             ]
+    //         );
+    //     }
 
-        $settings['section_title-buyer'] = array(
-            'name' => __('Auction Service Fee Settings - Buyer', 'woocommerce'),
-            'type' => 'title',
-        );
+    //     $settings['section_title-buyer'] = array(
+    //         'name' => __('Auction Service Fee Settings - Buyer', 'woocommerce'),
+    //         'type' => 'title',
+    //     );
 
-        return $settings;
-    }
+    //     return $settings;
+    // }
 
     /**
      * Max service fee setting in Woocommerce product editing page
      */
-    public function add_max_fee_option()
+    public function add_service_fee_delegation_option()
     {
+        global $post;
+        $buyer = get_post_meta($post->ID, $this->service_fee_delegation_buyer, true) ?: ['type' => '', 'fee' => '', 'max' => ''];
+        $seller = get_post_meta($post->ID, $this->service_fee_delegation_seller, true) ?: ['type' => '', 'fee' => '', 'threshold' => ''];
+
+        // Display is controlled by `service-fee-field.js`
+        echo '<h3 class="auction-product-edit-title">Service Fee - Buyer</h3>';
+        woocommerce_wp_select(
+            array(
+                'id' => '_auction_service_fee_delegation_buyer_type',
+                'label' => __('Service Fee Type', 'woocommerce'),
+                'value' => esc_attr__($buyer['type'], 'wc_simple_auction'),
+                'options' => [
+                    'percentage' => 'Percentage',
+                    'percentage_max' => 'Percentage with Max',
+                    'fixed' => 'Fixed',
+                ],
+            )
+        );
         woocommerce_wp_text_input(
             array(
-                'id' => '_auction_max_service_fee',
-                'name' => '_auction_max_service_fee',
-                'class' => 'wc_input_price short',
-                'label' => __('Maximum Service Fee', 'wc_simple_auctions') . ' (' . get_woocommerce_currency_symbol() . ')',
-                'data_type' => 'price',
-                'desc_tip' => 'true',
-                'description' => __('Leave it blank if using only general rules'),
+                'id' => '_auction_service_fee_delegation_buyer',
+                'label' => __('Service Fee', 'wc_simple_auctions'),
+                'value' => esc_attr__($buyer['fee'], 'wc_simple_auction'),
             )
+        );
+        woocommerce_wp_text_input(
+            array(
+                'id' => '_auction_service_fee_delegation_buyer_max',
+                'label' => __('Maximum', 'wc_simple_auctions'),
+                'value' => esc_attr__($buyer['max'], 'wc_simple_auction'),
+            )
+        );
+        echo '<h3 class="auction-product-edit-title">Service Fee - Seller</h3>';
+        woocommerce_wp_select(
+            array(
+                'id' => '_auction_service_fee_delegation_seller_type',
+                'label' => __('Service Fee Type', 'woocommerce'),
+                'value' => esc_attr__($seller['type'], 'wc_simple_auction'),
+                'options' => [
+                    'percentage' => 'Percentage',
+                    'fixed' => 'Fixed',
+                ],
+            )
+        );
+        woocommerce_wp_text_input(
+            array(
+                'id' => '_auction_service_fee_delegation_seller',
+                'label' => __('Service Fee', 'wc_simple_auctions'),
+                'value' => esc_attr__($seller['fee'], 'wc_simple_auction'),
+            )
+        );
+        woocommerce_wp_text_input(
+            array(
+                'id' => '_auction_service_fee_delegation_seller_threshold',
+                'label' => __('Threshold Upon Minimum Fee', 'wc_simple_auctions'),
+                'value' => esc_attr__($seller['threshold'], 'wc_simple_auction'),
+                'desc_tip' => true,
+                'description' => __('Service fee will be $50 + contract fee + tax ($71) if the total sale is less or equal than this input value', 'woocommerce'),
+            )
+        );
+    }
+
+    /**
+     * Save service fee for delegation auction in product edit page
+     * @param int $id
+     * @param WC_Product $product
+     */
+    public function save_service_fee_delegation_option($id, $product)
+    {
+        if (!isset($_POST['product-type']) || sanitize_text_field($_POST['product-type']) !== 'auction') {
+            return;
+        }
+
+        $type = sanitize_text_field($_POST['_auction_service_fee_delegation_buyer_type']);
+        update_post_meta(
+            $id,
+            $this->service_fee_delegation_buyer,
+            [
+                'type' => $type,
+                'fee' => sanitize_text_field($_POST['_auction_service_fee_delegation_buyer']),
+                'max' => $type === 'percentage_max' ? sanitize_text_field($_POST['_auction_service_fee_delegation_buyer_max']) : null,
+            ]
+        );
+
+        update_post_meta(
+            $id,
+            $this->service_fee_delegation_seller,
+            [
+                'type' => sanitize_text_field($_POST['_auction_service_fee_delegation_seller_type']),
+                'fee' => sanitize_text_field($_POST['_auction_service_fee_delegation_seller']),
+                'threshold' => sanitize_text_field($_POST['_auction_service_fee_delegation_seller_threshold']),
+            ]
         );
     }
 }

@@ -9,3 +9,7 @@
 .auction-points > span {
     margin: 0 0.5rem;
 }
+
+.auction-product-edit-title {
+    padding-left: 12px;
+}
