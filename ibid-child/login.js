@@ -1,6 +1,8 @@
 window.addEventListener('load', function () {
 
     var form = document.getElementById('register');
+    if (!form) return;
+    
     var emailConfirm = form.querySelector('.sz-confirm-email-row');
     var passwordConfirm = form.querySelector('.sz-confirm-password-row');
 

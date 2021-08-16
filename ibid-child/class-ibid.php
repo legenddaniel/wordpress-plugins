@@ -11,12 +11,13 @@ class Ibid_Auction
         add_action('wp_enqueue_scripts', [$this, 'init_assets']);
 
         add_shortcode('sz_signup_form', [$this, 'render_signup_form']);
-
         add_action('woocommerce_login_form_end', [$this, 'add_signup_link']);
         add_action('woocommerce_created_customer', [$this, 'verify_card_when_signup'], 10, 3);
         add_filter('wp_authenticate_user', [$this, 'verify_login'], 10, 2);
 
         add_action('publish_product', [$this, 'create_product_frontend'], 10, 2);
+
+        add_action('woocommerce_before_bid_button', [$this, 'add_max_bid_field']);
 
     }
 
@@ -28,11 +29,20 @@ class Ibid_Auction
             array(),
             wp_get_theme()->parent()->get('Version')
         );
-        wp_enqueue_script(
-            'login-validation',
-            get_stylesheet_directory_uri() . '/login.js',
-            array()
-        );
+
+        if (is_page(SIGNUP_PAGE)) {
+            wp_enqueue_script(
+                'login-validation',
+                get_stylesheet_directory_uri() . '/login.js'
+            );
+        }
+
+        if (is_product()) {
+            wp_enqueue_script(
+                'bid-indicator',
+                get_stylesheet_directory_uri() . '/bid-indicator.js'
+            );
+        }
     }
 
     /**
@@ -332,5 +342,27 @@ class Ibid_Auction
             $value = sanitize_text_field($data[$index]['value']);
             update_post_meta($id, $k, $value);
         }
+    }
+
+    /**
+     * Add max bid input in single product page
+     */
+    public function add_max_bid_field()
+    {
+        global $product;
+        $product_id = $product->get_id();
+        if ($product->get_auction_type() == 'reverse'): ?>
+            <div class="quantity buttons_added" id="bid-max-field">
+				<input type="button" value="+" class="plus" />
+				<input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>"  <?php if ($product->get_auction_sealed() != 'yes') {?> value="<?php echo $product->bid_value() ?>" max="<?php echo $product->bid_value() ?>"  <?php }?> step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid"  class="input-text qty">
+				<input type="button" value="-" class="minus" />
+			</div>
+        <?php else: ?>
+            <div class="quantity buttons_added" id="bid-max-field">
+                <input type="button" value="+" class="plus" />
+                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?>  value="<?php echo $product->bid_value() ?>" min="<?php echo $product->bid_value() ?>" <?php }?>  step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty">
+                <input type="button" value="-" class="minus" />
+            </div>
+        <?php endif;
     }
 }
