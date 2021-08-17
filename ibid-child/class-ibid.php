@@ -17,7 +17,8 @@ class Ibid_Auction
 
         add_action('publish_product', [$this, 'create_product_frontend'], 10, 2);
 
-        add_action('woocommerce_before_bid_button', [$this, 'add_max_bid_field']);
+        add_action('woocommerce_after_bid_button', [$this, 'add_max_bid_field']);
+        add_action('woocommerce_after_add_to_cart_form', [$this, 'add_watchlist_button']);
 
     }
 
@@ -349,20 +350,56 @@ class Ibid_Auction
      */
     public function add_max_bid_field()
     {
+
         global $product;
         $product_id = $product->get_id();
-        if ($product->get_auction_type() == 'reverse'): ?>
-            <div class="quantity buttons_added" id="bid-max-field">
+        ?>
+
+        <div class="bid-max-field disabled" id="bid-max-field">
+        <?php if ($product->get_auction_type() == 'reverse'): ?>
+            <div class="quantity buttons_added">
 				<input type="button" value="+" class="plus" />
-				<input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>"  <?php if ($product->get_auction_sealed() != 'yes') {?> value="<?php echo $product->bid_value() ?>" max="<?php echo $product->bid_value() ?>"  <?php }?> step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid"  class="input-text qty">
+				<input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>"  <?php if ($product->get_auction_sealed() != 'yes') {?> max="<?php echo $product->bid_value() ?>"  <?php }?> step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid"  class="input-text qty" disabled>
 				<input type="button" value="-" class="minus" />
 			</div>
         <?php else: ?>
-            <div class="quantity buttons_added" id="bid-max-field">
+            <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?>  value="<?php echo $product->bid_value() ?>" min="<?php echo $product->bid_value() ?>" <?php }?>  step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty">
+                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus" />
             </div>
-        <?php endif;
+        <?php endif; ?>
+            <label>
+                <input type="checkbox" name="max-bid-enable" id="max-bid-enable" />
+                    Enable Auto Bidding
+            </label>
+        </div>
+        <?php
+    }
+
+    /**
+     * Display watchlist button. This is original simple auction template.
+     */
+    public function add_watchlist_button()
+    {
+        global $product;
+
+        if (!(method_exists($product, 'get_type') && $product->get_type() == 'auction')) {
+            return;
+        }
+        $user_id = get_current_user_id();
+
+        ?>
+        <p class="wsawl-link">
+            <?php if ($product->is_user_watching()): ?>
+                <a href="#remove from watchlist" data-auction-id="<?php echo esc_attr($product->get_id()); ?>" class="remove-wsawl sa-watchlist-action"><?php _e('Remove from watchlist!', 'wc_simple_auctions')?></a>
+            <?php else: ?>
+                <a href="#add_to_watchlist" data-auction-id="<?php echo esc_attr($product->get_id()); ?>" class="add-wsawl sa-watchlist-action <?php if ($user_id == 0) {
+            echo " no-action ";
+        }
+        ?> " title="<?=$user_id ? 'Add to watchlist!' : 'You must be logged in to use watchlist feature';?>"></a>
+            <?php endif;?>
+        </p>
+        <?php
     }
 }

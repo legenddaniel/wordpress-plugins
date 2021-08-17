@@ -72,3 +72,70 @@
 .woocommerce-privacy-policy-link {
     text-transform: capitalize;
 }
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .single .single-product .summary.entry-summary {
+        width: calc(100% - 30px) !important;
+        margin-left: 15px !important;
+    }
+}
+@media (max-width: 767px) {
+    .single .single-product .summary.entry-summary {
+        margin-left: 0 !important;
+    }
+    .woocommerce div.product.sold-individually.product-type-auction form.cart.auction_form,
+    .woocommerce div.product form.cart div.quantity {
+        display: flex;
+    }
+    .woocommerce div.product.sold-individually.product-type-auction form.cart.buy-now {
+        float: left;
+    }
+    body.woocommerce.single-product .quantity .qty {
+        width: 100% !important;
+    }
+    .single.woocommerce div.product form.cart,
+    .woocommerce.single-product p.wsawl-link {
+        margin-bottom: 0;
+    }
+    .woocommerce div.product form.cart .button {
+        flex-shrink: 0;
+    }
+}
+.single-product form.cart {
+    float: none;
+}
+.bid-max-field {
+    clear: both;
+}
+.bid-max-field > label {
+    line-height: 42px;
+    margin-bottom: 0;
+    user-select: none;
+}
+.woocommerce div.product form.cart > div.quantity {
+    margin-bottom: 10px;
+}
+.woocommerce div.product form.cart .bid-max-field div.quantity {
+    clear: both;
+    width: 112px;
+}
+.woocommerce div.product form.cart .bid-max-field.disabled div.quantity {
+    opacity: 0.5;
+}
+.woocommerce div.product form.cart .bid-max-field.disabled div.quantity .plus,
+.woocommerce div.product form.cart .bid-max-field.disabled div.quantity .minus {
+    cursor: default;
+}
+.bid-max-label {
+    float: left;
+    margin-bottom: 0;
+    line-height: 42px;
+}
+.woocommerce div.product.sold-individually.product-type-auction form.cart.buy-now,
+.single-product .wishlist-container .yith-wcwl-add-to-wishlist,
+.woocommerce.single-product p.wsawl-link {
+    margin: 10px 5px 0 5px;
+}
+.woocommerce.single-product div.product.product-type-auction form.cart .button.single_add_to_cart_button {
+    width: 100%;
+}
