@@ -241,6 +241,7 @@ $buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, '
         woocommerce_wp_text_input(
             array(
                 'id' => '_auction_service_fee_delegation_buyer',
+                'data_type' => 'price',
                 'label' => __('Service Fee', 'wc_simple_auctions'),
                 'value' => esc_attr__($buyer['fee'], 'wc_simple_auction'),
             )
@@ -248,6 +249,7 @@ $buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, '
         woocommerce_wp_text_input(
             array(
                 'id' => '_auction_service_fee_delegation_buyer_max',
+                'data_type' => 'price',
                 'label' => __('Maximum', 'wc_simple_auctions'),
                 'value' => esc_attr__($buyer['max'], 'wc_simple_auction'),
             )
@@ -267,6 +269,7 @@ $buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, '
         woocommerce_wp_text_input(
             array(
                 'id' => '_auction_service_fee_delegation_seller',
+                'data_type' => 'price',
                 'label' => __('Service Fee', 'wc_simple_auctions'),
                 'value' => esc_attr__($seller['fee'], 'wc_simple_auction'),
             )
@@ -274,6 +277,7 @@ $buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, '
         woocommerce_wp_text_input(
             array(
                 'id' => '_auction_service_fee_delegation_seller_threshold',
+                'data_type' => 'price',
                 'label' => __('Threshold Upon Minimum Fee', 'wc_simple_auctions'),
                 'value' => esc_attr__($seller['threshold'], 'wc_simple_auction'),
                 'desc_tip' => true,
@@ -293,25 +297,35 @@ $buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, '
             return;
         }
 
-        $type = sanitize_text_field($_POST['_auction_service_fee_delegation_buyer_type']);
+        update_post_meta($id, 'service_type', 'delegation');
+
+        $buyer_type = sanitize_text_field($_POST['_auction_service_fee_delegation_buyer_type']);
+        $buyer_fee = sanitize_text_field($_POST['_auction_service_fee_delegation_buyer']);
+        $buyer_fee = is_numeric($buyer_fee) ? $buyer_fee : null;
+        $buyer_max = $buyer_type === 'percentage_max' && is_numeric($buyer_fee) ? sanitize_text_field($_POST['_auction_service_fee_delegation_buyer_max']) : null;
         update_post_meta(
             $id,
             $this->service_fee_delegation_buyer,
             [
-                'type' => $type,
-                'fee' => sanitize_text_field($_POST['_auction_service_fee_delegation_buyer']),
-                'max' => $type === 'percentage_max' ? sanitize_text_field($_POST['_auction_service_fee_delegation_buyer_max']) : null,
+                'type' => $buyer_type,
+                'fee' => $buyer_fee,
+                'max' => $buyer_max,
             ]
         );
 
+        $seller_type = sanitize_text_field($_POST['_auction_service_fee_delegation_seller_type']);
+        $seller_fee = sanitize_text_field($_POST['_auction_service_fee_delegation_seller']);
+        $seller_fee = is_numeric($seller_fee) ? $seller_fee : null;
+        $seller_threshold = is_numeric($seller_fee) ? sanitize_text_field($_POST['_auction_service_fee_delegation_seller_threshold']) : null;
         update_post_meta(
             $id,
             $this->service_fee_delegation_seller,
             [
-                'type' => sanitize_text_field($_POST['_auction_service_fee_delegation_seller_type']),
-                'fee' => sanitize_text_field($_POST['_auction_service_fee_delegation_seller']),
-                'threshold' => sanitize_text_field($_POST['_auction_service_fee_delegation_seller_threshold']),
+                'type' => $seller_type,
+                'fee' => $seller_fee,
+                'threshold' => $seller_threshold,
             ]
         );
+
     }
 }

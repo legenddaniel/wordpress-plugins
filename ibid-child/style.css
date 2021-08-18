@@ -6,6 +6,7 @@
 * Version: 1.0.0
 */
 
+/* Signup / Login form */
 .woocommerce form.login {
     position: relative;
 }
@@ -16,7 +17,6 @@
         right: 42px;
     }
 }
-
 @media (min-width: 576px) {
     #form-contact,
     #form-account,
@@ -31,7 +31,6 @@
         float: right;
     }
 }
-
 .card-expiry {
     position: relative;
 }
@@ -49,7 +48,6 @@
 .woocommerce form .form-row .card-expiry-input > input {
     width: 46%;
 }
-
 .woocommerce-form-row.form-row.sz-confirm-email-row,
 .woocommerce-form-row.form-row.sz-confirm-password-row {
     position: relative;
@@ -73,6 +71,7 @@
     text-transform: capitalize;
 }
 
+/* Single product */
 @media (min-width: 768px) and (max-width: 991px) {
     .single .single-product .summary.entry-summary {
         width: calc(100% - 30px) !important;
@@ -83,58 +82,41 @@
     .single .single-product .summary.entry-summary {
         margin-left: 0 !important;
     }
-    .woocommerce div.product.sold-individually.product-type-auction form.cart.auction_form,
-    .woocommerce div.product form.cart div.quantity {
-        display: flex;
-    }
     .woocommerce div.product.sold-individually.product-type-auction form.cart.buy-now {
         float: left;
-    }
-    body.woocommerce.single-product .quantity .qty {
-        width: 100% !important;
     }
     .single.woocommerce div.product form.cart,
     .woocommerce.single-product p.wsawl-link {
         margin-bottom: 0;
     }
-    .woocommerce div.product form.cart .button {
-        flex-shrink: 0;
-    }
 }
 .single-product form.cart {
     float: none;
 }
-.bid-max-field {
+.bid-max-field,
+.bid-max-label,
+.woocommerce div.product form.cart .bid-max-field div.quantity {
     clear: both;
 }
-.bid-max-field > label {
-    line-height: 42px;
-    margin-bottom: 0;
+.bid-max-label {
+    display: block;
     user-select: none;
+    font-weight: initial;
+}
+.bid-max-sublabel {
+    line-height: 42px;
+    float: left;
 }
 .woocommerce div.product form.cart > div.quantity {
     margin-bottom: 10px;
-}
-.woocommerce div.product form.cart .bid-max-field div.quantity {
-    clear: both;
-    width: 112px;
-}
-.woocommerce div.product form.cart .bid-max-field.disabled div.quantity {
-    opacity: 0.5;
-}
-.woocommerce div.product form.cart .bid-max-field.disabled div.quantity .plus,
-.woocommerce div.product form.cart .bid-max-field.disabled div.quantity .minus {
-    cursor: default;
-}
-.bid-max-label {
-    float: left;
-    margin-bottom: 0;
-    line-height: 42px;
 }
 .woocommerce div.product.sold-individually.product-type-auction form.cart.buy-now,
 .single-product .wishlist-container .yith-wcwl-add-to-wishlist,
 .woocommerce.single-product p.wsawl-link {
     margin: 10px 5px 0 5px;
+}
+.woocommerce div.product.sold-individually.product-type-auction form.cart.buy-now {
+    margin-left: 0;
 }
 .woocommerce.single-product div.product.product-type-auction form.cart .button.single_add_to_cart_button {
     width: 100%;

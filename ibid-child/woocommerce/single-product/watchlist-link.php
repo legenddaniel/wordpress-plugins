@@ -1,7 +1,9 @@
 <?php
 /**
- * Move the default auction watchlist link from parent theme to new place
- *
+ * This part is now rendered by `add_watchlist_button` in Ibid_Auction
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+// Exit if accessed directly

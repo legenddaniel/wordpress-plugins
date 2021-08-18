@@ -1,29 +1,42 @@
 window.addEventListener('load', function () {
-    var field = document.getElementById('bid-max-field');
-    if (!field) return;
+    var container = document.getElementById('bid-max-field');
+    if (!container) return;
 
-    var max = field.querySelector('.input-text.qty');
-    var enable = document.getElementById('max-bid-enable');
-    field.addEventListener('click', function (e) {
-        if (enable.checked) {
-            if (e.target.value === '+' && (max.max === '' || +max.value < +max.max)) {
-                max.value++;
-            }
-            if (e.target.value === '-' && +max.value > +max.min) {
-                max.value--;
-            }
+    var enable = document.getElementById('bid-max-enable');
+    if (!enable) return;
+
+    // Max bid indicator
+    container.addEventListener('click', function (e) {
+        if (!enable.checked) return;
+
+        var target = e.target;
+        if (['+', '-'].indexOf(target.value) === -1) return;
+
+        var realTarget = target.parentElement.querySelector('.input-text.qty');
+        if (!realTarget) return;
+
+        if (target.value === '+' && (realTarget.max === '' || +realTarget.value < +realTarget.max)) {
+            realTarget.value++;
+        }
+        if (target.value === '-' && +realTarget.value > +realTarget.min) {
+            realTarget.value--;
         }
     })
 
-    enable.addEventListener('change', function (e) {
-        if (e.currentTarget.checked) {
-            max.value = max.min;
-            max.disabled = false;
-            field.classList.remove('disabled');
+    // Toggle max field
+    enable.addEventListener('change', function () {
+        var inputs = container.getElementsByClassName('input-text qty');
+        var l = inputs.length;
+        if (!l) return;
+
+        for (var i = 0; i < l; i++) {
+            inputs[i].value = this.checked ? inputs[i].min : '';
+            inputs[i].disabled = !this.checked;
+        }
+        if (this.checked) {
+            container.classList.remove('hide');
         } else {
-            max.value = '';
-            max.disabled = true;
-            field.classList.add('disabled');
+            container.classList.add('hide');
         }
     })
 })

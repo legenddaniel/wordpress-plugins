@@ -312,7 +312,7 @@ class Ibid_Auction
         }
 
         // Mark it as self service product
-        update_post_meta($id, 'self_service', true);
+        update_post_meta($id, 'service_type', 'self_service');
 
         // Some other auction meta data
         if (isset($_POST['_auction_dates_from'])) {
@@ -355,7 +355,11 @@ class Ibid_Auction
         $product_id = $product->get_id();
         ?>
 
-        <div class="bid-max-field disabled" id="bid-max-field">
+        <label class="bid-max-label">
+            <input type="checkbox" name="bid-max-enable" id="bid-max-enable" />
+            Enable Auto Bidding
+        </label>
+        <div class="bid-max-field hide" id="bid-max-field">
         <?php if ($product->get_auction_type() == 'reverse'): ?>
             <div class="quantity buttons_added">
 				<input type="button" value="+" class="plus" />
@@ -365,20 +369,23 @@ class Ibid_Auction
         <?php else: ?>
             <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
-                <input type="button" value="-" class="minus" />
+                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="1" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
+                <input type="button" value="-" class="minus bid_max" />
             </div>
         <?php endif; ?>
-            <label>
-                <input type="checkbox" name="max-bid-enable" id="max-bid-enable" />
-                    Enable Auto Bidding
-            </label>
+            <span class="bid-max-sublabel">Max Bid Limit</span>
+            <div class="quantity buttons_added">
+                <input type="button" value="+" class="plus" />
+                <input type="number" name="bid_increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
+                <input type="button" value="-" class="minus" />
+            </div>
+            <span class="bid-max-sublabel">Bid Increment</span>
         </div>
         <?php
     }
 
     /**
-     * Display watchlist button. This is original simple auction template.
+     * Move the displaying position of watchlist button. This is originally rendered by WooCommerce Simple Auction.
      */
     public function add_watchlist_button()
     {
