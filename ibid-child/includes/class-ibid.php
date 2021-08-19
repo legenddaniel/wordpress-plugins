@@ -20,6 +20,36 @@ class Ibid_Auction
         add_action('woocommerce_after_bid_button', [$this, 'add_max_bid_field']);
         add_action('woocommerce_after_add_to_cart_form', [$this, 'add_watchlist_button']);
 
+        // add_filter('woocommerce_simple_auctions_before_place_bid_filter', function ($product, $bid) {
+        //     if ($product->get_id() !== 6909) {
+        //         return $product;
+        //     }
+
+        //     if (!$product->get_auction_proxy() || $product->get_auction_type() === 'reverse') {
+        //         return;
+        //     }
+        //     if (isset($_POST['bid-max-enable'])) {
+        //         $max = sanitize_text_field($_POST['bid_max']);
+        //         $increment = sanitize_text_field($_POST['bid_max_increment']);
+        //     }
+        //     die(var_dump($data));
+        // }, 10, 2);
+        // add_filter('woocommerce_simple_auctions_proxy_curent_bid_value', function ($curent_bid, $product, $bid) {
+        //     if ($product->get_id() !== 6909) {
+        //         return $curent_bid;
+        //     }
+        //     die(var_dump(func_get_args()));
+        // });
+
+        // Fire for auto bidding when new current bid is lower than current max bid
+        // add_filter('woocommerce_simple_auctions_proxy_bid_value', function($new_bid, $product, $old_bid) {
+        //     if ($product->get_id() !== 6909) {
+        //         return $new_bid;
+        //     }
+
+        //     die(var_dump(func_get_args()));
+        // }, 10, 3);
+
     }
 
     public function init_assets()
@@ -34,14 +64,14 @@ class Ibid_Auction
         if (is_page(SIGNUP_PAGE)) {
             wp_enqueue_script(
                 'login-validation',
-                get_stylesheet_directory_uri() . '/login.js'
+                get_stylesheet_directory_uri() . '/js/login.js'
             );
         }
 
         if (is_product()) {
             wp_enqueue_script(
                 'bid-indicator',
-                get_stylesheet_directory_uri() . '/bid-indicator.js'
+                get_stylesheet_directory_uri() . '/js/bid-indicator.js'
             );
         }
     }
@@ -337,7 +367,7 @@ class Ibid_Auction
         wp_set_object_terms($id, 'auction', 'product_type');
 
         // Add auction related post meta
-        $auction_keys = ['_auction_item_condition', '_auction_type', '_auction_proxy', '_auction_start_price', '_auction_bid_increment', '_auction_reserved_price', '_auction_dates_from', '_auction_dates_to'];
+        $auction_keys = ['_auction_item_condition', '_auction_type', '_auction_proxy', '_auction_start_price', '_auction_bid_increment', '_auction_reserved_price', '_auction_dates_from', '_auction_dates_to', '_auction_allow_faq'];
         foreach ($auction_keys as $k) {
             $index = array_search($k, array_column($data, 'name'));
             $value = sanitize_text_field($data[$index]['value']);
@@ -372,17 +402,17 @@ class Ibid_Auction
                 <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="1" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus bid_max" />
             </div>
-        <?php endif; ?>
+        <?php endif;?>
             <span class="bid-max-sublabel">Max Bid Limit</span>
             <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
+                <input type="number" name="bid_max_increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus" />
             </div>
             <span class="bid-max-sublabel">Bid Increment</span>
         </div>
         <?php
-    }
+}
 
     /**
      * Move the displaying position of watchlist button. This is originally rendered by WooCommerce Simple Auction.
@@ -407,6 +437,7 @@ class Ibid_Auction
         ?> " title="<?=$user_id ? 'Add to watchlist!' : 'You must be logged in to use watchlist feature';?>"></a>
             <?php endif;?>
         </p>
+        <!-- <p>sdadsadsa</p> -->
         <?php
-    }
+}
 }

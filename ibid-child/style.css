@@ -90,6 +90,14 @@
         margin-bottom: 0;
     }
 }
+@media (max-width: 479px) {
+    body.woocommerce.single-product .quantity .qty {
+        width: 70px !important;
+    }
+    .woocommerce div.product.sold-individually.product-type-auction form.cart.buy-now {
+        width: 100% !important;
+    }
+}
 .single-product form.cart {
     float: none;
 }

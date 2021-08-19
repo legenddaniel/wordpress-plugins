@@ -45,7 +45,7 @@ class Ibid_Auction_Admin
         ) {
             wp_enqueue_script(
                 'points-setting',
-                get_stylesheet_directory_uri() . "/points-setting.js"
+                get_stylesheet_directory_uri() . "/js/points-setting.js"
             );
         }
 
@@ -57,7 +57,7 @@ class Ibid_Auction_Admin
         ) {
             wp_enqueue_script(
                 'service-fee-field',
-                get_stylesheet_directory_uri() . "/service-fee-field.js"
+                get_stylesheet_directory_uri() . "/js/service-fee-field.js"
             );
         }
     }
