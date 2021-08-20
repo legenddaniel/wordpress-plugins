@@ -20,35 +20,8 @@ class Ibid_Auction
         add_action('woocommerce_after_bid_button', [$this, 'add_max_bid_field']);
         add_action('woocommerce_after_add_to_cart_form', [$this, 'add_watchlist_button']);
 
-        // add_filter('woocommerce_simple_auctions_before_place_bid_filter', function ($product, $bid) {
-        //     if ($product->get_id() !== 6909) {
-        //         return $product;
-        //     }
-
-        //     if (!$product->get_auction_proxy() || $product->get_auction_type() === 'reverse') {
-        //         return;
-        //     }
-        //     if (isset($_POST['bid-max-enable'])) {
-        //         $max = sanitize_text_field($_POST['bid_max']);
-        //         $increment = sanitize_text_field($_POST['bid_max_increment']);
-        //     }
-        //     die(var_dump($data));
-        // }, 10, 2);
-        // add_filter('woocommerce_simple_auctions_proxy_curent_bid_value', function ($curent_bid, $product, $bid) {
-        //     if ($product->get_id() !== 6909) {
-        //         return $curent_bid;
-        //     }
-        //     die(var_dump(func_get_args()));
-        // });
-
-        // Fire for auto bidding when new current bid is lower than current max bid
-        // add_filter('woocommerce_simple_auctions_proxy_bid_value', function($new_bid, $product, $old_bid) {
-        //     if ($product->get_id() !== 6909) {
-        //         return $new_bid;
-        //     }
-
-        //     die(var_dump(func_get_args()));
-        // }, 10, 3);
+        add_filter('woocommerce_simple_auctions_before_place_bid_filter', [$this, 'use_default_placebid'], 10, 2);
+        add_action('woocommerce_simple_auctions_before_place_bid', [$this, 'place_bid'], 10, 3);
 
     }
 
@@ -440,4 +413,82 @@ class Ibid_Auction
         <!-- <p>sdadsadsa</p> -->
         <?php
 }
+
+    /**
+     * Whether use the default placebid functionalities or use the custom one below
+     * @param WC_Product_Auction $product_data
+     * @param float $bid - $_POST['bid_value']
+     * @return bool - Use default if true, use custom if false
+     */
+    public function use_default_placebid($product_data, $bid)
+    {
+        return $product_data->get_auction_sealed() == 'yes' || $product_data->get_auction_type() != 'normal' || !$product_data->get_auction_proxy();
+    }
+
+    /**
+     * Replace the default `placebid` function in `WC_Bid` in WooCommerce Simple Auction
+     * @param int $product_id
+     * @param float $bid - $_POST['bid_value']
+     * @param WC_Product_Auction $product_data
+     */
+    public function place_bid($product_id, $bid, $product_data)
+    {
+        if ($this->use_default_placebid($product_data, $bid)) {
+            return;
+        }
+
+        if (!is_user_logged_in()) {
+            return wc_add_notice(sprintf(__('Sorry, you must be logged in to place a bid. <a href="%s" class="button">Login &rarr;</a>', 'wc_simple_auctions'), get_permalink(wc_get_page_id('myaccount'))), 'error');
+        }
+
+        if ($product_data->is_closed()) {
+            return wc_add_notice(sprintf(__('Sorry, auction for &quot;%s&quot; is finished', 'wc_simple_auctions'), $product_data->get_title()), 'error');
+        }
+        if (!$product_data->is_started()) {
+            return wc_add_notice(sprintf(__('Sorry, the auction for &quot;%s&quot; has not started yet', 'wc_simple_auctions'), $product_data->get_title()), 'error');
+        }
+        if (!$product_data->is_in_stock()) {
+            return wc_add_notice(sprintf(__('You cannot place a bid for &quot;%s&quot; because the product is out of stock.', 'wc_simple_auctions'), $product_data->get_title()), 'error');
+        }
+
+        if ($bid <= 0) {
+            return wc_add_notice(__('Bid must be greater than 0!', 'wc_simple_auctions'), 'error');
+        }
+        // Throw if bid exceeds the limit which is configured `Max bid amount` in WooCommerce->Settings->Auctions
+        $maximum_bid_amount = get_option('simple_auctions_max_bid_amount', '999999999999.99');
+        $maximum_bid_amount = $maximum_bid_amount > 0 ? $maximum_bid_amount : '999999999999.99';
+        if ($bid >= $maximum_bid_amount) {
+            return wc_add_notice(sprintf(__('Bid must be lower than %s !', 'wc_simple_auctions'), wc_price($maximum_bid_amount)), 'error');
+        }
+
+        // Throw if the customized max values are invalid
+        $auto_enable = isset($_POST['bid-max-enable']);
+        if ($auto_enable) {
+            $max = sanitize_text_field($_POST['bid_max']);
+            if ($max <= 0) {
+                return wc_add_notice(__('Invalid max bid value!', 'wc_simple_auctions'), 'error');
+            }
+            $max_increment = sanitize_text_field($_POST['bid_max_increment']);
+            if ($max_increment <= 0) {
+                return wc_add_notice(__('Invalid max bid increment value!', 'wc_simple_auctions'), 'error');
+            }
+        }
+
+        $current_user = wp_get_current_user();
+        $user_id = $current_user->ID;
+
+        // Throw if the highest bider is bidding and `Allow highest bidder to outbid himself` is checked in WooCommerce->Settings->Auctions
+        if ($user_id == $product_data->get_auction_current_bider() && get_option('simple_auctions_curent_bidder_can_bid') !== 'yes') {
+            return wc_add_notice(__('No need to bid. Your bid is winning! ', 'wc_simple_auctions'));
+        }
+        // Throw if the bid is smaller than current bid and `Allow on proxy auction change to smaller max bid value` is unchecked in WooCommerce->Settings->Auctions
+        if ($bid <= $product_data->get_current_bid() && get_option('simple_auctions_smaller_max_bid', 'no') === 'no') {
+            return wc_add_notice(__('New bid cannot be smaller than old bid!', 'wc_simple_auctions'));
+        }
+
+        // Process if new bid is higher than current max bid
+        if ($bid > $product_data->get_auction_max_bid()) {
+            update_post_meta($product_id, '_auction_current_bid', $bid);
+        }
+    }
 }
