@@ -9,6 +9,9 @@
 .auction-points > span {
     margin: 0 0.5rem;
 }
+._auction_type_field {
+    display: none;
+}
 
 .auction-product-edit-title {
     padding-left: 12px;
