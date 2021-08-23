@@ -107,7 +107,7 @@
     clear: both;
 }
 .bid-max-label {
-    display: block;
+    float: left;
     user-select: none;
     font-weight: initial;
 }

@@ -41,12 +41,21 @@ class Ibid_Auction
             );
         }
 
-        if (is_product()) {
+        if ($this->is_auto_bidding_product_page()) {
             wp_enqueue_script(
                 'bid-indicator',
                 get_stylesheet_directory_uri() . '/js/bid-indicator.js'
             );
         }
+    }
+
+    /**
+     * Check if is on single page of a auto bidding auction product
+     * @return bool
+     */
+    private function is_auto_bidding_product_page()
+    {
+        return is_product() && get_post_meta(get_the_ID(), '_auction_proxy', true) === 'yes';
     }
 
     /**
@@ -349,13 +358,17 @@ class Ibid_Auction
     }
 
     /**
-     * Add max bid input in single product page
+     * Add max bid input in single product page if auto bidding enabled
      */
     public function add_max_bid_field()
     {
+        if (!$this->is_auto_bidding_product_page()) {
+            return;
+        }
 
         global $product;
         $product_id = $product->get_id();
+
         ?>
 
         <label class="bid-max-label">
@@ -366,20 +379,20 @@ class Ibid_Auction
         <?php if ($product->get_auction_type() == 'reverse'): ?>
             <div class="quantity buttons_added">
 				<input type="button" value="+" class="plus" />
-				<input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>"  <?php if ($product->get_auction_sealed() != 'yes') {?> max="<?php echo $product->bid_value() ?>"  <?php }?> step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid"  class="input-text qty" disabled>
+				<input type="number" name="bid_max" id="bid-max" data-auction-id="<?php echo esc_attr($product_id); ?>"  <?php if ($product->get_auction_sealed() != 'yes') {?> max="<?php echo $product->bid_value() ?>"  <?php }?> step="any" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid"  class="input-text qty" disabled>
 				<input type="button" value="-" class="minus" />
 			</div>
         <?php else: ?>
             <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="1" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
+                <input type="number" name="bid_max" id="bid-max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="1" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus bid_max" />
             </div>
         <?php endif;?>
             <span class="bid-max-sublabel">Max Bid Limit</span>
             <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_max_increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
+                <input type="number" name="bid_max_increment" id="bid-max-increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus" />
             </div>
             <span class="bid-max-sublabel">Bid Increment</span>
@@ -413,6 +426,27 @@ class Ibid_Auction
         <!-- <p>sdadsadsa</p> -->
         <?php
 }
+
+    /**
+     * Copy of log bid function in `WC_Bid` in Woocommerce Simple Auction
+     * @param int $product_id
+     * @param float $bid
+     * @param WP_User $current_user
+     * @param int $proxy - Whether customer enabled auto bidding in single product page
+     * @return int auto generated db id
+     */
+    private function log_bid($product_id, $bid, $current_user, $proxy = 0)
+    {
+        global $wpdb;
+        $log_bid_id = false;
+
+        $log_bid = $wpdb->insert($wpdb->prefix . 'simple_auction_log', array('userid' => $current_user->ID, 'auction_id' => $product_id, 'bid' => $bid, 'proxy' => $proxy, 'date' => current_time('mysql')), array('%d', '%d', '%f', '%d', '%s'));
+        if ($log_bid) {
+            $log_bid_id = $wpdb->insert_id;
+        }
+        do_action('woocommerce_simple_auctions_log_bid', $log_bid_id, $product_id, $bid, $current_user);
+        return $log_bid_id;
+    }
 
     /**
      * Whether use the default placebid functionalities or use the custom one below
@@ -472,23 +506,50 @@ class Ibid_Auction
             if ($max_increment <= 0) {
                 return wc_add_notice(__('Invalid max bid increment value!', 'wc_simple_auctions'), 'error');
             }
+            if ($bid + $max_increment > $max) {
+                return wc_add_notice(__('Your max bid value must be enough for at least one increment'), 'error');
+            }
         }
+        // Use default as max if auto bidding not enabled
+        $max = $max ? $max : $bid;
 
         $current_user = wp_get_current_user();
         $user_id = $current_user->ID;
+        $current_bider = $product_data->get_auction_current_bider();
+        $is_self = $user_id == $current_bider;
 
         // Throw if the highest bider is bidding and `Allow highest bidder to outbid himself` is checked in WooCommerce->Settings->Auctions
-        if ($user_id == $product_data->get_auction_current_bider() && get_option('simple_auctions_curent_bidder_can_bid') !== 'yes') {
+        if ($is_self && get_option('simple_auctions_curent_bidder_can_bid') !== 'yes') {
             return wc_add_notice(__('No need to bid. Your bid is winning! ', 'wc_simple_auctions'));
         }
         // Throw if the bid is smaller than current bid and `Allow on proxy auction change to smaller max bid value` is unchecked in WooCommerce->Settings->Auctions
-        if ($bid <= $product_data->get_current_bid() && get_option('simple_auctions_smaller_max_bid', 'no') === 'no') {
+        // Notice the method name is 'curent' instead of 'current'
+        if ($bid <= $product_data->get_curent_bid() && get_option('simple_auctions_smaller_max_bid', 'no') === 'no') {
             return wc_add_notice(__('New bid cannot be smaller than old bid!', 'wc_simple_auctions'));
         }
 
         // Process if new bid is higher than current max bid
         if ($bid > $product_data->get_auction_max_bid()) {
             update_post_meta($product_id, '_auction_current_bid', $bid);
+            update_post_meta($product_id, '_auction_max_bid', $max);
+            update_post_meta($product_id, '_auction_bid_count', absint($product_data->get_auction_bid_count() + 1));
+            
+            if ($auto_enable) {
+                update_post_meta($product_id, '_auction_current_bid_proxy', 'yes');
+            } else {
+                delete_post_meta($product_id, '_auction_current_bid_proxy');
+            }
+
+            if (!$is_self) {
+                update_post_meta($product_id, '_auction_max_current_bider', $user_id);
+                update_post_meta($product_id, '_auction_current_bider', $user_id);
+            }
+
+            $log_id = $this->log_bid($product_id, $bid, $current_user, +$auto_enable);
+
+            do_action('woocommerce_simple_auctions_outbid', array('product_id' => $product_id, 'outbiddeduser_id' => $current_bider, 'log_id' => $log_id, 'auction_max_bid' => $max, 'auction_max_current_bider' => $user_id));
         }
+
+        do_action('woocommerce_simple_auctions_place_bid', array('product_id' => $product_id, 'is_proxy_bid' => $auto_enable, 'log_id' => $log_id));
     }
 }
