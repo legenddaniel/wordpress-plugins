@@ -385,14 +385,14 @@ class Ibid_Auction
         <?php else: ?>
             <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_max" id="bid-max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="1" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
+                <input type="number" name="bid_max" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="<?php echo $product->bid_value() ?>" <?php }?>  step="1" size="<?php echo strlen($product->get_curent_bid()) + 2 ?>" title="max bid" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus bid_max" />
             </div>
         <?php endif;?>
             <span class="bid-max-sublabel">Max Bid Limit</span>
             <div class="quantity buttons_added">
                 <input type="button" value="+" class="plus" />
-                <input type="number" name="bid_max_increment" id="bid-max-increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
+                <input type="number" name="bid_max_increment" data-auction-id="<?php echo esc_attr($product_id); ?>" <?php if ($product->get_auction_sealed() != 'yes') {?> min="1" <?php }?> step="1" title="bid increment" class="input-text qty" disabled>
                 <input type="button" value="-" class="minus" />
             </div>
             <span class="bid-max-sublabel">Bid Increment</span>
@@ -498,34 +498,43 @@ class Ibid_Auction
         // Throw if the customized max values are invalid
         $auto_enable = isset($_POST['bid-max-enable']);
         if ($auto_enable) {
-            $max = sanitize_text_field($_POST['bid_max']);
-            if ($max <= 0) {
-                return wc_add_notice(__('Invalid max bid value!', 'wc_simple_auctions'), 'error');
-            }
-            $max_increment = sanitize_text_field($_POST['bid_max_increment']);
-            if ($max_increment <= 0) {
+            $increment = sanitize_text_field($_POST['bid_max_increment']);
+            if ($increment <= 0) {
                 return wc_add_notice(__('Invalid max bid increment value!', 'wc_simple_auctions'), 'error');
             }
-            if ($bid + $max_increment > $max) {
-                return wc_add_notice(__('Your max bid value must be enough for at least one increment'), 'error');
+            $max = sanitize_text_field($_POST['bid_max']);
+            if ($max < $bid + $increment) {
+                return wc_add_notice(sprintf(__('Max bid must be at least %s for auto bidding', 'wc_simple_auctions'), get_woocommerce_currency_symbol() . $bid + $increment), 'error');
             }
         }
         // Use default as max if auto bidding not enabled
         $max = $max ? $max : $bid;
+        $increment = $increment ? $increment : '0';
 
         $current_user = wp_get_current_user();
         $user_id = $current_user->ID;
         $current_bider = $product_data->get_auction_current_bider();
         $is_self = $user_id == $current_bider;
 
-        // Throw if the highest bider is bidding and `Allow highest bidder to outbid himself` is checked in WooCommerce->Settings->Auctions
-        if ($is_self && get_option('simple_auctions_curent_bidder_can_bid') !== 'yes') {
-            return wc_add_notice(__('No need to bid. Your bid is winning! ', 'wc_simple_auctions'));
-        }
-        // Throw if the bid is smaller than current bid and `Allow on proxy auction change to smaller max bid value` is unchecked in WooCommerce->Settings->Auctions
+        // Throw if the bid is not greater than current bid and `Allow on proxy auction change to smaller max bid value` is unchecked in WooCommerce->Settings->Auctions
         // Notice the method name is 'curent' instead of 'current'
         if ($bid <= $product_data->get_curent_bid() && get_option('simple_auctions_smaller_max_bid', 'no') === 'no') {
-            return wc_add_notice(__('New bid cannot be smaller than old bid!', 'wc_simple_auctions'));
+            return wc_add_notice(__('New bid must be greater than old bid!', 'wc_simple_auctions'), 'error');
+        }
+
+        $current_max = $product_data->get_auction_max_bid();
+        $current_increment = get_post_meta($product_id, '_auction_max_bid_increment', true);
+
+        if ($is_self) {
+
+            // Return if the highest bider is bidding but not updating the current max bid or `Allow highest bidder to outbid himself` is unchecked in WooCommerce->Settings->Auctions. Else, update the max bid and max increment.
+            if (get_option('simple_auctions_curent_bidder_can_bid') !== 'yes' || $max <= $current_max) {
+                return wc_add_notice(__('No need to bid. Your bid is winning! ', 'wc_simple_auctions'));
+            } else {
+                update_post_meta($product_id, '_auction_max_bid', $max);
+                update_post_meta($product_id, '_auction_max_bid_increment', $increment);
+                $log_id = $this->log_bid($product_id, $bid, $current_user, +$auto_enable);
+            }
         }
 
         // Process if new bid is higher than current max bid
@@ -533,7 +542,7 @@ class Ibid_Auction
             update_post_meta($product_id, '_auction_current_bid', $bid);
             update_post_meta($product_id, '_auction_max_bid', $max);
             update_post_meta($product_id, '_auction_bid_count', absint($product_data->get_auction_bid_count() + 1));
-            
+
             if ($auto_enable) {
                 update_post_meta($product_id, '_auction_current_bid_proxy', 'yes');
             } else {
