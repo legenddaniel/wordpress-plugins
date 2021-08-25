@@ -488,6 +488,13 @@ class Ibid_Auction
         if ($bid <= 0) {
             return wc_add_notice(__('Bid must be greater than 0!', 'wc_simple_auctions'), 'error');
         }
+
+        // Throw if the bid is not higher than current bid and `Allow on proxy auction change to smaller max bid value` is unchecked in WooCommerce->Settings->Auctions
+        // Notice the method name is 'curent' instead of 'current'
+        if ($bid <= $product_data->get_curent_bid() && get_option('simple_auctions_smaller_max_bid', 'no') === 'no') {
+            return wc_add_notice(__('New bid must be greater than old bid!', 'wc_simple_auctions'), 'error');
+        }
+
         // Throw if bid exceeds the limit which is configured `Max bid amount` in WooCommerce->Settings->Auctions
         $maximum_bid_amount = get_option('simple_auctions_max_bid_amount', '999999999999.99');
         $maximum_bid_amount = $maximum_bid_amount > 0 ? $maximum_bid_amount : '999999999999.99';
@@ -504,61 +511,70 @@ class Ibid_Auction
             }
             $max = sanitize_text_field($_POST['bid_max']);
             if ($max < $bid + $increment) {
-                return wc_add_notice(sprintf(__('Max bid must be at least %s for auto bidding', 'wc_simple_auctions'), get_woocommerce_currency_symbol() . $bid + $increment), 'error');
+                return wc_add_notice(sprintf(__('Max bid must be at least %s for auto bidding', 'wc_simple_auctions'), wc_price($bid + $increment)), 'error');
             }
         }
-        // Use default as max if auto bidding not enabled
+        // Use default as max if auto bidding not enabled for further convenience
         $max = $max ? $max : $bid;
         $increment = $increment ? $increment : '0';
 
         $current_user = wp_get_current_user();
         $user_id = $current_user->ID;
         $current_bider = $product_data->get_auction_current_bider();
-        $is_self = $user_id == $current_bider;
-
-        // Throw if the bid is not greater than current bid and `Allow on proxy auction change to smaller max bid value` is unchecked in WooCommerce->Settings->Auctions
-        // Notice the method name is 'curent' instead of 'current'
-        if ($bid <= $product_data->get_curent_bid() && get_option('simple_auctions_smaller_max_bid', 'no') === 'no') {
-            return wc_add_notice(__('New bid must be greater than old bid!', 'wc_simple_auctions'), 'error');
-        }
-
         $current_max = $product_data->get_auction_max_bid();
-        $current_increment = get_post_meta($product_id, '_auction_max_bid_increment', true);
 
-        if ($is_self) {
-
-            // Return if the highest bider is bidding but not updating the current max bid or `Allow highest bidder to outbid himself` is unchecked in WooCommerce->Settings->Auctions. Else, update the max bid and max increment.
+        if ($user_id == $current_bider) {
             if (get_option('simple_auctions_curent_bidder_can_bid') !== 'yes' || $max <= $current_max) {
+                // Return if the highest bider is bidding but not updating the current max bid or `Allow highest bidder to outbid himself` is unchecked in WooCommerce->Settings->Auctions.
                 return wc_add_notice(__('No need to bid. Your bid is winning! ', 'wc_simple_auctions'));
             } else {
+                // Else, update the max bid and max increment.
                 update_post_meta($product_id, '_auction_max_bid', $max);
                 update_post_meta($product_id, '_auction_max_bid_increment', $increment);
-                $log_id = $this->log_bid($product_id, $bid, $current_user, +$auto_enable);
             }
-        }
-
-        // Process if new bid is higher than current max bid
-        if ($bid > $product_data->get_auction_max_bid()) {
-            update_post_meta($product_id, '_auction_current_bid', $bid);
-            update_post_meta($product_id, '_auction_max_bid', $max);
+        } else {
+            // As long as the new bider can bid, add new bid record.
             update_post_meta($product_id, '_auction_bid_count', absint($product_data->get_auction_bid_count() + 1));
-
-            if ($auto_enable) {
-                update_post_meta($product_id, '_auction_current_bid_proxy', 'yes');
-            } else {
-                delete_post_meta($product_id, '_auction_current_bid_proxy');
-            }
-
-            if (!$is_self) {
-                update_post_meta($product_id, '_auction_max_current_bider', $user_id);
-                update_post_meta($product_id, '_auction_current_bider', $user_id);
-            }
 
             $log_id = $this->log_bid($product_id, $bid, $current_user, +$auto_enable);
 
-            do_action('woocommerce_simple_auctions_outbid', array('product_id' => $product_id, 'outbiddeduser_id' => $current_bider, 'log_id' => $log_id, 'auction_max_bid' => $max, 'auction_max_current_bider' => $user_id));
+            if ($bid > $current_max) {
+                // If another bider bids higher than current max bid, renew the bid info and outbid the current bider.
+                update_post_meta($product_id, '_auction_max_current_bider', $user_id);
+                update_post_meta($product_id, '_auction_current_bider', $user_id);
+                update_post_meta($product_id, '_auction_current_bid', $bid);
+                update_post_meta($product_id, '_auction_max_bid', $max);
+
+                do_action('woocommerce_simple_auctions_outbid', array('product_id' => $product_id, 'outbiddeduser_id' => $current_bider, 'log_id' => $log_id, 'auction_max_bid' => $max, 'auction_max_current_bider' => $user_id));
+            } else {
+                if ($max > $current_max) {
+                    // If another bider bids not higher than current max bid but max bid higher than current max bid, renew the bid info and outbid the current bider
+                    update_post_meta($product_id, '_auction_max_current_bider', $user_id);
+                    update_post_meta($product_id, '_auction_current_bider', $user_id);
+                    update_post_meta($product_id, '_auction_current_bid', min($current_max, $current_max + $increment));
+                    update_post_meta($product_id, '_auction_max_bid', $max);
+
+                    do_action('woocommerce_simple_auctions_outbid', array('product_id' => $product_id, 'outbiddeduser_id' => $current_bider, 'log_id' => $log_id, 'auction_max_bid' => $max, 'auction_max_current_bider' => $user_id));
+                } else {
+                    // If another bider bids not higher than current max bid and max bid either, renew the bid info and outbid the new bider.
+                    $current_increment = get_post_meta($product_id, '_auction_max_bid_increment', true);
+                    update_post_meta($product_id, '_auction_current_bid', min($max, $max + $current_increment));
+
+                    do_action('woocommerce_simple_auctions_outbid', array('product_id' => $product_id, 'outbiddeduser_id' => $user_id, 'log_id' => $log_id, 'auction_max_bid' => $current_max, 'auction_max_current_bider' => $current_bider));
+                }
+            }
         }
 
         do_action('woocommerce_simple_auctions_place_bid', array('product_id' => $product_id, 'is_proxy_bid' => $auto_enable, 'log_id' => $log_id));
+
+        $this->place_bid_notice();
+    }
+
+    /**
+     * Replace the default `woocommerce__simple_auctions_place_bid_message` function in WooCommerce Simple Auction
+     */
+    private function place_bid_notice()
+    {
+
     }
 }
