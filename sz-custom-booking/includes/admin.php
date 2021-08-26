@@ -274,3 +274,16 @@ function sz_admin_save_user_passes_field($user_id)
 }
 add_action('personal_options_update', 'sz_admin_save_user_passes_field');
 add_action('edit_user_profile_update', 'sz_admin_save_user_passes_field');
+
+/**
+ * Do not show unpaid bookings on calendar
+ * @param array $booking_ids
+ * @return array
+ */
+function sz_admin_remove_unpaid_bookings_from_calendar($booking_ids)
+{
+    return array_filter($booking_ids, function($id) {
+        return get_post_status($id) !== 'unpaid';
+    });
+}
+add_filter('woocommerce_bookings_in_date_range_query', 'sz_admin_remove_unpaid_bookings_from_calendar');
