@@ -35,6 +35,6 @@ jQuery(document).ready(function ($) {
             var $person = $(this).is(':visible') ? $(that).attr('data-persons') : 0;
             $(this).children('input').val($person);
         });
-        $('sz-archery-children').toggle(that.val() != types[1]);
+        $('.sz-archery-children').toggle($(that).val() != types[1]);
     });
 });
