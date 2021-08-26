@@ -182,6 +182,15 @@ function render_summary()
 add_action('woocommerce_single_product_summary', 'render_summary');
 
 /**
+ * Add archery children policy text
+ */
+function sz_render_archery_children_policy()
+{
+    echo '<div class="sz-archery-children">For all children under the age of 12 we will be charging $50 CAD for each child. The difference will be collected in the store during the time of the event.</div>';
+}
+add_action('woocommerce_before_booking_form', 'sz_render_archery_children_policy');
+
+/**
  * Set booking availability based on user type (member or not).
  * @param array $availability_rules - Array of availability rules
  * @param int $resource_id - Resource rules apply to, if resource is 0, then for the product itself

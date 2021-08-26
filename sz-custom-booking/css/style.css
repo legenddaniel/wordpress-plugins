@@ -98,3 +98,15 @@
     color: #000;
     font-weight: bold;
 }
+
+.wc-bookings-booking-form {
+    position: relative;
+}
+@media screen and (min-width: 480px) {
+    .sz-archery-children {
+        position: absolute;
+        top: 2.5em;
+        right: 1em;
+        width: 70%;
+    }
+}

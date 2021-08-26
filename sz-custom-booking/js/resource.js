@@ -27,7 +27,7 @@ jQuery(document).ready(function ($) {
         $resources.attr('data-persons', $(this).children('input').val());
     }); 
     
-    // Reset all persons according to their visibility and display the corresponding resource input
+    // Reset all persons according to their visibility and display the corresponding resource input. Toggle archery children policy.
     $resources.on('change', function () {
         var that = this;
         $persons.each(function () {
@@ -35,5 +35,6 @@ jQuery(document).ready(function ($) {
             var $person = $(this).is(':visible') ? $(that).attr('data-persons') : 0;
             $(this).children('input').val($person);
         });
+        $('sz-archery-children').toggle(that.val() != types[1]);
     });
 });
