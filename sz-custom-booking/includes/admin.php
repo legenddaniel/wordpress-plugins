@@ -276,14 +276,21 @@ add_action('personal_options_update', 'sz_admin_save_user_passes_field');
 add_action('edit_user_profile_update', 'sz_admin_save_user_passes_field');
 
 /**
- * Do not show unpaid bookings on calendar
+ * Do not show unpaid bookings from checkout on calendar
  * @param array $booking_ids
  * @return array
  */
-function sz_admin_remove_unpaid_bookings_from_calendar($booking_ids)
+function sz_admin_remove_unpaid_checkout_bookings_from_calendar($booking_ids)
 {
-    return array_filter($booking_ids, function($id) {
-        return get_post_status($id) !== 'unpaid';
+    return array_filter($booking_ids, function ($id) {
+        $is_unpaid = get_post_status($id) === 'unpaid';
+        $is_checkout = false;
+        if ($is_unpaid) {
+            $booking = new WC_Booking($id);
+            $order_id = $booking->get_order_id();
+            $is_checkout = get_post_meta($order_id, '_created_via', true) === 'checkout';
+        }
+        return !($is_unpaid && $is_checkout);
     });
 }
-add_filter('woocommerce_bookings_in_date_range_query', 'sz_admin_remove_unpaid_bookings_from_calendar');
+add_filter('woocommerce_bookings_in_date_range_query', 'sz_admin_remove_unpaid_checkout_bookings_from_calendar');
