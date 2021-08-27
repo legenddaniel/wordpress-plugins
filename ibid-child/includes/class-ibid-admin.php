@@ -221,8 +221,37 @@ $buyer_service_fee = get_option($this->self_service_fee) ?: [['point' => null, '
     public function add_service_fee_delegation_option()
     {
         global $post;
-        $buyer = get_post_meta($post->ID, $this->service_fee_delegation_buyer, true) ?: ['type' => '', 'fee' => '', 'max' => ''];
-        $seller = get_post_meta($post->ID, $this->service_fee_delegation_seller, true) ?: ['type' => '', 'fee' => '', 'threshold' => ''];
+        $id = $post->ID;
+
+        $service_type = get_post_meta($id, 'service_type', true);
+
+        $buyer = get_post_meta($id, $this->service_fee_delegation_buyer, true) ?: ['type' => '', 'fee' => '', 'max' => ''];
+        $seller = get_post_meta($id, $this->service_fee_delegation_seller, true) ?: ['type' => '', 'fee' => '', 'threshold' => ''];
+
+        // Display auction type (delegation or self-service) and allow faq, readonly.
+        woocommerce_wp_text_input(
+            array(
+                'id' => 'service_type',
+                'label' => __('Service Type', 'woocommerce'),
+                'value' => esc_attr__($service_type, 'wc_simple_auction'),
+                'custom_attributes' => [
+                    'disabled' => true,
+                ],
+            )
+        );
+        $service_type === 'self_service' && woocommerce_wp_text_input(
+            array(
+                'id' => '_auction_allow_faq',
+                'type' => 'checkbox',
+                'label' => __('Allow FAQ', 'woocommerce'),
+                'value' => esc_attr__(get_post_meta($id, '_auction_allow_faq', true), 'wc_simple_auction'),
+                'custom_attributes' => [
+                    'disabled' => true,
+                ],
+                'desc_tip' => true,
+                'description' => __('Allow customers to ask 3 questions during bidding. Only for self service.', 'wc_simple_auctions'),
+            )
+        );
 
         // Display is controlled by `service-fee-field.js`
         echo '<h3 class="auction-product-edit-title">Service Fee - Buyer</h3>';
