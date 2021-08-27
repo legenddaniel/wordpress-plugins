@@ -734,3 +734,57 @@ function add_discount_info_into_order($item, $cart_item_key, $values, $order)
     $item->update_meta_data('discount', $discount_data);
 }
 add_action('woocommerce_checkout_create_order_line_item', 'add_discount_info_into_order', 10, 4);
+
+function sz_custom_cron_schedule($schedules)
+{
+    if (!isset($schedules["30min"])) {
+        $schedules["30min"] = array(
+            'interval' => 30 * 60,
+            'display' => __('Once every 30 minutes'),
+        );
+    }
+    return $schedules;
+}
+// add_filter('cron_schedules', 'sz_custom_cron_schedule');
+
+if (!wp_next_scheduled('sz_custom_pending_orders_hook')) {
+    // wp_schedule_event(time(), '30min', 'sz_custom_pending_orders_hook');
+}
+function sz_custom_cancel_pending_orders()
+{
+    // Get bookings older than 24 hours and with pending status
+    $args = array(
+        'post_type' => 'wc_booking',
+        'posts_per_page' => -1,
+        'post_status' => 'unpaid',
+        'date_query' => array(
+            array(
+                'before' => '0.25 hours ago', // hours ago
+            ),
+        ),
+    );
+
+    // do the query
+    $query = new WP_Query($args);
+
+    // The Loop
+    if ($query->have_posts()) {
+        $bookings = $query->posts;
+
+        // Loop through posts
+        foreach ($bookings as $booking) {
+            if (class_exists('WC_Booking')) {
+                // Get the booking object using the id of the post
+                $wc_booking = new WC_Booking($booking->ID);
+
+                // Change the status
+                if ($wc_booking) {
+                    $wc_booking->update_status('cancelled');
+                }
+            }
+        }
+    }
+
+    wp_reset_postdata();
+}
+// add_action('sz_custom_pending_orders_hook', 'sz_custom_cancel_pending_orders');
